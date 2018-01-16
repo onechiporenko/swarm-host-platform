@@ -1,3 +1,4 @@
+/* istanbul ignore next */
 import winston = require('winston');
 
 // from https://github.com/expressjs/express/issues/3308#issuecomment-300957572
