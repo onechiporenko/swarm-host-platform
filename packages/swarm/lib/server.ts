@@ -1,10 +1,11 @@
 import bodyParser = require('body-parser');
 import colors = require('colors/safe');
 import * as express from 'express';
+import * as http from 'http';
 import {Factory, Lair} from 'lair-db/dist';
 import winston = require('winston');
+import {printRoutesMap} from './express';
 import Route from './route';
-import {printRoutesMap} from './utils';
 
 export default class Server {
   public static getServer(): Server {
@@ -21,15 +22,21 @@ export default class Server {
 
   private static instance: Server;
 
-  public namespace = '/dlm/api';
+  public expressApp: express.Application;
+  public namespace = '';
   public port = 54321;
   public verbose = true;
   public delay = 0;
 
-  private expressApp: express.Application;
+  public get server(): http.Server {
+    return this.internalServer;
+  }
+
   private expressRouter: express.Router;
   private lair: Lair;
   private createRecordsQueue: Array<[string, number]> = [];
+  private middlewaresQueue: express.RequestHandler[] = [];
+  private internalServer: http.Server;
 
   private constructor() {
     this.expressApp = express();
@@ -60,9 +67,33 @@ export default class Server {
     this.createRecordsQueue.push([factoryName, count]);
   }
 
-  public startServer() {
+  public addMiddleware(clb: express.RequestHandler) {
+    this.middlewaresQueue.push(clb);
+  }
+
+  public addMiddlewares(clbs: express.RequestHandler[]) {
+    clbs.map(clb => this.addMiddleware(clb));
+  }
+
+  public startServer(clb?: () => any) {
     this.lair.verbose = this.verbose;
+    this.fillLair();
+    this.useMiddlewares();
+    this.expressApp.use(this.namespace, this.expressRouter);
+    this.printRoutesMap();
+    this.internalServer = this.expressApp.listen(this.port, () => clb ? clb() : null);
+  }
+
+  public stopServer(clb?: () => any) {
+    this.internalServer.close(() => clb ? clb() : null);
+  }
+
+  private fillLair() {
     this.createRecordsQueue.map(crArgs => this.lair.createRecords.apply(this.lair, crArgs));
+    this.createRecordsQueue = [];
+  }
+
+  private useMiddlewares() {
     const app = this.expressApp;
     app.use(bodyParser.json());
     app.use((req, res, next) => {
@@ -71,6 +102,8 @@ export default class Server {
       }
       next();
     });
+    this.middlewaresQueue.map(clb => app.use(clb));
+    this.middlewaresQueue = [];
     app.use((req, res, next) => {
       if (this.delay) {
         setTimeout(next, this.delay);
@@ -78,9 +111,6 @@ export default class Server {
         next();
       }
     });
-    app.use(this.namespace, this.expressRouter);
-    this.printRoutesMap();
-    app.listen(this.port);
   }
 
   private printRoutesMap() {

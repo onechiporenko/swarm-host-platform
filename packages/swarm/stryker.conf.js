@@ -9,7 +9,7 @@ module.exports = function(config) {
     testFramework: "mocha",
     coverageAnalysis: "off",
     // logLevel: "trace",
-    mutate: ["lib/**/*.ts"],
+    mutate: ["lib/**/*.ts", "!lib/express.ts"],
     thresholds: {break: 50, high: 80, low: 60}
   });
 };
