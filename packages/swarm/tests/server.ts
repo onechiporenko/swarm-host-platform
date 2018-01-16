@@ -69,6 +69,12 @@ describe('#Server', () => {
     });
   });
 
+  describe('#lairMetaRoute', () => {
+    it('should have default value', () => {
+      expect(Server.getServer().lairMetaRoute).to.be.equal('/lair/meta');
+    });
+  });
+
   describe('#addFactory', () => {
     it('should register factory in the Lair', () => {
       expect(this.lair.getDevInfo()).to.be.eql({});
@@ -198,6 +204,44 @@ describe('#Server integration', () => {
       }]);
       this.server.addRoute(Route.get('/a', 'a'));
       this.server.startServer(() => chai.request(this.server.server).get('/api/v2/a').end(() => ({})));
+    });
+  });
+
+  describe('#lairMetaRoute', () => {
+    it('should return lair meta info', done => {
+      this.server.addFactory(modelA, 'a');
+      this.server.addFactory(modelA, 'b');
+      this.server.createRecords('a', 2);
+      this.server.createRecords('b', 3);
+      this.server.startServer(() => chai.request(this.server.server)
+        .get('/lair/meta')
+        .end((err, res) => {
+          expect(res.body).to.be.eql({
+            a: {
+              count: 2,
+              id: 3,
+              meta: {
+                name: {
+                  defaultValue: 'test',
+                  type: 1,
+                  value: 'test',
+                },
+              },
+            },
+            b: {
+              count: 3,
+              id: 4,
+              meta: {
+                name: {
+                  defaultValue: 'test',
+                  type: 1,
+                  value: 'test',
+                },
+              },
+            },
+          });
+          done();
+        }));
     });
   });
 

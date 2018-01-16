@@ -27,6 +27,7 @@ export default class Server {
   public port = 54321;
   public verbose = true;
   public delay = 0;
+  public lairMetaRoute = '/lair/meta';
 
   public get server(): http.Server {
     return this.internalServer;
@@ -75,10 +76,18 @@ export default class Server {
     clbs.map(clb => this.addMiddleware(clb));
   }
 
+  public addLairMetaRoute() {
+    if (!this.lairMetaRoute) {
+      return;
+    }
+    this.expressApp.get(this.lairMetaRoute, (req, res) => res.json(this.lair.getDevInfo()));
+  }
+
   public startServer(clb?: () => any) {
     this.lair.verbose = this.verbose;
     this.fillLair();
     this.useMiddlewares();
+    this.addLairMetaRoute();
     this.expressApp.use(this.namespace, this.expressRouter);
     this.printRoutesMap();
     this.internalServer = this.expressApp.listen(this.port, () => clb ? clb() : null);
