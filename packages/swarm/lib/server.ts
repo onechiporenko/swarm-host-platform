@@ -7,6 +7,32 @@ import winston = require('winston');
 import {printRoutesMap} from './express';
 import Route from './route';
 
+function getAll(req: express.Request, res: express.Response): express.Response {
+  const {factoryName} = req.params;
+  return res.json(Lair.getLair().getAll(factoryName, {depth: 1}));
+}
+
+function getOne(req: express.Request, res: express.Response): express.Response {
+  const {factoryName, id} = req.params;
+  return res.json(Lair.getLair().getOne(factoryName, id, {depth: 1}));
+}
+
+function updateOne(req: express.Request, res: express.Response): express.Response {
+  const {factoryName, id} = req.params;
+  return res.json(Lair.getLair().updateOne(factoryName, id, req.body, {depth: 1}));
+}
+
+function deleteOne(req: express.Request, res: express.Response): express.Response {
+  const {factoryName, id} = req.params;
+  Lair.getLair().deleteOne(factoryName, id);
+  return res.json({});
+}
+
+function createOne(req: express.Request, res: express.Response): express.Response {
+  const {factoryName} = req.params;
+  return res.json(Lair.getLair().createOne(factoryName, req.body, {depth: 1}));
+}
+
 export default class Server {
   public static getServer(): Server {
     if (!Server.instance) {
@@ -27,13 +53,14 @@ export default class Server {
   public port = 54321;
   public verbose = true;
   public delay = 0;
-  public lairMetaRoute = '/lair/meta';
+  public lairNamespace = '/lair';
 
   public get server(): http.Server {
     return this.internalServer;
   }
 
   private expressRouter: express.Router;
+  private expressLairRouter: express.Router;
   private lair: Lair;
   private createRecordsQueue: Array<[string, number]> = [];
   private middlewaresQueue: express.RequestHandler[] = [];
@@ -42,6 +69,7 @@ export default class Server {
   private constructor() {
     this.expressApp = express();
     this.expressRouter = express.Router();
+    this.expressLairRouter = express.Router();
     this.lair = Lair.getLair();
   }
 
@@ -76,25 +104,35 @@ export default class Server {
     clbs.map(clb => this.addMiddleware(clb));
   }
 
-  public addLairMetaRoute() {
-    if (!this.lairMetaRoute) {
-      return;
-    }
-    this.expressApp.get(this.lairMetaRoute, (req, res) => res.json(this.lair.getDevInfo()));
-  }
-
   public startServer(clb?: () => any) {
     this.lair.verbose = this.verbose;
     this.fillLair();
     this.useMiddlewares();
-    this.addLairMetaRoute();
-    this.expressApp.use(this.namespace, this.expressRouter);
+    this.addLairMetaRoutes();
+    this.addAppRoutes();
     this.printRoutesMap();
     this.internalServer = this.expressApp.listen(this.port, () => clb ? clb() : null);
   }
 
   public stopServer(clb?: () => any) {
     this.internalServer.close(() => clb ? clb() : null);
+  }
+
+  private addLairMetaRoutes() {
+    this.expressLairRouter.get('/meta', (req, res) => res.json(this.lair.getDevInfo()));
+    const path = `/factories/:factoryName`;
+    const singlePath = `${path}/:id`;
+    this.expressLairRouter.get(path, getAll);
+    this.expressLairRouter.get(singlePath, getOne);
+    this.expressLairRouter.delete(singlePath, deleteOne);
+    this.expressLairRouter.patch(singlePath, updateOne);
+    this.expressLairRouter.put(singlePath, updateOne);
+    this.expressLairRouter.post(path, createOne);
+    this.expressApp.use(this.lairNamespace, this.expressLairRouter);
+  }
+
+  private addAppRoutes() {
+    this.expressApp.use(this.namespace, this.expressRouter);
   }
 
   private fillLair() {

@@ -69,9 +69,9 @@ describe('#Server', () => {
     });
   });
 
-  describe('#lairMetaRoute', () => {
+  describe('#lairNamespace', () => {
     it('should have default value', () => {
-      expect(Server.getServer().lairMetaRoute).to.be.equal('/lair/meta');
+      expect(Server.getServer().lairNamespace).to.be.equal('/lair');
     });
   });
 
@@ -207,42 +207,125 @@ describe('#Server integration', () => {
     });
   });
 
-  describe('#lairMetaRoute', () => {
-    it('should return lair meta info', done => {
-      this.server.addFactory(modelA, 'a');
-      this.server.addFactory(modelA, 'b');
-      this.server.createRecords('a', 2);
-      this.server.createRecords('b', 3);
-      this.server.startServer(() => chai.request(this.server.server)
-        .get('/lair/meta')
-        .end((err, res) => {
-          expect(res.body).to.be.eql({
-            a: {
-              count: 2,
-              id: 3,
-              meta: {
-                name: {
-                  defaultValue: 'test',
-                  type: 1,
-                  value: 'test',
+  describe('#lair meta', () => {
+
+    describe('/lair/meta', () => {
+      it('should return Lair meta info', done => {
+        this.server.addFactory(modelA, 'a');
+        this.server.addFactory(modelA, 'b');
+        this.server.createRecords('a', 2);
+        this.server.createRecords('b', 3);
+        this.server.startServer(() => chai.request(this.server.server)
+          .get('/lair/meta')
+          .end((err, res) => {
+            expect(res.body).to.be.eql({
+              a: {
+                count: 2,
+                id: 3,
+                meta: {
+                  name: {
+                    defaultValue: 'test',
+                    type: 1,
+                    value: 'test',
+                  },
                 },
               },
-            },
-            b: {
-              count: 3,
-              id: 4,
-              meta: {
-                name: {
-                  defaultValue: 'test',
-                  type: 1,
-                  value: 'test',
+              b: {
+                count: 3,
+                id: 4,
+                meta: {
+                  name: {
+                    defaultValue: 'test',
+                    type: 1,
+                    value: 'test',
+                  },
                 },
               },
-            },
-          });
-          done();
-        }));
+            });
+            done();
+          }));
+      });
     });
+
+    describe('/lair/factories', () => {
+
+      beforeEach(() => {
+        this.server.addFactory(modelA, 'a');
+        this.server.createRecords('a', 2);
+      });
+
+      describe('get all', () => {
+        it('should return all records of a given factory', done => {
+          this.server.startServer(() => chai.request(this.server.server)
+            .get('/lair/factories/a')
+            .end((err, res) => {
+              expect(res.body).to.be.eql([
+                {id: '1', name: 'test'},
+                {id: '2', name: 'test'},
+              ]);
+              done();
+            }));
+        });
+      });
+
+      describe('get one', () => {
+        it('should return single record of a given factory', done => {
+          this.server.startServer(() => chai.request(this.server.server)
+            .get('/lair/factories/a/1')
+            .end((err, res) => {
+              expect(res.body).to.be.eql({id: '1', name: 'test'});
+              done();
+            }));
+        });
+      });
+
+      describe('update one', () => {
+        it('should update single record of a given factory (using `put`)', done => {
+          this.server.startServer(() => chai.request(this.server.server)
+            .put('/lair/factories/a/1')
+            .send({name: 'new name'})
+            .end((err, res) => {
+              expect(res.body).to.be.eql({id: '1', name: 'new name'});
+              done();
+            }));
+        });
+
+        it('should update single record of a given factory (using `patch`)', done => {
+          this.server.startServer(() => chai.request(this.server.server)
+            .patch('/lair/factories/a/1')
+            .send({name: 'new name'})
+            .end((err, res) => {
+              expect(res.body).to.be.eql({id: '1', name: 'new name'});
+              done();
+            }));
+        });
+      });
+
+      describe('delete one', () => {
+        it('should delete single record of a given factory', done => {
+          this.server.startServer(() => chai.request(this.server.server)
+            .del('/lair/factories/a/1')
+            .end((err, res) => {
+              expect(Lair.getLair().getAll('a')).to.be.eql([{id: '2', name: 'test'}]);
+              done();
+            }));
+        });
+      });
+
+      describe('create one', () => {
+        it('should create record of a given factory', done => {
+          this.server.startServer(() => chai.request(this.server.server)
+            .post('/lair/factories/a')
+            .send({name: 'new record'})
+            .end((err, res) => {
+              expect(Lair.getLair().getOne('a', '3')).to.be.eql({id: '3', name: 'new record'});
+              done();
+            }));
+        });
+      });
+
+    });
+
   });
 
 });
