@@ -224,6 +224,7 @@ describe('#Server integration', () => {
                 id: 3,
                 meta: {
                   name: {
+                    allowedValues: [],
                     defaultValue: 'test',
                     type: 1,
                     value: 'test',
@@ -235,6 +236,7 @@ describe('#Server integration', () => {
                 id: 4,
                 meta: {
                   name: {
+                    allowedValues: [],
                     defaultValue: 'test',
                     type: 1,
                     value: 'test',
