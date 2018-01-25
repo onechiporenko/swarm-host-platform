@@ -1,6 +1,6 @@
 {
   "name": "swarm-host",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "fake-server",
   "main": "dist/index.js",
   "scripts": {
