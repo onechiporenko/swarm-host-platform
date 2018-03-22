@@ -1,5 +1,11 @@
 # swarm-host
 
+[![Build Status](https://travis-ci.org/onechiporenko/swarm.svg?branch=master)](https://travis-ci.org/onechiporenko/swarm)
+[![npm version](https://badge.fury.io/js/swarm-host.svg)](https://badge.fury.io/js/swarm-host)
+[![npm version](https://img.shields.io/npm/dm/swarm-host.svg)](https://npmjs.com/package/swarm-host)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a308984984ff4f9a826a5b34be2cc46a)](https://www.codacy.com/app/cv_github/lair)
+[![Coverage Status](https://coveralls.io/repos/github/onechiporenko/lair/badge.svg?branch=master)](https://coveralls.io/github/onechiporenko/lair?branch=master)
+
 Swarm-host is a server for SPA test-modes which is based on [express.js](http://expressjs.com) and uses [lair-db](https://github.com/onechiporenko/lair) as a data-storage.
 
 ## Install
