@@ -1,5 +1,5 @@
 import * as express from 'express';
-import {Lair} from 'lair-db/dist';
+import {Lair} from 'lair-db';
 import {CRUDOptions} from 'lair-db/dist/lair';
 import methods = require('methods');
 import {assert} from './utils';

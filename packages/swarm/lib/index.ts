@@ -1,4 +1,4 @@
-import {Factory, Lair} from 'lair-db/dist';
+import {Factory, Lair} from 'lair-db';
 import Cron from './cron';
 import Job from './job';
 import Route from './route';

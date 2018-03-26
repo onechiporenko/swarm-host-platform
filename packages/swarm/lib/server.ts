@@ -1,8 +1,9 @@
 import bodyParser = require('body-parser');
 import colors = require('colors/safe');
 import * as express from 'express';
+import read = require('fs-readdir-recursive');
 import * as http from 'http';
-import {Factory, Lair} from 'lair-db/dist';
+import {Factory, Lair} from 'lair-db';
 import winston = require('winston');
 import {printRoutesMap} from './express';
 import Route from './route';
@@ -84,12 +85,20 @@ export default class Server {
     routes.map(route => this.addRoute(route));
   }
 
-  public addFactory(factory: Factory, name: string) {
+  public addRoutesFromDir(path: string) {
+    read(path).forEach(routePath => this.add('route', path, routePath));
+  }
+
+  public addFactory(factory: Factory, name?: string) {
     this.lair.registerFactory(factory, name);
   }
 
   public addFactories(factories: Array<[Factory, string]>) {
     factories.map(args => this.addFactory.apply(this, args));
+  }
+
+  public addFactoriesFromDir(path: string) {
+    read(path).forEach(factoryPath => this.add('factory', path, factoryPath));
   }
 
   public createRecords(factoryName: string, count: number) {
@@ -164,6 +173,20 @@ export default class Server {
     if (this.verbose) {
       winston.info('Defined route-handlers');
       this.expressApp._router.stack.forEach(printRoutesMap.bind(null, []));
+    }
+  }
+
+  private add(type: string, parent: string, path: string) {
+    if (path.match(/\.ts$/) !== null || path.match(/\.js$/) !== null) {
+      const instance = require(`${parent}/${path}`).default;
+      if (instance) {
+        if (type === 'route' && instance instanceof Route) {
+          this.addRoute(instance);
+        }
+        if (type === 'factory' && instance instanceof Factory) {
+          this.addFactory(instance);
+        }
+      }
     }
   }
 }

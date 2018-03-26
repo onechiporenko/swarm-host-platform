@@ -91,6 +91,17 @@ describe('#Server', () => {
       expect(this.lair.getDevInfo()).to.have.property('b').that.is.an('object');
     });
   });
+
+  describe('#addFactoriesFromDir', () => {
+    it('should register factories in the Lair', () => {
+      expect(this.lair.getDevInfo()).to.be.eql({});
+      Server.getServer().addFactoriesFromDir(`${__dirname}/test-factories`);
+      const devInfo = this.lair.getDevInfo();
+      expect(devInfo).to.have.property('unit').that.is.an('object');
+      expect(devInfo).to.have.property('squad').that.is.an('object');
+      expect(devInfo).to.have.property('dir').that.is.an('object');
+    });
+  });
 });
 
 describe('#Server integration', () => {
@@ -144,6 +155,31 @@ describe('#Server integration', () => {
       this.server.addRoute(Route.createRoute('get', '/some-another-path'));
       this.server.startServer(() => chai.request(this.server.server)
         .get('/api/v2/some-path')
+        .end((err, res) => {
+          expect(res).to.have.property('status', 200);
+          done();
+        }));
+    });
+  });
+
+  describe('#addRoutesFromDir', () => {
+
+    beforeEach(() => {
+      this.server.addRoutesFromDir(`${__dirname}/test-routes`);
+    });
+
+    it('should add a first route', done => {
+      this.server.startServer(() => chai.request(this.server.server)
+        .get('/api/v2/path')
+        .end((err, res) => {
+          expect(res).to.have.property('status', 200);
+          done();
+        }));
+    });
+
+    it('should add a second route', done => {
+      this.server.startServer(() => chai.request(this.server.server)
+        .get('/api/v2/path/subpath')
         .end((err, res) => {
           expect(res).to.have.property('status', 200);
           done();
