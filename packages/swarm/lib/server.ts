@@ -177,7 +177,8 @@ export default class Server {
   }
 
   private add(type: string, parent: string, path: string) {
-    if (path.match(/\.ts$/) !== null || path.match(/\.js$/) !== null && path.match(/\.d\.ts$/) === null) {
+    console.log(path, path.match(/\.d\.ts$/));
+    if ((path.match(/\.ts$/) !== null || path.match(/\.js$/) !== null) && path.match(/\.d\.ts$/) === null) {
       const instance = require(`${parent}/${path}`).default;
       if (instance) {
         if (type === 'route' && instance instanceof Route) {
