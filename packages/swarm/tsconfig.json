@@ -11,5 +11,9 @@
   },
   "exclude": [
     "node_modules"
+  ],
+  "include": [
+    "lib",
+    "tests"
   ]
 }
