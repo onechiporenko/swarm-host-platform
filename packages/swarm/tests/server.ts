@@ -95,7 +95,7 @@ describe('#Server', () => {
   describe('#addFactoriesFromDir', () => {
     it('should register factories in the Lair', () => {
       expect(this.lair.getDevInfo()).to.be.eql({});
-      Server.getServer().addFactoriesFromDir(`${__dirname}/test-factories`);
+      Server.getServer().addFactoriesFromDir(`${__dirname}/../tests-data/test-factories`);
       const devInfo = this.lair.getDevInfo();
       expect(devInfo).to.have.property('unit').that.is.an('object');
       expect(devInfo).to.have.property('squad').that.is.an('object');
@@ -165,7 +165,7 @@ describe('#Server integration', () => {
   describe('#addRoutesFromDir', () => {
 
     beforeEach(() => {
-      this.server.addRoutesFromDir(`${__dirname}/test-routes`);
+      this.server.addRoutesFromDir(`${__dirname}/../tests-data/test-routes`);
     });
 
     it('should add a first route', done => {
