@@ -66,7 +66,7 @@ File `routes/units/unit/objectives/objective.ts` will be created. Its content:
 //routes/units/unit/objectives/objective.ts
 import {Route} from 'swarm-host';
 
-export default Route.createRoute('get', '/units/:unit_id/objectives/:objective_id', ({unit_id, objective_id}, res, next, lair) => {
+export default Route.createRoute('get', '/units/:unit_id/objectives/:objective_id', ({params: {unit_id, objective_id}}, res, next, lair) => {
   res.json({});
 });
 

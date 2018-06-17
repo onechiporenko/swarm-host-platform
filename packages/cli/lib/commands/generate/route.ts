@@ -34,7 +34,7 @@ exports.handler = argv => {
   shell.mkdir('-p', routeDir);
   shell.echo(ejs.render(tpl, {
     method: argv.method,
-    req: dynamic.length ? `{${dynamic.join(', ')}}` : 'req',
+    req: dynamic.length ? `{params: {${dynamic.join(', ')}}}` : 'req',
     url: argv.url
   })).to(routeFullPath);
 };
