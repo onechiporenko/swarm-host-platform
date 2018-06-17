@@ -94,7 +94,7 @@ export default Factory.create({
 ### Create a new Factory with attributes:
 
 ```bash
-swarm-host g factory my/unit name:string squad:has-one:squad objectives:has-many:objective
+swarm-host g factory my/unit name:string squad:has-one:squad:units objectives:has-many:objective
 ```
 
 File `factories/my/unit.ts` will be created. Its content:
@@ -119,7 +119,7 @@ export default Factory.create({
       preferredType: 'number'
     }),
     objectives: Factory.hasMany('objective', null),
-    squad: Factory.hasOne('squad', null),
+    squad: Factory.hasOne('squad', 'units'),
   }
 });
 ```
