@@ -1,0 +1,23 @@
+import {Factory} from 'swarm-host';
+
+export default Factory.create({
+  name: '<%= name %>',
+  attrs: {
+<%_ attrs.forEach(function(attr){ _%>
+<%_ if (attr.attrType === 'field') { _%>
+    <%= attr.attrName %>: Factory.field({
+      value() {
+        return <%- attr.defaultValue %>;
+      },
+      preferredType: '<%= attr.valueType %>'
+    }),
+<%_ } _%>
+<%_ if (attr.attrType === 'has-one') { _%>
+    <%= attr.attrName %>: Factory.hasOne('<%= attr.factory %>', null),
+<%_ } _%>
+<%_ if (attr.attrType === 'has-many') { _%>
+    <%= attr.attrName %>: Factory.hasMany('<%= attr.factory %>', null),
+<%_ } _%>
+<%_ }); _%>
+  }
+});

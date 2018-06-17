@@ -1,0 +1,5 @@
+import {Route} from 'swarm-host';
+
+export default Route.createRoute('post', 'api/v1/units', (req, res, next, lair) => {
+  res.json({});
+});

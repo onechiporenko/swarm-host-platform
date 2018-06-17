@@ -1,0 +1,7 @@
+import {Factory} from 'swarm-host';
+
+export default Factory.create({
+  name: 'unit',
+  attrs: {
+  }
+});

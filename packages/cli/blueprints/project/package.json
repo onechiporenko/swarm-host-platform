@@ -1,0 +1,22 @@
+{
+  "name": "<%= name %>",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Small description for <%= name %> goes here",
+  "license": "MIT",
+  "author": "",
+  "repository": "",
+  "scripts": {
+    "start": "npm run build && node dist/index.js",
+    "build": "rm -rf dist && tsc"
+  },
+  "dependencies": {
+    "swarm-host": "*",
+    "typescript": "*"
+  },
+  "devDependencies": {
+    "@types/node": "*",
+    "ts-node": "*",
+    "tslint": "*"
+  }
+}
