@@ -1,5 +1,9 @@
 # Swarm-Host-CLI
 
+[![Build Status](https://travis-ci.org/onechiporenko/swarm-host-cli.svg?branch=master)](https://travis-ci.org/onechiporenko/swarm-host-cli)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/09abde586a6a4f24b859a5e4b3f57472)](https://www.codacy.com/app/cv_github/swarm-host-cli?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=onechiporenko/swarm-host-cli&amp;utm_campaign=Badge_Grade)
+[![npm version](https://badge.fury.io/js/swarm-host-cli.svg)](https://badge.fury.io/js/swarm-host-cli)
+
 CLI for [Swarm-Host](https://github.com/onechiporenko/swarm)
 
 ## Install:
@@ -39,7 +43,7 @@ export default Route.createRoute('get', 'units', (req, res, next, lair) => {
 swarm-host g route units/new --url=api/v1/units --method=post
 ```
 
-### File `routes/units/new.ts` will be created. Its content:
+File `routes/units/new.ts` will be created. Its content:
 
 ```typescript
 // routes/units/new.ts
