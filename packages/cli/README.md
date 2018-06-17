@@ -24,7 +24,7 @@ swarm-host g route units
 
 File `routes/units.ts` will be created. Its content:
 
-```typscript
+```typescript
 // routes/units.ts
 import {Route} from 'swarm-host';
 
