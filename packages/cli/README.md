@@ -54,6 +54,24 @@ export default Route.createRoute('post', 'api/v1/units', (req, res, next, lair) 
 });
 ```
 
+### Create a new Route with dynamic parts:
+
+```bash
+swarm-host g route units/unit/objectives/objective --url=units/:unit_id/objectives/:objective_id
+```
+
+File `routes/units/unit/objectives/objective.ts` will be created. Its content:
+
+```typescript
+//routes/units/unit/objectives/objective.ts
+import {Route} from 'swarm-host';
+
+export default Route.createRoute('get', '/units/:unit_id/objectives/:objective_id', ({unit_id, objective_id}, res, next, lair) => {
+  res.json({});
+});
+
+```
+
 ### Create a new Factory:
 
 ```bash
@@ -113,7 +131,6 @@ swarm-host d factory units
 ```
 
 File `factories/units.ts` will be deleted.
-
 
 ### Destroy existing Route
 

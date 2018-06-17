@@ -33,4 +33,14 @@ describe('Generate Route', () => {
       });
   });
 
+  it('should create a route with dynamic parameters', done => {
+    execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js generate route units/unit/objectives/objective --url=units/:unit_id/objectives/:objective_id`)
+      .then(() => {
+        const original = shell.cat(`${this.tmpDir}/routes/units/unit/objectives/objective.ts`).stdout;
+        const expected = shell.cat(path.join(process.cwd(), `tests/results/routes/dynamic-params.txt`)).stdout;
+        expect(original).to.be.equal(expected);
+        done();
+      });
+  });
+
 });
