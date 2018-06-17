@@ -13,10 +13,10 @@ export default Factory.create({
     }),
 <%_ } _%>
 <%_ if (attr.attrType === 'has-one') { _%>
-    <%= attr.attrName %>: Factory.hasOne('<%= attr.factory %>', null),
+    <%= attr.attrName %>: Factory.hasOne('<%= attr.factory %>', <%- attr.inverseAttr %>),
 <%_ } _%>
 <%_ if (attr.attrType === 'has-many') { _%>
-    <%= attr.attrName %>: Factory.hasMany('<%= attr.factory %>', null),
+    <%= attr.attrName %>: Factory.hasMany('<%= attr.factory %>', <%- attr.inverseAttr %>),
 <%_ } _%>
 <%_ }); _%>
   }

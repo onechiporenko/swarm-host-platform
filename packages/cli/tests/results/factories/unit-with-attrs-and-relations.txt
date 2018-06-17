@@ -16,6 +16,6 @@ export default Factory.create({
       preferredType: 'number'
     }),
     objectives: Factory.hasMany('objective', null),
-    squad: Factory.hasOne('squad', null),
+    squad: Factory.hasOne('squad', 'units'),
   }
 });

@@ -8,6 +8,7 @@ const defaultValuesMap = {
 
 export default class FactoryAttr {
   public attrName: string;
+  public inverseAttr: string;
   public attrType: string;
   public valueType: string;
   public defaultValue: any;
@@ -27,16 +28,18 @@ export default class FactoryAttr {
       this.defaultValue = defaultValuesMap[chunks[1]];
       this.attrType = 'field';
     }
-    if (chunks.length === 3) {
+    if (chunks.length >= 3) {
       if (chunks[1] === 'has-one') {
         this.attrType = 'has-one';
         this.factory = chunks[2];
         this.attrName = chunks[0];
+        this.inverseAttr = chunks[3] ? `'${chunks[3]}'` : 'null';
       }
       if (chunks[1] === 'has-many') {
         this.attrType = 'has-many';
         this.factory = chunks[2];
         this.attrName = chunks[0];
+        this.inverseAttr = chunks[3] ? `'${chunks[3]}'` : 'null';
       }
     }
   }
