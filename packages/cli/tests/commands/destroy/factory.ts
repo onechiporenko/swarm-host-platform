@@ -16,7 +16,7 @@ describe('Destroy Factory', () => {
     execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js generate factory unit`)
       .then(() => {
         expect(shell.cat(`${this.tmpDir}/factories/unit.ts`).stdout).to.be.not.empty;
-        execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js destroy factory unit`)
+        execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js destroy factory unit`, {input: 'y'})
           .then(() => {
             expect(shell.cat(`${this.tmpDir}/factories/unit.ts`).stdout).to.be.empty;
             done();
@@ -28,7 +28,7 @@ describe('Destroy Factory', () => {
     execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js generate factory some/path/unit`)
       .then(() => {
         expect(shell.cat(`${this.tmpDir}/factories/some/path/unit.ts`).stdout).to.be.not.empty;
-        execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js destroy factory some/path/unit`)
+        execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js destroy factory some/path/unit`, {input: 'y'})
           .then(() => {
             expect(shell.cat(`${this.tmpDir}/factories/some/path/unit.ts`).stdout).to.be.empty;
             done();

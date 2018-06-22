@@ -1,3 +1,6 @@
+import {Destroy} from '../../models/commands/destroy';
+import {Factory} from '../../models/instances/factory';
+
 exports.command = 'factory <path>';
 exports.describe = 'destroy existing factory';
 exports.builder = yargs => {
@@ -9,11 +12,14 @@ exports.builder = yargs => {
   });
 };
 exports.handler = argv => {
-  const shell = require('shelljs');
-  const path = require('path');
-  const p = path.parse(argv.path);
-  const factoryName = p.name;
-  const factoryDir = path.join(process.cwd(), 'factories', p.dir);
-  const factoryFullPath = path.join(factoryDir, `${factoryName}.ts`);
-  shell.rm('-rf', factoryFullPath);
+  require('inquirer').createPromptModule()({
+    choices: ['n', 'y'],
+    message: 'Are you sure?',
+    name: 'confirmDestroy',
+    type: 'confirm'
+  }).then(({confirmDestroy}) => {
+    if (confirmDestroy) {
+      new Factory(argv.path, argv, new Destroy()).command.execute();
+    }
+  });
 };

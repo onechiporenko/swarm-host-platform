@@ -18,7 +18,9 @@
     "swarm-host": "./dist/index.js"
   },
   "dependencies": {
+    "colors": "^1.3.0",
     "ejs": "^2.6.1",
+    "inquirer": "^6.0.0",
     "shelljs": "^0.8.2",
     "yargs": "^11.0.0"
   },

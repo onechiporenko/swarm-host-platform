@@ -16,7 +16,7 @@ describe('Destroy Route', () => {
     execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js generate route units`)
       .then(() => {
         expect(shell.cat(`${this.tmpDir}/routes/units.ts`).stdout).to.be.not.empty;
-        execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js destroy route units`)
+        execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js destroy route units`, {input: 'y'})
           .then(() => {
             expect(shell.cat(`${this.tmpDir}/routes/unit.ts`).stdout).to.be.empty;
             done();
@@ -28,7 +28,7 @@ describe('Destroy Route', () => {
     execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js generate route all/units`)
       .then(() => {
         expect(shell.cat(`${this.tmpDir}/routes/all/units.ts`).stdout).to.be.not.empty;
-        execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js destroy route all/units`)
+        execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js destroy route all/units`, {input: 'y'})
           .then(() => {
             expect(shell.cat(`${this.tmpDir}/routes/all/unit.ts`).stdout).to.be.empty;
             done();

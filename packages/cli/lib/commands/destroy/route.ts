@@ -1,3 +1,6 @@
+import {Destroy} from '../../models/commands/destroy';
+import {Route} from '../../models/instances/route';
+
 exports.command = 'route <path>';
 exports.describe = 'destroy existing route';
 exports.builder = yargs => {
@@ -9,10 +12,14 @@ exports.builder = yargs => {
   });
 };
 exports.handler = argv => {
-  const shell = require('shelljs');
-  const path = require('path');
-  const p = path.parse(argv.path);
-  const routeDir = path.join(process.cwd(), 'routes', p.dir);
-  const routeFullPath = path.join(routeDir, `${p.name}.ts`);
-  shell.rm('-rf', routeFullPath);
+  require('inquirer').createPromptModule()({
+    choices: ['n', 'y'],
+    message: 'Are you sure?',
+    name: 'confirmDestroy',
+    type: 'confirm'
+  }).then(({confirmDestroy}) => {
+    if (confirmDestroy) {
+      new Route(argv.path, argv, new Destroy()).command.execute();
+    }
+  });
 };

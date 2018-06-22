@@ -1,3 +1,6 @@
+import {GenerateRoute} from '../../models/commands/generate/route';
+import {Route} from '../../models/instances/route';
+
 exports.command = 'route <path>';
 exports.describe = 'generates new route';
 exports.builder = yargs => {
@@ -16,25 +19,5 @@ exports.builder = yargs => {
   });
 };
 exports.handler = argv => {
-  const shell = require('shelljs');
-  const path = require('path');
-  const fs = require('fs');
-  const ejs = require('ejs');
-  const p = path.parse(argv.path);
-  if (!argv.url) {
-    argv.url = path.join(p.dir, p.name);
-  }
-  if (argv.url[0] !== '/') {
-    argv.url = `/${argv.url}`;
-  }
-  const dynamic = argv.url.split('/').filter(c => c[0] === ':').map(c => c.substr(1));
-  const tpl = fs.readFileSync(path.join(__dirname, '../../../blueprints/files/route.ejs'), 'utf-8');
-  const routeDir = path.join(process.cwd(), 'routes', p.dir);
-  const routeFullPath = path.join(routeDir, `${p.name}.ts`);
-  shell.mkdir('-p', routeDir);
-  shell.echo(ejs.render(tpl, {
-    method: argv.method,
-    req: dynamic.length ? `{params: {${dynamic.join(', ')}}}` : 'req',
-    url: argv.url
-  })).to(routeFullPath);
+  new Route(argv.path, argv, new GenerateRoute()).command.execute();
 };
