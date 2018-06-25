@@ -3,11 +3,11 @@ import ejs = require('ejs');
 import fs = require('fs');
 import path = require('path');
 import shell = require('shelljs');
-import { Generate } from '../generate';
+import {Generate} from '../generate';
 import FactoryAttr from './../../../models/factory-attr';
 
 export class GenerateFactory extends Generate {
-  public execute() {
+  public writeFile() {
     const tpl = fs.readFileSync(path.join(__dirname, '../../../../blueprints/files/factory.ejs'), 'utf-8');
     shell.mkdir('-p', this.instance.dirPath);
     shell.echo(ejs.render(tpl, {

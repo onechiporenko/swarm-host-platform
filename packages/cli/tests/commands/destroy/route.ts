@@ -5,6 +5,7 @@ import execa = require('execa');
 import shell = require('shelljs');
 
 describe('Destroy Route', () => {
+
   beforeEach(() => {
     this.tmpDir = getTmpDir();
     shell.mkdir(this.tmpDir);
@@ -18,7 +19,19 @@ describe('Destroy Route', () => {
         expect(shell.cat(`${this.tmpDir}/routes/units.ts`).stdout).to.be.not.empty;
         execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js destroy route units`, {input: 'y'})
           .then(() => {
-            expect(shell.cat(`${this.tmpDir}/routes/unit.ts`).stdout).to.be.empty;
+            expect(shell.cat(`${this.tmpDir}/routes/units.ts`).stdout).to.be.empty;
+            done();
+          });
+      });
+  });
+
+  it('should not delete existing route', done => {
+    execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js generate route units`)
+      .then(() => {
+        expect(shell.cat(`${this.tmpDir}/routes/units.ts`).stdout).to.be.not.empty;
+        execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js destroy route units`, {input: 'n'})
+          .then(() => {
+            expect(shell.cat(`${this.tmpDir}/routes/units.ts`).stdout).to.be.not.empty;
             done();
           });
       });
@@ -30,9 +43,29 @@ describe('Destroy Route', () => {
         expect(shell.cat(`${this.tmpDir}/routes/all/units.ts`).stdout).to.be.not.empty;
         execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js destroy route all/units`, {input: 'y'})
           .then(() => {
-            expect(shell.cat(`${this.tmpDir}/routes/all/unit.ts`).stdout).to.be.empty;
+            expect(shell.cat(`${this.tmpDir}/routes/all/units.ts`).stdout).to.be.empty;
             done();
           });
+      });
+  });
+
+  it('should not delete existing nested route', done => {
+    execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js generate route all/units`)
+      .then(() => {
+        expect(shell.cat(`${this.tmpDir}/routes/all/units.ts`).stdout).to.be.not.empty;
+        execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js destroy route all/units`, {input: 'n'})
+          .then(() => {
+            expect(shell.cat(`${this.tmpDir}/routes/all/units.ts`).stdout).to.be.not.empty;
+            done();
+          })
+          .catch(e => {
+            console.log('!!', e);
+            done();
+          });
+      })
+      .catch(e => {
+        console.log('!!', e);
+        done();
       });
   });
 });

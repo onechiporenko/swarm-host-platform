@@ -6,7 +6,7 @@ import shell = require('shelljs');
 import { Generate } from '../generate';
 
 export class GenerateRoute extends Generate {
-  public execute() {
+  public writeFile() {
     let url: string = this.instance.options.url || path.join(this.instance.dir, this.instance.name);
     if (url[0] !== '/') {
       url = `/${url}`;

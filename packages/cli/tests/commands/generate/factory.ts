@@ -23,6 +23,32 @@ describe('Generate Factory', () => {
       });
   });
 
+  it('should override existing factory', done => {
+    execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js generate factory unit`)
+      .then(() => {
+        execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js generate factory unit name:string age:number squad:has-one:squad:units objectives:has-many:objective`, {input: 'y'})
+          .then(() => {
+            const original = shell.cat(`${this.tmpDir}/factories/unit.ts`).stdout;
+            const expected = shell.cat(path.join(process.cwd(), `tests/results/factories/unit-with-attrs-and-relations.txt`)).stdout;
+            expect(original).to.be.equal(expected);
+            done();
+          });
+      });
+  });
+
+  it('should not override existing factory', done => {
+    execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js generate factory unit`)
+      .then(() => {
+        execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js generate factory unit`, {input: 'n'})
+          .then(() => {
+            const original = shell.cat(`${this.tmpDir}/factories/unit.ts`).stdout;
+            const expected = shell.cat(path.join(process.cwd(), `tests/results/factories/empty-unit.txt`)).stdout;
+            expect(original).to.be.equal(expected);
+            done();
+          });
+      });
+  });
+
   it('should create a factory with attributes ans relations', done => {
     execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js generate factory some/unit name:string age:number squad:has-one:squad:units objectives:has-many:objective`)
       .then(() => {
