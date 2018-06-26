@@ -24,10 +24,7 @@ exports.handler = argv => {
   const projectName = p.name;
   const projectTplPath = path.join(__dirname, '../../blueprints/project/');
   const packageJson = fs.readFileSync(path.join(projectTplPath, 'package.json'), 'utf-8');
-  shell.cp(path.join(projectTplPath, 'index.ejs'), 'index.ts');
-  shell.cp(path.join(projectTplPath, 'server.ejs'), 'server.ts');
-  shell.cp(path.join(projectTplPath, 'tsconfig.json'), 'tsconfig.json');
-  shell.cp(path.join(projectTplPath, 'tslint.json'), 'tslint.json');
+  shell.cp(path.join(projectTplPath, '/*'), '.');
   shell.echo(ejs.render(packageJson, {
     name: projectName
   })).to('package.json');
