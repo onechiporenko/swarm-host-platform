@@ -14,7 +14,7 @@ describe('Init Project', () => {
   afterEach(() => shell.rm('-rf', this.tmpDir));
 
   it('should create initial files', done => {
-    execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js init`)
+    execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js init --skip-npm`)
       .then(() => {
         const dirContent = shell.ls('-A', this.tmpDir);
         expect(dirContent).to.include('factories');

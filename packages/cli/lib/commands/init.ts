@@ -2,6 +2,11 @@ exports.command = 'init';
 exports.desc = 'initialize swarm-host project in the empty directory';
 exports.builder = yargs => {
   yargs.example('`swarm-host init`', 'Initialize new Swarm-Host in the current dir');
+  yargs.options({
+    'skip-npm': {
+      describe: 'Do not install npm packages'
+    }
+  });
 };
 exports.handler = argv => {
   const shell = require('shelljs');
@@ -26,4 +31,9 @@ exports.handler = argv => {
   shell.echo(ejs.render(packageJson, {
     name: projectName
   })).to('package.json');
+  if (!argv.skipNpm) {
+    console.log('Installing npm dependencies...');
+    shell.exec('npm i --save swarm-host typescript');
+    shell.exec('npm i --save-dev @types/node ts-node tslint');
+  }
 };
