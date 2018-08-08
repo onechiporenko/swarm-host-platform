@@ -4,6 +4,7 @@ import * as express from 'express';
 import read = require('fs-readdir-recursive');
 import * as http from 'http';
 import {Factory, Lair} from 'lair-db';
+import nPath = require('path');
 import winston = require('winston');
 import {printRoutesMap} from './express';
 import Route from './route';
@@ -75,8 +76,17 @@ export default class Server {
   }
 
   public addRoute(route: Route) {
-    this.expressRouter[route.method](
-      route.path,
+    let source;
+    let path;
+    if (route.namespace === null) {
+      source = this.expressRouter;
+      path = route.path;
+    } else {
+      source = this.expressApp;
+      path = nPath.join(route.namespace, route.path);
+    }
+    source[route.method](
+      path,
       (req, res, next) =>
         route.handler.call(this.expressRouter, req, res, next, this.lair));
   }

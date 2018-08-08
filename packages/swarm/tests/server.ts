@@ -185,6 +185,15 @@ describe('#Server integration', () => {
           done();
         }));
     });
+
+    it('should add a second route', done => {
+      this.server.startServer(() => chai.request(this.server.server)
+        .get('/reset-namespace')
+        .end((err, res) => {
+          expect(res).to.have.property('status', 200);
+          done();
+        }));
+    });
   });
 
   describe('#createRecords', () => {

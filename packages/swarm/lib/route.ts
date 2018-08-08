@@ -1,8 +1,8 @@
 import * as express from 'express';
-import {Lair} from 'lair-db';
-import {CRUDOptions} from 'lair-db/dist/lair';
+import { Lair } from 'lair-db';
+import { CRUDOptions } from 'lair-db/dist/lair';
 import methods = require('methods');
-import {assert} from './utils';
+import { assert } from './utils';
 
 function defaultNext(req: express.Request, res: express.Response, data: any) {
   return res.json(data);
@@ -26,7 +26,7 @@ export default class Route {
   }
 
   public static get(path: string, modelName: string, lairOptions: CRUDOptions = {}, customNext: CustomNext = defaultNext): Route {
-    const handler = (req, res, next, lair) => {
+    const handler = (req: express.Request, res: express.Response, next: express.NextFunction, lair: Lair) => {
       const parameters = Object.keys(req.params);
       const id = parameters.length === 1 ? req.params[parameters[0]] : undefined;
       const result = id ? lair.getOne(modelName, id, lairOptions) : lair.getAll(modelName, lairOptions);
@@ -36,14 +36,14 @@ export default class Route {
   }
 
   public static post(path: string, modelName: string, lairOptions: CRUDOptions = {}, customNext: CustomNext = defaultNext): Route {
-    return Route.createRoute('post', path, (req, res, next, lair) => {
+    return Route.createRoute('post', path, (req: express.Request, res: express.Response, next: express.NextFunction, lair: Lair) => {
       const result = lair.createOne(modelName, req.body, lairOptions);
       return customNext(req, res, result, lair);
     });
   }
 
   public static put(path: string, modelName: string, lairOptions: CRUDOptions = {}, customNext: CustomNext = defaultNext): Route {
-    return Route.createRoute('put', path, (req, res, next, lair) => {
+    return Route.createRoute('put', path, (req: express.Request, res: express.Response, next: express.NextFunction, lair: Lair) => {
       const parameters = Object.keys(req.params);
       const id = parameters.length === 1 ? req.params[parameters[0]] : undefined;
       assert('identifier is not provided', !!id);
@@ -53,7 +53,7 @@ export default class Route {
   }
 
   public static patch(path: string, modelName: string, lairOptions: CRUDOptions = {}, customNext: CustomNext = defaultNext): Route {
-    return Route.createRoute('patch', path, (req, res, next, lair) => {
+    return Route.createRoute('patch', path, (req: express.Request, res: express.Response, next: express.NextFunction, lair: Lair) => {
       const parameters = Object.keys(req.params);
       const id = parameters.length === 1 ? req.params[parameters[0]] : undefined;
       assert('identifier is not provided', !!id);
@@ -63,7 +63,7 @@ export default class Route {
   }
 
   public static delete(path: string, modelName: string, customNext: CustomNext = defaultNext): Route {
-    const handler = (req, res, next, lair) => {
+    const handler = (req: express.Request, res: express.Response, next: express.NextFunction, lair: Lair) => {
       const parameters = Object.keys(req.params);
       const id = parameters.length === 1 ? req.params[parameters[0]] : undefined;
       assert('identifier is not provided', !!id);
@@ -75,5 +75,10 @@ export default class Route {
 
   public handler: Handler;
   public method;
+  /**
+   * Used to override `server.namespace` for current Route
+   * @type {string?}
+   */
+  public namespace = null;
   public path;
 }
