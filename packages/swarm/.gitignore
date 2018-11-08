@@ -3,3 +3,4 @@ reports
 dist
 docs
 /.idea
+tests-data

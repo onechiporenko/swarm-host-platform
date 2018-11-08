@@ -35,8 +35,6 @@ export interface JobOptions {
    */
   endTime?: number;
 
-  immediateStart?: boolean;
-
   /**
    * Start job
    */
@@ -93,7 +91,7 @@ export default class Job {
           job.lastTick.call(null, result);
         }
       }, (options.ticksCount + 1) * options.ticksDelay * 1000);
-    }, options.immediateStart);
+    });
     cronInstance.add(job.internalId, job.internalJob);
     return job;
   }

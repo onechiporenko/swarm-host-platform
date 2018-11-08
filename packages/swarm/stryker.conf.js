@@ -1,6 +1,5 @@
 module.exports = function(config) {
   config.set({
-    files: [],
     testRunner: "mocha",
     mutator: "typescript",
     transpilers: ["typescript"],
@@ -10,6 +9,9 @@ module.exports = function(config) {
     coverageAnalysis: "off",
     // logLevel: "trace",
     mutate: ["lib/**/*.ts", "!lib/express.ts"],
+    mochaOptions: {
+      files: ["dist/tests/**/*.js"]
+    },
     thresholds: {break: 50, high: 80, low: 60}
   });
 };
