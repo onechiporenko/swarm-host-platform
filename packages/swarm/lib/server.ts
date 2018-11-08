@@ -83,7 +83,8 @@ export default class Server {
       path = route.path;
     } else {
       source = this.expressApp;
-      path = nPath.join(route.namespace, route.path);
+      path = nPath.join(route.namespace, route.path)
+        .replace(/\\/g, '/'); // quick fix for windows
     }
     source[route.method](
       path,
