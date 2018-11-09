@@ -75,7 +75,10 @@ export default class Server {
     this.expressLairRouter = express.Router();
     this.lair = Lair.getLair();
     this.logger = winston.createLogger({
-      transports: [new winston.transports.Console()],
+      level: 'info',
+      transports: [new winston.transports.Console({
+        format: winston.format.simple(),
+      })],
     });
   }
 
@@ -169,7 +172,7 @@ export default class Server {
     app.use(bodyParser.json());
     app.use((req, res, next) => {
       if (this.verbose) {
-        this.logger.info(colors.green(`${req.method} ${req.url}`));
+        this.logger.info({level: 'info', message: colors.green(`${req.method} ${req.url}`)});
       }
       next();
     });
@@ -186,7 +189,7 @@ export default class Server {
 
   private printRoutesMap() {
     if (this.verbose) {
-      this.logger.info('Defined route-handlers');
+      this.logger.info({level: 'info', message: 'Defined route-handlers'});
       this.expressApp._router.stack.forEach(printRoutesMap.bind(null, []));
     }
   }
