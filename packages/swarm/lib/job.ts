@@ -3,10 +3,11 @@ import cron = require('node-cron');
 import Cron from './cron';
 import {assert} from './utils';
 
-function noop() {
+function noop(): void {
   return null;
 }
 
+// tslint:disable-next-line:no-any
 export type tickCallback = (val: any, indx?: number) => any;
 
 export interface JobOptions {
@@ -61,7 +62,7 @@ export interface JobOptions {
  * `tick` is called `ticksCount` times
  */
 export default class Job {
-  public static createJob(options: JobOptions) {
+  public static createJob(options: JobOptions): Job {
     assert('"options.ticksCount" must be greater than 0', options.ticksCount > 0);
     const job = new Job();
     const cronInstance = Cron.getCron();
@@ -96,26 +97,26 @@ export default class Job {
     return job;
   }
 
-  private internalId: any;
+  private internalId: string;
   private firstTick: tickCallback;
   private tick: tickCallback;
   private lastTick: tickCallback;
   private internalJob: ScheduledTask;
   private constructor() {}
 
-  get id() {
+  get id(): string {
     return this.internalId;
   }
 
-  public start() {
+  public start(): void {
     Cron.getCron().start(this.id);
   }
 
-  public stop() {
+  public stop(): void {
     Cron.getCron().stop(this.id);
   }
 
-  public destroy() {
+  public destroy(): void {
     Cron.getCron().destroy(this.id);
   }
 }

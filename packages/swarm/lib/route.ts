@@ -4,19 +4,19 @@ import { CRUDOptions } from 'lair-db/dist/lair';
 import methods = require('methods');
 import { assert } from './utils';
 
-function defaultNext(req: express.Request, res: express.Response, data: any) {
+function defaultNext(req: express.Request, res: express.Response, data: object|void): express.Response {
   return res.json(data);
 }
 
-function defaultHandler(req: express.Request, res: express.Response, next: express.NextFunction, lair: Lair) {
+function defaultHandler(req: express.Request, res: express.Response, next: express.NextFunction, lair: Lair): express.Response {
   return res.json({});
 }
 
 export type Handler = (req: express.Request, res: express.Response, next: express.NextFunction, lair: Lair) => any;
-export type CustomNext = (req: express.Request, res: express.Response, data: any, lair: Lair) => any;
+export type CustomNext = (req: express.Request, res: express.Response, data: object|void, lair: Lair) => any;
 
 export default class Route {
-  public static createRoute(method = 'get', path = '/', handler: Handler = defaultHandler): Route {
+  public static createRoute(method: string = 'get', path: string = '/', handler: Handler = defaultHandler): Route {
     const route = new Route();
     route.handler = handler;
     route.method = method;
@@ -74,11 +74,11 @@ export default class Route {
   }
 
   public handler: Handler;
-  public method;
+  public method: string;
   /**
    * Used to override `server.namespace` for current Route
    * @type {string?}
    */
-  public namespace = null;
-  public path;
+  public namespace: string = null;
+  public path: string;
 }

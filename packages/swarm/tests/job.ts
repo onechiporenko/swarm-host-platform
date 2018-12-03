@@ -47,13 +47,13 @@ describe('#Job', () => {
         frequency: '1 * * * *',
         ticksDelay: 4,
         ticksCount: 5,
-        firstTick() {
+        firstTick(): void {
           executed++;
         },
-        tick() {
+        tick(): void {
           executed++;
         },
-        lastTick() {
+        lastTick(): void {
           executed++;
           expect(executed).to.equal(7);
           done();
@@ -68,14 +68,14 @@ describe('#Job', () => {
         frequency: '1 * * * *',
         ticksDelay: 4,
         ticksCount: 5,
-        firstTick() {
+        firstTick(): string {
           return '1';
         },
-        tick(val) {
+        tick(val: string): string {
           expect(val).to.be.equal('1');
           return val;
         },
-        lastTick(val) {
+        lastTick(val: string): void {
           expect(val).to.be.equal('1');
           done();
         },
@@ -90,10 +90,10 @@ describe('#Job', () => {
         frequency: '1 * * * *',
         ticksDelay: 4,
         ticksCount: 5,
-        tick(val, index) {
+        tick(val: any, index: number): void {
           expect(index).to.be.equal(indx++);
         },
-        lastTick() {
+        lastTick(): void {
           indx = 1;
           done();
         },
@@ -109,7 +109,7 @@ describe('#Job', () => {
           ticksCount: 4,
           ticksDelay: 5,
           endTime: 1,
-          firstTick() {
+          firstTick(): void {
             throw new Error('should not be called');
           },
         } as JobOptions);
@@ -125,13 +125,13 @@ describe('#Job', () => {
           frequency: '1 * * * *',
           ticksCount: 1,
           ticksDelay: 10,
-          firstTick() {
+          firstTick(): void {
             throw new Error('should not be executed');
           },
-          tick() {
+          tick(): void {
             executed++;
           },
-          lastTick() {
+          lastTick(): void {
             executed++;
           },
         } as JobOptions);
@@ -150,13 +150,13 @@ describe('#Job', () => {
           frequency: '1 * * * *',
           ticksCount: 1,
           ticksDelay: 1,
-          firstTick() {
+          firstTick(): void {
             executed++;
           },
-          tick() {
+          tick(): void {
             Cron.getCron().destroy(jobId);
           },
-          lastTick() {
+          lastTick(): void {
             executed++;
           },
         } as JobOptions);

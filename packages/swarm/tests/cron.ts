@@ -41,7 +41,7 @@ describe('#Cron', () => {
     it('should start a Task if it exists', done => {
       const cron = Cron.getCron();
       cron.add('1', {
-        start() {
+        start(): void {
           done();
         },
       } as ScheduledTask);
@@ -53,7 +53,7 @@ describe('#Cron', () => {
     it('should stop a Task if it exists', done => {
       const cron = Cron.getCron();
       cron.add('1', {
-        stop() {
+        stop(): void {
           done();
         },
       } as ScheduledTask);
@@ -65,7 +65,7 @@ describe('#Cron', () => {
     it('should destroy a Task if it exists', done => {
       const cron = Cron.getCron();
       cron.add('1', {
-        destroy() {
+        destroy(): void {
           done();
         },
       } as ScheduledTask);

@@ -38,7 +38,7 @@ describe('#Route', () => {
       route.handler(
         {} as express.Request,
         {
-          json(data) {
+          json(data: object): void {
             expect(data).to.be.eql({});
             done();
           },
@@ -101,7 +101,7 @@ describe('#Route', () => {
         expect(route.handler(
           {params: {id: '1'}} as express.Request,
           {
-            json(d) {
+            json(d: any): any {
               return d;
             },
           } as express.Response,

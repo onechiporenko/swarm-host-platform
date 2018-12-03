@@ -9,7 +9,7 @@ const logger = winston.createLogger({
 });
 
 // from https://github.com/expressjs/express/issues/3308#issuecomment-300957572
-export function printRoutesMap(path, layer) {
+export function printRoutesMap(path: string[], layer: any): void {
   if (layer.route) {
     layer.route.stack.forEach(printRoutesMap.bind(null, path.concat(split(layer.route.path))));
   } else if (layer.name === 'router' && layer.handle.stack) {
@@ -19,7 +19,7 @@ export function printRoutesMap(path, layer) {
   }
 }
 
-function split(thing) {
+function split(thing: any): string[]|string {
   if (typeof thing === 'string') {
     return thing.split('/');
   } else if (thing.fast_slash) {

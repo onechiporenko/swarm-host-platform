@@ -1,7 +1,7 @@
 import {ScheduledTask} from 'node-cron';
 
 export default class Cron {
-  public static getCron() {
+  public static getCron(): Cron {
     if (!Cron.instance) {
       Cron.instance = new Cron();
     }
@@ -20,7 +20,7 @@ export default class Cron {
     this.tasks = {};
   }
 
-  public add(id: string, job: ScheduledTask) {
+  public add(id: string, job: ScheduledTask): void {
     this.tasks[id] = job;
   }
 
@@ -28,21 +28,21 @@ export default class Cron {
     return this.tasks.hasOwnProperty(id);
   }
 
-  public start(id: string) {
+  public start(id: string): void {
     const task = this.tasks[id];
     if (task) {
       task.start();
     }
   }
 
-  public stop(id: string) {
+  public stop(id: string): void {
     const job = this.tasks[id];
     if (job) {
       job.stop();
     }
   }
 
-  public destroy(id: string) {
+  public destroy(id: string): void {
     const job = this.tasks[id];
     if (job) {
       job.destroy();

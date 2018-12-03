@@ -51,11 +51,11 @@ export default class Server {
   private static instance: Server;
 
   public expressApp: express.Application;
-  public namespace = '';
-  public port = 54321;
-  public verbose = true;
-  public delay = 0;
-  public lairNamespace = '/lair';
+  public namespace: string = '';
+  public port: number = 54321;
+  public verbose: boolean = true;
+  public delay: number = 0;
+  public lairNamespace: string = '/lair';
 
   public get server(): http.Server {
     return this.internalServer;
@@ -82,7 +82,7 @@ export default class Server {
     });
   }
 
-  public addRoute(route: Route) {
+  public addRoute(route: Route): void {
     let source;
     let path;
     if (route.namespace === null) {
@@ -99,39 +99,39 @@ export default class Server {
         route.handler.call(this.expressRouter, req, res, next, this.lair));
   }
 
-  public addRoutes(routes: Route[]) {
+  public addRoutes(routes: Route[]): void {
     routes.map(route => this.addRoute(route));
   }
 
-  public addRoutesFromDir(path: string) {
+  public addRoutesFromDir(path: string): void {
     read(path).forEach(routePath => this.add('route', path, routePath));
   }
 
-  public addFactory(factory: Factory, name?: string) {
+  public addFactory(factory: Factory, name?: string): void {
     this.lair.registerFactory(factory, name);
   }
 
-  public addFactories(factories: Array<[Factory, string]>) {
+  public addFactories(factories: Array<[Factory, string]>): void {
     factories.map(args => this.addFactory.apply(this, args));
   }
 
-  public addFactoriesFromDir(path: string) {
+  public addFactoriesFromDir(path: string): void {
     read(path).forEach(factoryPath => this.add('factory', path, factoryPath));
   }
 
-  public createRecords(factoryName: string, count: number) {
+  public createRecords(factoryName: string, count: number): void {
     this.createRecordsQueue.push([factoryName, count]);
   }
 
-  public addMiddleware(clb: express.RequestHandler) {
+  public addMiddleware(clb: express.RequestHandler): void {
     this.middlewaresQueue.push(clb);
   }
 
-  public addMiddlewares(clbs: express.RequestHandler[]) {
+  public addMiddlewares(clbs: express.RequestHandler[]): void {
     clbs.map(clb => this.addMiddleware(clb));
   }
 
-  public startServer(clb?: () => any) {
+  public startServer(clb?: () => void): void {
     this.lair.verbose = this.verbose;
     this.fillLair();
     this.useMiddlewares();
@@ -141,11 +141,11 @@ export default class Server {
     this.internalServer = this.expressApp.listen(this.port, () => clb ? clb() : null);
   }
 
-  public stopServer(clb?: () => any) {
+  public stopServer(clb?: () => void): void {
     this.internalServer.close(() => clb ? clb() : null);
   }
 
-  private addLairMetaRoutes() {
+  private addLairMetaRoutes(): void {
     this.expressLairRouter.get('/meta', (req, res) => res.json(this.lair.getDevInfo()));
     const path = `/factories/:factoryName`;
     const singlePath = `${path}/:id`;
@@ -158,16 +158,16 @@ export default class Server {
     this.expressApp.use(this.lairNamespace, this.expressLairRouter);
   }
 
-  private addAppRoutes() {
+  private addAppRoutes(): void {
     this.expressApp.use(this.namespace, this.expressRouter);
   }
 
-  private fillLair() {
+  private fillLair(): void {
     this.createRecordsQueue.map(crArgs => this.lair.createRecords.apply(this.lair, crArgs));
     this.createRecordsQueue = [];
   }
 
-  private useMiddlewares() {
+  private useMiddlewares(): void {
     const app = this.expressApp;
     app.use(bodyParser.json());
     app.use((req, res, next) => {
@@ -187,14 +187,14 @@ export default class Server {
     });
   }
 
-  private printRoutesMap() {
+  private printRoutesMap(): void {
     if (this.verbose) {
       this.logger.info({level: 'info', message: 'Defined route-handlers'});
       this.expressApp._router.stack.forEach(printRoutesMap.bind(null, []));
     }
   }
 
-  private add(type: string, parent: string, path: string) {
+  private add(type: string, parent: string, path: string): void {
     if ((path.match(/\.ts$/) !== null || path.match(/\.js$/) !== null) && path.match(/\.d\.ts$/) === null) {
       const instance = require(`${parent}/${path}`).default;
       if (instance) {
