@@ -4,7 +4,7 @@ import { CRUDOptions } from 'lair-db/dist/lair';
 import methods = require('methods');
 import { assert } from './utils';
 
-function defaultNext(req: express.Request, res: express.Response, data: object|void): express.Response {
+function defaultNext(req: express.Request, res: express.Response, data: object[] | object | any): express.Response {
   return res.json(data);
 }
 
@@ -13,7 +13,7 @@ function defaultHandler(req: express.Request, res: express.Response, next: expre
 }
 
 export type Handler = (req: express.Request, res: express.Response, next: express.NextFunction, lair: Lair) => any;
-export type CustomNext = (req: express.Request, res: express.Response, data: object|void, lair: Lair) => any;
+export type CustomNext = (req: express.Request, res: express.Response, data: object[] | object | any, lair: Lair) => any;
 
 export default class Route {
   public static createRoute(method: string = 'get', path: string = '/', handler: Handler = defaultHandler): Route {
