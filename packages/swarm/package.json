@@ -46,7 +46,7 @@
     "@types/sinon": "^5.0.5",
     "@types/yargs": "^12.0.1",
     "chai": "^4.2.0",
-    "chai-http": "^4.2.0",
+    "chai-http": "^4.2.1",
     "coveralls": "^3.0.2",
     "istanbul": "^0.4.5",
     "jest-cli": "^23.6.0",
