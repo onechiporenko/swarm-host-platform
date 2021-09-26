@@ -6,6 +6,7 @@ docs
 .idea
 .stryker-tmp
 .github
+tests-data
 dist/coverage
 publish.sh
 tslint.json
