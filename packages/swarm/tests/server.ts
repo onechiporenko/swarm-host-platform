@@ -6,6 +6,9 @@ import {Factory, Lair} from 'lair-db/dist';
 import Route from '../lib/route';
 import Server from '../lib/server';
 
+let lair;
+let server;
+
 const modelA = Factory.create({
   attrs: {
     name: Factory.field({
@@ -27,7 +30,7 @@ const modelB = Factory.create({
 describe('#Server', () => {
 
   beforeEach(() => {
-    this.lair = Lair.getLair();
+    lair = Lair.getLair();
   });
 
   afterEach(() => {
@@ -39,9 +42,9 @@ describe('#Server', () => {
       expect(Server.getServer()).to.be.instanceof(Server);
     });
     it('should not create new instance if old-one exists', () => {
-      const server = Server.getServer();
+      const server1 = Server.getServer();
       const server2 = Server.getServer();
-      expect(server).to.be.equal(server2);
+      expect(server1).to.be.equal(server2);
     });
   });
 
@@ -77,26 +80,26 @@ describe('#Server', () => {
 
   describe('#addFactory', () => {
     it('should register factory in the Lair', () => {
-      expect(this.lair.getDevInfo()).to.be.eql({});
+      expect(lair.getDevInfo()).to.be.eql({});
       Server.getServer().addFactory(modelA, 'a');
-      expect(this.lair.getDevInfo()).to.have.property('a').that.is.an('object');
+      expect(lair.getDevInfo()).to.have.property('a').that.is.an('object');
     });
   });
 
   describe('#addFactories', () => {
     it('should register factories in the Lair', () => {
-      expect(this.lair.getDevInfo()).to.be.eql({});
+      expect(lair.getDevInfo()).to.be.eql({});
       Server.getServer().addFactories([[modelA, 'a'], [modelB, 'b']]);
-      expect(this.lair.getDevInfo()).to.have.property('a').that.is.an('object');
-      expect(this.lair.getDevInfo()).to.have.property('b').that.is.an('object');
+      expect(lair.getDevInfo()).to.have.property('a').that.is.an('object');
+      expect(lair.getDevInfo()).to.have.property('b').that.is.an('object');
     });
   });
 
   describe('#addFactoriesFromDir', () => {
     it('should register factories in the Lair', () => {
-      expect(this.lair.getDevInfo()).to.be.eql({});
+      expect(lair.getDevInfo()).to.be.eql({});
       Server.getServer().addFactoriesFromDir(`${__dirname}/../tests-data/test-factories`);
-      const devInfo = this.lair.getDevInfo();
+      const devInfo = lair.getDevInfo();
       expect(devInfo).to.have.property('unit').that.is.an('object');
       expect(devInfo).to.have.property('squad').that.is.an('object');
       expect(devInfo).to.have.property('dir').that.is.an('object');
@@ -107,15 +110,15 @@ describe('#Server', () => {
 describe('#Server integration', () => {
 
   beforeEach(() => {
-    this.lair = Lair.getLair();
-    this.server = Server.getServer();
-    this.server.port = 12345;
-    this.server.namespace = '/api/v2';
-    this.server.verbose = false;
+    lair = Lair.getLair();
+    server = Server.getServer();
+    server.port = 12345;
+    server.namespace = '/api/v2';
+    server.verbose = false;
   });
 
   afterEach(done => {
-    this.server.stopServer(() => {
+    server.stopServer(() => {
       Server.cleanServer();
       done();
     });
@@ -123,8 +126,8 @@ describe('#Server integration', () => {
 
   describe('#addRoute', () => {
     it('should add route', done => {
-      this.server.addRoute(Route.createRoute('get', '/some-path'));
-      this.server.startServer(() => chai.request(this.server.server)
+      server.addRoute(Route.createRoute('get', '/some-path'));
+      server.startServer(() => chai.request(server.server)
         .get('/api/v2/some-path')
         .end((err, res) => {
           expect(res).to.have.property('status', 200);
@@ -135,15 +138,15 @@ describe('#Server integration', () => {
 
   describe('#addRoutes', () => {
     beforeEach(() => {
-      this.server.addRoutes([
+      server.addRoutes([
         Route.createRoute('get', '/some-path'),
         Route.createRoute('get', '/some-another-path'),
       ]);
     });
 
     it('should add first route', done => {
-      this.server.addRoute(Route.createRoute('get', '/some-path'));
-      this.server.startServer(() => chai.request(this.server.server)
+      server.addRoute(Route.createRoute('get', '/some-path'));
+      server.startServer(() => chai.request(server.server)
         .get('/api/v2/some-path')
         .end((err, res) => {
           expect(res).to.have.property('status', 200);
@@ -152,8 +155,8 @@ describe('#Server integration', () => {
     });
 
     it('should add second route', done => {
-      this.server.addRoute(Route.createRoute('get', '/some-another-path'));
-      this.server.startServer(() => chai.request(this.server.server)
+      server.addRoute(Route.createRoute('get', '/some-another-path'));
+      server.startServer(() => chai.request(server.server)
         .get('/api/v2/some-path')
         .end((err, res) => {
           expect(res).to.have.property('status', 200);
@@ -165,11 +168,11 @@ describe('#Server integration', () => {
   describe('#addRoutesFromDir', () => {
 
     beforeEach(() => {
-      this.server.addRoutesFromDir(`${__dirname}/../tests-data/test-routes`);
+      server.addRoutesFromDir(`${__dirname}/../tests-data/test-routes`);
     });
 
     it('should add a first route', done => {
-      this.server.startServer(() => chai.request(this.server.server)
+      server.startServer(() => chai.request(server.server)
         .get('/api/v2/path')
         .end((err, res) => {
           expect(res).to.have.property('status', 200);
@@ -178,7 +181,7 @@ describe('#Server integration', () => {
     });
 
     it('should add a second route', done => {
-      this.server.startServer(() => chai.request(this.server.server)
+      server.startServer(() => chai.request(server.server)
         .get('/api/v2/path/subpath')
         .end((err, res) => {
           expect(res).to.have.property('status', 200);
@@ -187,7 +190,7 @@ describe('#Server integration', () => {
     });
 
     it('should add a second route', done => {
-      this.server.startServer(() => chai.request(this.server.server)
+      server.startServer(() => chai.request(server.server)
         .get('/reset-namespace')
         .end((err, res) => {
           expect(res).to.have.property('status', 200);
@@ -198,15 +201,15 @@ describe('#Server integration', () => {
 
   describe('#createRecords', () => {
     beforeEach(() => {
-      this.server.addFactory(modelA, 'a');
-      this.server.addFactory(modelA, 'b');
-      this.server.createRecords('a', 2);
-      this.server.createRecords('b', 3);
-      this.server.addRoutes([Route.get('/a', 'a'), Route.get('/b', 'b')]);
+      server.addFactory(modelA, 'a');
+      server.addFactory(modelA, 'b');
+      server.createRecords('a', 2);
+      server.createRecords('b', 3);
+      server.addRoutes([Route.get('/a', 'a'), Route.get('/b', 'b')]);
     });
 
     it('should create records for `modelA` in the Lair on server start', done => {
-      this.server.startServer(() => chai.request(this.server.server)
+      server.startServer(() => chai.request(server.server)
         .get('/api/v2/a')
         .end((err, res) => {
           expect(res).to.have.property('status', 200);
@@ -216,7 +219,7 @@ describe('#Server integration', () => {
     });
 
     it('should create records for `modelB` in the Lair on server start', done => {
-      this.server.startServer(() => chai.request(this.server.server)
+      server.startServer(() => chai.request(server.server)
         .get('/api/v2/b')
         .end((err, res) => {
           expect(res).to.have.property('status', 200);
@@ -228,27 +231,27 @@ describe('#Server integration', () => {
 
   describe('#addMiddleware', () => {
     it('should add middleware', done => {
-      this.server.addFactory(modelA, 'a');
-      this.server.createRecords('a', 2);
-      this.server.addMiddleware((req, res, next) => {
+      server.addFactory(modelA, 'a');
+      server.createRecords('a', 2);
+      server.addMiddleware((req, res, next) => {
         next();
         done();
       });
-      this.server.addRoute(Route.get('/a', 'a'));
-      this.server.startServer(() => chai.request(this.server.server).get('/api/v2/a').end(() => ({})));
+      server.addRoute(Route.get('/a', 'a'));
+      server.startServer(() => chai.request(server.server).get('/api/v2/a').end(() => ({})));
     });
   });
 
   describe('#addMiddlewares', () => {
     it('should add middlewares', done => {
-      this.server.addFactory(modelA, 'a');
-      this.server.createRecords('a', 2);
-      this.server.addMiddlewares([(req, res, next) => {
+      server.addFactory(modelA, 'a');
+      server.createRecords('a', 2);
+      server.addMiddlewares([(req, res, next) => {
         next();
         done();
       }]);
-      this.server.addRoute(Route.get('/a', 'a'));
-      this.server.startServer(() => chai.request(this.server.server).get('/api/v2/a').end(() => ({})));
+      server.addRoute(Route.get('/a', 'a'));
+      server.startServer(() => chai.request(server.server).get('/api/v2/a').end(() => ({})));
     });
   });
 
@@ -256,11 +259,11 @@ describe('#Server integration', () => {
 
     describe('/lair/meta', () => {
       it('should return Lair meta info', done => {
-        this.server.addFactory(modelA, 'a');
-        this.server.addFactory(modelA, 'b');
-        this.server.createRecords('a', 2);
-        this.server.createRecords('b', 3);
-        this.server.startServer(() => chai.request(this.server.server)
+        server.addFactory(modelA, 'a');
+        server.addFactory(modelA, 'b');
+        server.createRecords('a', 2);
+        server.createRecords('b', 3);
+        server.startServer(() => chai.request(server.server)
           .get('/lair/meta')
           .end((err, res) => {
             expect(res.body).to.be.eql({
@@ -297,13 +300,13 @@ describe('#Server integration', () => {
     describe('/lair/factories', () => {
 
       beforeEach(() => {
-        this.server.addFactory(modelA, 'a');
-        this.server.createRecords('a', 2);
+        server.addFactory(modelA, 'a');
+        server.createRecords('a', 2);
       });
 
       describe('get all', () => {
         it('should return all records of a given factory', done => {
-          this.server.startServer(() => chai.request(this.server.server)
+          server.startServer(() => chai.request(server.server)
             .get('/lair/factories/a')
             .end((err, res) => {
               expect(res.body).to.be.eql([
@@ -317,7 +320,7 @@ describe('#Server integration', () => {
 
       describe('get one', () => {
         it('should return single record of a given factory', done => {
-          this.server.startServer(() => chai.request(this.server.server)
+          server.startServer(() => chai.request(server.server)
             .get('/lair/factories/a/1')
             .end((err, res) => {
               expect(res.body).to.be.eql({id: '1', name: 'test'});
@@ -328,7 +331,7 @@ describe('#Server integration', () => {
 
       describe('update one', () => {
         it('should update single record of a given factory (using `put`)', done => {
-          this.server.startServer(() => chai.request(this.server.server)
+          server.startServer(() => chai.request(server.server)
             .put('/lair/factories/a/1')
             .send({name: 'new name'})
             .end((err, res) => {
@@ -338,7 +341,7 @@ describe('#Server integration', () => {
         });
 
         it('should update single record of a given factory (using `patch`)', done => {
-          this.server.startServer(() => chai.request(this.server.server)
+          server.startServer(() => chai.request(server.server)
             .patch('/lair/factories/a/1')
             .send({name: 'new name'})
             .end((err, res) => {
@@ -350,7 +353,7 @@ describe('#Server integration', () => {
 
       describe('delete one', () => {
         it('should delete single record of a given factory', done => {
-          this.server.startServer(() => chai.request(this.server.server)
+          server.startServer(() => chai.request(server.server)
             .del('/lair/factories/a/1')
             .end((err, res) => {
               expect(Lair.getLair().getAll('a')).to.be.eql([{id: '2', name: 'test'}]);
@@ -361,7 +364,7 @@ describe('#Server integration', () => {
 
       describe('create one', () => {
         it('should create record of a given factory', done => {
-          this.server.startServer(() => chai.request(this.server.server)
+          server.startServer(() => chai.request(server.server)
             .post('/lair/factories/a')
             .send({name: 'new record'})
             .end((err, res) => {

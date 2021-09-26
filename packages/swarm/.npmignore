@@ -3,5 +3,11 @@ lib
 tests
 reports
 docs
-/.idea
-tests-data
+.idea
+.stryker-tmp
+.github
+dist/coverage
+publish.sh
+tslint.json
+tsconfig.json
+stryker.conf.json

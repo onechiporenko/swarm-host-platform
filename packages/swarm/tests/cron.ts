@@ -1,5 +1,4 @@
-import chai = require('chai');
-const {expect} = chai;
+import {expect} from 'chai';
 import Cron from '../lib/cron';
 import {ScheduledTask} from 'node-cron';
 

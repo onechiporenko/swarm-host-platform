@@ -1,6 +1,7 @@
 import bodyParser = require('body-parser');
 import colors = require('colors/safe');
-import * as express from 'express';
+import express = require('express');
+import {Response, Request, RequestHandler, Router, Application} from 'express';
 import read = require('fs-readdir-recursive');
 import * as http from 'http';
 import {Factory, Lair} from 'lair-db';
@@ -9,28 +10,28 @@ import winston = require('winston');
 import {printRoutesMap} from './express';
 import Route from './route';
 
-function getAll(req: express.Request, res: express.Response): express.Response {
+function getAll(req: Request, res: Response): Response {
   const {factoryName} = req.params;
   return res.json(Lair.getLair().getAll(factoryName, {depth: 1}));
 }
 
-function getOne(req: express.Request, res: express.Response): express.Response {
+function getOne(req: Request, res: Response): Response {
   const {factoryName, id} = req.params;
   return res.json(Lair.getLair().getOne(factoryName, id, {depth: 1}));
 }
 
-function updateOne(req: express.Request, res: express.Response): express.Response {
+function updateOne(req: Request, res: Response): Response {
   const {factoryName, id} = req.params;
   return res.json(Lair.getLair().updateOne(factoryName, id, req.body, {depth: 1}));
 }
 
-function deleteOne(req: express.Request, res: express.Response): express.Response {
+function deleteOne(req: Request, res: Response): Response {
   const {factoryName, id} = req.params;
   Lair.getLair().deleteOne(factoryName, id);
   return res.json({});
 }
 
-function createOne(req: express.Request, res: express.Response): express.Response {
+function createOne(req: Request, res: Response): Response {
   const {factoryName} = req.params;
   return res.json(Lair.getLair().createOne(factoryName, req.body, {depth: 1}));
 }
@@ -50,7 +51,7 @@ export default class Server {
 
   private static instance: Server;
 
-  public expressApp: express.Application;
+  public expressApp: Application;
   public namespace: string = '';
   public port: number = 54321;
   public verbose: boolean = true;
@@ -61,18 +62,18 @@ export default class Server {
     return this.internalServer;
   }
 
-  private expressRouter: express.Router;
-  private expressLairRouter: express.Router;
-  private lair: Lair;
+  private readonly expressRouter: Router;
+  private readonly expressLairRouter: Router;
+  private readonly lair: Lair;
   private logger: winston.Logger;
-  private createRecordsQueue: Array<[string, number]> = [];
-  private middlewaresQueue: express.RequestHandler[] = [];
+  private createRecordsQueue: [string, number][] = [];
+  private middlewaresQueue: RequestHandler[] = [];
   private internalServer: http.Server;
 
   private constructor() {
     this.expressApp = express();
-    this.expressRouter = express.Router();
-    this.expressLairRouter = express.Router();
+    this.expressRouter = Router();
+    this.expressLairRouter = Router();
     this.lair = Lair.getLair();
     this.logger = winston.createLogger({
       level: 'info',
@@ -111,7 +112,7 @@ export default class Server {
     this.lair.registerFactory(factory, name);
   }
 
-  public addFactories(factories: Array<[Factory, string]>): void {
+  public addFactories(factories: [Factory, string][]): void {
     factories.map(args => this.addFactory.apply(this, args));
   }
 
@@ -123,11 +124,11 @@ export default class Server {
     this.createRecordsQueue.push([factoryName, count]);
   }
 
-  public addMiddleware(clb: express.RequestHandler): void {
+  public addMiddleware(clb: RequestHandler): void {
     this.middlewaresQueue.push(clb);
   }
 
-  public addMiddlewares(clbs: express.RequestHandler[]): void {
+  public addMiddlewares(clbs: RequestHandler[]): void {
     clbs.map(clb => this.addMiddleware(clb));
   }
 

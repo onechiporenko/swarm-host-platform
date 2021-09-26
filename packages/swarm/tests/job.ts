@@ -1,10 +1,10 @@
-import chai = require('chai');
 import sinon = require('sinon');
-const {expect} = chai;
+import {expect} from 'chai';
 import Cron from '../lib/cron';
 import Job, {JobOptions} from '../lib/job';
 
 const jobId = '1';
+let clock;
 
 describe('#Job', () => {
 
@@ -13,12 +13,12 @@ describe('#Job', () => {
     initialDate.setMinutes(0);
     initialDate.setHours(0);
     initialDate.setSeconds(0);
-    this.clock = sinon.useFakeTimers(initialDate.getTime());
+    clock = sinon.useFakeTimers(initialDate.getTime());
   });
 
   afterEach(() => {
     Cron.getCron().destroy(jobId);
-    this.clock.restore();
+    clock.restore();
   });
 
   describe('#createJob', () => {
@@ -59,7 +59,7 @@ describe('#Job', () => {
           done();
         },
       } as JobOptions);
-      this.clock.tick(1000 * 60 * 2);
+      clock.tick(1000 * 60 * 2);
     });
 
     it('each returned from tick value is passed to the next tick', done => {
@@ -80,7 +80,7 @@ describe('#Job', () => {
           done();
         },
       } as JobOptions);
-      this.clock.tick(1000 * 60 * 2);
+      clock.tick(1000 * 60 * 2);
     });
 
     it('each tick should take two arguments', done => {
@@ -98,7 +98,7 @@ describe('#Job', () => {
           done();
         },
       } as JobOptions);
-      this.clock.tick(1000 * 60 * 2);
+      clock.tick(1000 * 60 * 2);
     });
 
     it('should not execute a job if its endTime is before current time', () => {
@@ -113,7 +113,7 @@ describe('#Job', () => {
             throw new Error('should not be called');
           },
         } as JobOptions);
-        this.clock.tick(1000 * 60 * 2);
+        clock.tick(1000 * 60 * 2);
       }).to.not.throw();
     });
 
@@ -136,7 +136,7 @@ describe('#Job', () => {
           },
         } as JobOptions);
         Cron.getCron().destroy(jobId);
-        this.clock.tick(1000 * 60);
+        clock.tick(1000 * 60);
         expect(executed).to.be.equal(0);
         done();
       }).to.not.throw();
@@ -160,7 +160,7 @@ describe('#Job', () => {
             executed++;
           },
         } as JobOptions);
-        this.clock.tick(1000 * 60 * 2);
+        clock.tick(1000 * 60 * 2);
         expect(executed).to.be.equal(1);
         done();
       }).to.not.throw();
