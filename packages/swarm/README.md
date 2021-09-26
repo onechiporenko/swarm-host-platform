@@ -1,6 +1,6 @@
 # swarm-host
 
-[![Build Status](https://travis-ci.org/onechiporenko/swarm.svg?branch=master)](https://travis-ci.org/onechiporenko/swarm)
+[![CI](https://github.com/onechiporenko/swarm/actions/workflows/nodejs.yml/badge.svg)](https://github.com/onechiporenko/swarm/actions/workflows/nodejs.yml)
 [![npm version](https://badge.fury.io/js/swarm-host.svg)](https://badge.fury.io/js/swarm-host)
 [![npm version](https://img.shields.io/npm/dm/swarm-host.svg)](https://npmjs.com/package/swarm-host)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a308984984ff4f9a826a5b34be2cc46a)](https://www.codacy.com/app/cv_github/swarm)
