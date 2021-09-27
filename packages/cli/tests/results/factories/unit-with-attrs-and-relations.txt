@@ -3,17 +3,17 @@ import {Factory} from 'swarm-host';
 export default Factory.create({
   name: 'unit',
   attrs: {
-    name: Factory.field({
-      value() {
-        return '';
-      },
-      preferredType: 'string'
-    }),
     age: Factory.field({
       value() {
         return 0;
       },
       preferredType: 'number'
+    }),
+    name: Factory.field({
+      value() {
+        return '';
+      },
+      preferredType: 'string'
     }),
     objectives: Factory.hasMany('objective', null),
     squad: Factory.hasOne('squad', 'units'),

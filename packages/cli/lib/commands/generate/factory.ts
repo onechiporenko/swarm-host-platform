@@ -1,5 +1,5 @@
-import {GenerateFactory} from '../../models/commands/generate/factory';
-import {Factory} from '../../models/instances/factory';
+import { GenerateFactory } from '../../models/commands/generate/factory';
+import { Factory } from '../../models/instances/factory';
 
 exports.command = 'factory <path> [rest..]';
 exports.describe = 'generates new factory';

@@ -1,10 +1,6 @@
 import inquirer = require('inquirer');
-import shell = require('shelljs');
-import {Command} from '../command';
-
-const fileExists = (path: string): boolean => {
-  return shell.cat(path).code === 0;
-};
+import { Command } from '../command';
+import { test } from 'shelljs';
 
 const inquirerConfirmOverride = (): Promise<any> => {
   return inquirer.createPromptModule()({
@@ -18,7 +14,7 @@ const inquirerConfirmOverride = (): Promise<any> => {
 export class Generate extends Command {
 
   public execute() {
-    if (fileExists(this.instance.fullPath)) {
+    if (test('-e', this.instance.fullPath)) {
       inquirerConfirmOverride().then(({confirmOverride}) => {
         if (confirmOverride) {
           this.writeFile();

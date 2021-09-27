@@ -1,5 +1,5 @@
-import {Destroy} from '../../models/commands/destroy';
-import {Route} from '../../models/instances/route';
+import { Destroy } from '../../models/commands/destroy';
+import { Route } from '../../models/instances/route';
 
 exports.command = 'route <path>';
 exports.describe = 'destroy existing route';

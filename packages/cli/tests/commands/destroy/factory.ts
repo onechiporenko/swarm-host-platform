@@ -1,7 +1,6 @@
-import { getTmpDir } from '../../utils/utils';
-import {expect} from 'chai';
-import execa = require('execa');
-import shell = require('shelljs');
+import { destroy, fileExists, generate, getTmpDir } from '../../utils/utils';
+import { expect } from 'chai';
+import { cd, mkdir, test, rm } from 'shelljs';
 
 let tmpDir;
 
@@ -9,56 +8,40 @@ describe('Destroy Factory', () => {
 
   beforeEach(() => {
     tmpDir = getTmpDir();
-    shell.mkdir(tmpDir);
+    mkdir(tmpDir);
+    cd(tmpDir);
   });
 
-  afterEach(() => shell.rm('-rf', tmpDir));
-
-  it('should delete existing factory', done => {
-    execa.command(`cd ./${tmpDir} && node ../dist/index.js generate factory unit`)
-      .then(a => {
-        expect(shell.cat(`${tmpDir}/factories/unit.ts`).stdout).to.be.not.empty;
-        execa.command(`cd ./${tmpDir} && node ../dist/index.js destroy factory unit`, {input: 'y'})
-          .then(() => {
-            expect(shell.cat(`${tmpDir}/factories/unit.ts`).stdout).to.be.empty;
-            done();
-          });
-      });
+  afterEach(() => {
+    cd('..');
+    rm('-rf', tmpDir);
   });
 
-  it('should not delete existing factory', done => {
-    execa.command(`cd ./${tmpDir} && node ../dist/index.js generate factory unit`)
-      .then(() => {
-        expect(shell.cat(`${tmpDir}/factories/unit.ts`).stdout).to.be.not.empty;
-        execa.command(`cd ./${tmpDir} && node ../dist/index.js destroy factory unit`, {input: 'n'})
-          .then(() => {
-            expect(shell.cat(`${tmpDir}/factories/unit.ts`).stdout).to.be.not.empty;
-            done();
-          });
-      });
+  it('should delete existing factory', () => {
+    generate('factory', 'unit');
+    expect(fileExists('factories/unit.ts')).to.be.true;
+    destroy('factory', 'unit');
+    expect(fileExists('factories/unit.ts')).to.be.false;
   });
 
-  it('should delete existing nested factory', done => {
-    execa.command(`cd ./${tmpDir} && node ../dist/index.js generate factory some/path/unit`)
-      .then(() => {
-        expect(shell.cat(`${tmpDir}/factories/some/path/unit.ts`).stdout).to.be.not.empty;
-        execa.command(`cd ./${tmpDir} && node ../dist/index.js destroy factory some/path/unit`, {input: 'y'})
-          .then(() => {
-            expect(shell.cat(`${tmpDir}/factories/some/path/unit.ts`).stdout).to.be.empty;
-            done();
-          });
-      });
+  it('should not delete existing factory', () => {
+    generate('factory', 'unit');
+    expect(fileExists('factories/unit.ts')).to.be.true;
+    destroy('factory', 'unit', 'n');
+    expect(fileExists('factories/unit.ts')).to.be.true;
   });
 
-  it('should not delete existing nested factory', done => {
-    execa.command(`cd ./${tmpDir} && node ../dist/index.js generate factory some/path/unit`)
-      .then(() => {
-        expect(shell.cat(`${tmpDir}/factories/some/path/unit.ts`).stdout).to.be.not.empty;
-        execa.command(`cd ./${tmpDir} && node ../dist/index.js destroy factory some/path/unit`, {input: 'n'})
-          .then(() => {
-            expect(shell.cat(`${tmpDir}/factories/some/path/unit.ts`).stdout).to.be.not.empty;
-            done();
-          });
-      });
+  it('should delete existing nested factory', () => {
+    generate('factory', 'some/path/unit');
+    expect(fileExists('factories/some/path/unit.ts')).to.be.true;
+    destroy('factory', 'some/path/unit');
+    expect(fileExists('factories/some/path/unit.ts')).to.be.false;
+  });
+
+  it('should not delete existing nested factory', () => {
+    generate('factory', 'some/path/unit');
+    expect(fileExists('factories/some/path/unit.ts')).to.be.true;
+    destroy('factory', 'some/path/unit', 'n');
+    expect(fileExists('factories/some/path/unit.ts')).to.be.true;
   });
 });

@@ -1,5 +1,5 @@
-import {Destroy} from '../../models/commands/destroy';
-import {Factory} from '../../models/instances/factory';
+import { Destroy } from '../../models/commands/destroy';
+import { Factory } from '../../models/instances/factory';
 
 exports.command = 'factory <path>';
 exports.describe = 'destroy existing factory';

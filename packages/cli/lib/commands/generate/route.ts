@@ -1,5 +1,5 @@
-import {GenerateRoute} from '../../models/commands/generate/route';
-import {Route} from '../../models/instances/route';
+import { GenerateRoute } from '../../models/commands/generate/route';
+import { Route } from '../../models/instances/route';
 
 exports.command = 'route <path>';
 exports.describe = 'generates new route';
