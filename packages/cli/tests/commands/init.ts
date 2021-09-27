@@ -1,22 +1,23 @@
 import {getTmpDir} from '../utils/utils';
 import {expect} from 'chai';
-import path = require('path');
 import execa = require('execa');
 import shell = require('shelljs');
+
+let tmpDir;
 
 describe('Init Project', () => {
 
   beforeEach(() => {
-    this.tmpDir = getTmpDir();
-    shell.mkdir(this.tmpDir);
+    tmpDir = getTmpDir();
+    shell.mkdir(tmpDir);
   });
 
-  afterEach(() => shell.rm('-rf', this.tmpDir));
+  afterEach(() => shell.rm('-rf', tmpDir));
 
   it('should create initial files', done => {
-    execa.shell(`cd ./${this.tmpDir} && node ../dist/index.js init --skip-npm`)
+    execa.command(`cd ./${tmpDir} && node ../dist/index.js init --skip-npm`)
       .then(() => {
-        const dirContent = shell.ls('-A', this.tmpDir);
+        const dirContent = shell.ls('-A', tmpDir);
         expect(dirContent).to.include('factories');
         expect(dirContent).to.include('routes');
         expect(dirContent).to.include('package.json');

@@ -30,7 +30,7 @@ exports.handler = argv => {
   })).to('package.json');
   if (!argv.skipNpm) {
     console.log('Installing npm dependencies...');
-    shell.exec('npm i --save swarm-host typescript');
-    shell.exec('npm i --save-dev @types/node ts-node tslint');
+    shell.exec('npm i --save swarm-host');
+    shell.exec('npm i --save-dev @types/node ts-node tslint typescript');
   }
 };

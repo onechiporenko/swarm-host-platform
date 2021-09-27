@@ -1,5 +1,4 @@
 import colors = require('colors/safe');
-import path = require('path');
 import shell = require('shelljs');
 import { Command } from '../command';
 

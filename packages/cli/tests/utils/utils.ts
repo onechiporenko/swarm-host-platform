@@ -1,1 +1,1 @@
-export const getTmpDir = () => `tmp${Math.random()}`.replace(/\./g, '');
+export const getTmpDir = () => `swarm-host-tmp-${Math.random()}`.replace(/\./g, '');

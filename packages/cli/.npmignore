@@ -3,4 +3,8 @@ lib
 tests
 reports
 docs
-/.idea
+.idea
+.github
+publish.sh
+tslint.json
+tsconfig.json

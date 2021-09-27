@@ -1,4 +1,4 @@
-import {Lair, Server} from 'swarm-host';
+import {/*Lair, */Server} from 'swarm-host';
 
 const server = Server.getServer();
 
