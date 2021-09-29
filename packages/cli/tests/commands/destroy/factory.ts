@@ -1,11 +1,10 @@
 import { destroy, fileExists, generate, getTmpDir } from '../../utils/utils';
 import { expect } from 'chai';
-import { cd, mkdir, test, rm } from 'shelljs';
+import { cd, mkdir, rm } from 'shelljs';
 
 let tmpDir;
 
 describe('Destroy Factory', () => {
-
   beforeEach(() => {
     tmpDir = getTmpDir();
     mkdir(tmpDir);

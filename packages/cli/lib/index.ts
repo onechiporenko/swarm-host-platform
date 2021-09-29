@@ -1,10 +1,6 @@
 #!/usr/bin/env node
 
-import yargs = require('yargs');
-// tslint:disable-next-line:no-unused-expression
-yargs
-  .wrap(yargs.terminalWidth())
-  .commandDir('commands')
-  .demandCommand()
-  .help()
+import * as yargs from 'yargs';
+// eslint-disable-next-line no-unused-expressions
+yargs.wrap(yargs.terminalWidth()).commandDir('commands').demandCommand().help()
   .argv;

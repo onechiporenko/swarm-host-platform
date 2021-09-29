@@ -1,8 +1,14 @@
 import path = require('path');
 import { Command } from './command';
 
+export interface InstanceOptions {
+  url?: string;
+  method?: string;
+  rest?: string[];
+}
+
 export class Instance {
-  public options: any;
+  public options: InstanceOptions;
   public name: string;
   public dir: string;
   public fileName: string;
@@ -12,7 +18,11 @@ export class Instance {
   public type: string;
   public command: Command;
 
-  constructor(pathToNewInstance: string, options, command: Command) {
+  constructor(
+    pathToNewInstance: string,
+    options: InstanceOptions,
+    command: Command
+  ) {
     this.setup();
     this.options = options;
     this.command = command;
@@ -20,11 +30,11 @@ export class Instance {
     this.parsePath(pathToNewInstance);
   }
 
-  public setup() {
+  public setup(): void {
     return undefined;
   }
 
-  public parsePath(pathToNewInstance: string) {
+  public parsePath(pathToNewInstance: string): void {
     const p = path.parse(pathToNewInstance);
     this.name = p.name;
     this.dir = p.dir;

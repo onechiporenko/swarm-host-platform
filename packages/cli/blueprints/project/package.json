@@ -8,15 +8,19 @@
   "repository": "",
   "scripts": {
     "start": "npm run build && node dist/index.js",
-    "build": "rm -rf dist && tsc"
+    "build": "rm -rf dist && tsc",
+    "lint": "eslint -c .eslintrc.json ."
   },
   "dependencies": {
-    "swarm-host": "*",
-    "typescript": "*"
+    "swarm-host": "*"
   },
   "devDependencies": {
     "@types/node": "*",
+    "eslint": "*",
+    "eslint-config-prettier": "*",
+    "eslint-plugin-prettier": "*",
+    "prettier": "2.4.1",
     "ts-node": "*",
-    "tslint": "*"
+    "typescript": "*"
   }
 }

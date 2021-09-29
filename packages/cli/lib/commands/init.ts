@@ -1,36 +1,51 @@
+import { Argv } from 'yargs';
+import { cp, exec, echo, ls, mkdir } from 'shelljs';
+import { render } from 'ejs';
+import * as path from 'path';
+import * as fs from 'fs';
+
 exports.command = 'init';
 exports.desc = 'initialize swarm-host project in the empty directory';
-exports.builder = yargs => {
-  yargs.example('`swarm-host init`', 'Initialize new Swarm-Host in the current dir');
+exports.builder = (yargs: Argv) => {
+  yargs.example(
+    '`swarm-host init`',
+    'Initialize new Swarm-Host in the current dir'
+  );
   yargs.options({
     'skip-npm': {
-      describe: 'Do not install npm packages'
-    }
+      describe: 'Do not install npm packages',
+    },
   });
 };
-exports.handler = argv => {
-  const shell = require('shelljs');
-  const path = require('path');
-  const fs = require('fs');
-  const ejs = require('ejs');
-  const dirContent = shell.ls('-A', process.cwd());
+exports.handler = (argv) => {
+  const dirContent = ls('-A', process.cwd());
   if (dirContent.length !== 0) {
     console.log('`init` can be executed only in the empty dir');
     process.exit(1);
   }
-  shell.mkdir('routes');
-  shell.mkdir('factories');
+  mkdir('routes');
+  mkdir('factories');
   const p = path.parse(process.cwd());
   const projectName = p.name;
   const projectTplPath = path.join(__dirname, '../../blueprints/project/');
-  const packageJson = fs.readFileSync(path.join(projectTplPath, 'package.json'), 'utf-8');
-  shell.cp(path.join(projectTplPath, '/*'), '.');
-  shell.echo(ejs.render(packageJson, {
-    name: projectName
-  })).to('package.json');
+  const packageJson = fs.readFileSync(
+    path.join(projectTplPath, 'package.json'),
+    'utf-8'
+  );
+  cp(path.join(projectTplPath, '/*'), '.');
+  // cp skipping dot files - https://github.com/shelljs/shelljs/issues/79
+  cp(path.join(projectTplPath, '/.eslintrc.json'), '.');
+  cp(path.join(projectTplPath, '/.prettierrc.js'), '.');
+  echo(
+    render(packageJson, {
+      name: projectName,
+    })
+  ).to('package.json');
   if (!argv.skipNpm) {
     console.log('Installing npm dependencies...');
-    shell.exec('npm i --save swarm-host');
-    shell.exec('npm i --save-dev @types/node ts-node tslint typescript');
+    exec('npm i --save swarm-host');
+    exec(
+      'npm i --save-dev @types/node ts-node typescript eslint eslint-config-prettier eslint-plugin-prettier prettier'
+    );
   }
 };

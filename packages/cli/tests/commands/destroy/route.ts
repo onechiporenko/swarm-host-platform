@@ -6,7 +6,6 @@ import { cd } from 'shelljs';
 let tmpDir;
 
 describe('Destroy Route', () => {
-
   beforeEach(() => {
     tmpDir = getTmpDir();
     shell.mkdir(tmpDir);
