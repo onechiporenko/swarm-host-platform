@@ -19,7 +19,7 @@
     "eslint": "*",
     "eslint-config-prettier": "*",
     "eslint-plugin-prettier": "*",
-    "prettier": "2.4.1",
+    "prettier": "*",
     "ts-node": "*",
     "typescript": "*"
   }
