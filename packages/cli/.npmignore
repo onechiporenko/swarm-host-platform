@@ -6,6 +6,3 @@ docs
 .idea
 .github
 publish.sh
-.eslintrc.json
-.prettierrc.js
-tsconfig.json
