@@ -1,9 +1,8 @@
-import {expect} from 'chai';
+import { expect } from 'chai';
 import Cron from '../lib/cron';
-import {ScheduledTask} from 'node-cron';
+import { ScheduledTask } from 'node-cron';
 
 describe('#Cron', () => {
-
   afterEach(() => {
     Cron.cleanCron();
   });
@@ -37,7 +36,7 @@ describe('#Cron', () => {
   });
 
   describe('#start', () => {
-    it('should start a Task if it exists', done => {
+    it('should start a Task if it exists', (done) => {
       const cron = Cron.getCron();
       cron.add('1', {
         start(): void {
@@ -49,7 +48,7 @@ describe('#Cron', () => {
   });
 
   describe('#stop', () => {
-    it('should stop a Task if it exists', done => {
+    it('should stop a Task if it exists', (done) => {
       const cron = Cron.getCron();
       cron.add('1', {
         stop(): void {
@@ -61,7 +60,7 @@ describe('#Cron', () => {
   });
 
   describe('#destroy', () => {
-    it('should destroy a Task if it exists', done => {
+    it('should destroy a Task if it exists', (done) => {
       const cron = Cron.getCron();
       cron.add('1', {
         destroy(): void {
@@ -72,5 +71,4 @@ describe('#Cron', () => {
       expect(cron.has('1')).to.be.false;
     });
   });
-
 });

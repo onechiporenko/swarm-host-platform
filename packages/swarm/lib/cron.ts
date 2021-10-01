@@ -1,4 +1,6 @@
-import {ScheduledTask} from 'node-cron';
+import { ScheduledTask } from 'node-cron';
+
+const { hasOwnProperty } = Object;
 
 export default class Cron {
   public static getCron(): Cron {
@@ -25,7 +27,7 @@ export default class Cron {
   }
 
   public has(id: string): boolean {
-    return this.tasks.hasOwnProperty(id);
+    return hasOwnProperty.call(this.tasks, id);
   }
 
   public start(id: string): void {

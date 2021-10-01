@@ -1,6 +1,6 @@
-import {Request, Response, NextFunction} from 'express';
-import {expect} from 'chai';
-import {Factory, Lair} from 'lair-db/dist';
+import { Request, Response, NextFunction } from 'express';
+import { expect } from 'chai';
+import { Factory, Lair } from 'lair-db/dist';
 import Route from '../lib/route';
 
 let lair;
@@ -15,7 +15,6 @@ const model = Factory.create({
 });
 
 describe('#Route', () => {
-
   beforeEach(() => {
     lair = Lair.getLair();
     lair.registerFactory(model, 'model');
@@ -33,26 +32,27 @@ describe('#Route', () => {
       expect(Route.createRoute('get').path).to.be.equal('/');
     });
     it('should throw an Error for unknown request-type', () => {
-      expect(() => Route.createRoute('fake-method', '', () => 1)).to.throw('"fake-method" is unknown method. It must be one of the known methods');
+      expect(() => Route.createRoute('fake-method', '', () => 1)).to.throw(
+        '"fake-method" is unknown method. It must be one of the known methods'
+      );
     });
-    it('default handler should call `res.json` with `{}`', done => {
+    it('default handler should call `res.json` with `{}`', (done) => {
       const route = Route.createRoute('get', '/');
       route.handler(
         {} as Request,
         {
-          json(data: object): void {
+          json(data): void {
             expect(data).to.be.eql({});
             done();
           },
         } as Response,
         {} as NextFunction,
-        lair,
+        lair
       );
     });
   });
 
   describe('#get', () => {
-
     beforeEach(() => {
       lair.createOne('model', {});
     });
@@ -64,25 +64,27 @@ describe('#Route', () => {
         expect(route.method).to.be.equal('get');
       });
 
-      it('default handler should return all records', done => {
+      it('default handler should return all records', (done) => {
         const route = Route.get('/some', 'model', {}, (req, res, data) => {
-          expect(data).to.be.eql([{
-            id: '1',
-            name: 'test',
-          }]);
+          expect(data).to.be.eql([
+            {
+              id: '1',
+              name: 'test',
+            },
+          ]);
           done();
         });
         route.handler(
-          {params: {}} as Request,
+          { params: {} } as Request,
           {} as Response,
           {} as NextFunction,
-          lair,
+          lair
         );
       });
     });
 
     describe('single dynamic part', () => {
-      it('default handler should return single record', done => {
+      it('default handler should return single record', (done) => {
         const route = Route.get('/some', 'model', {}, (req, res, data) => {
           expect(data).to.be.eql({
             id: '1',
@@ -91,42 +93,51 @@ describe('#Route', () => {
           done();
         });
         route.handler(
-          {params: {id: '1'}} as unknown as Request,
+          { params: { id: '1' } } as unknown as Request,
           {} as Response,
           {} as NextFunction,
-          lair,
+          lair
         );
       });
 
       it('default `next` should return `json` with data provided by handler', () => {
         const route = Route.get('/some', 'model', {});
-        expect(route.handler(
-          {params: {id: '1'}} as unknown as Request,
-          {
-            json(d: any): any {
-              return d;
-            },
-          } as Response,
-          {} as NextFunction,
-          lair,
-        )).to.be.eql({id: '1', name: 'test'});
+        expect(
+          route.handler(
+            { params: { id: '1' } } as unknown as Request,
+            {
+              json(d: any): any {
+                return d;
+              },
+            } as Response,
+            {} as NextFunction,
+            lair
+          )
+        ).to.be.eql({ id: '1', name: 'test' });
       });
     });
 
     describe('multiple dynamic parts', () => {
-      it('default handler should return single record', done => {
-        const route = Route.get('/some/:id/part/:id2', 'model', {}, (req, res, data) => {
-          expect(data).to.be.eql([{
-            id: '1',
-            name: 'test',
-          }]);
-          done();
-        });
+      it('default handler should return single record', (done) => {
+        const route = Route.get(
+          '/some/:id/part/:id2',
+          'model',
+          {},
+          (req, res, data) => {
+            expect(data).to.be.eql([
+              {
+                id: '1',
+                name: 'test',
+              },
+            ]);
+            done();
+          }
+        );
         route.handler(
-          {params: {id: '1', id2: '2'}} as unknown as Request,
+          { params: { id: '1', id2: '2' } } as unknown as Request,
           {} as Response,
           {} as NextFunction,
-          lair,
+          lair
         );
       });
     });
@@ -139,7 +150,7 @@ describe('#Route', () => {
       expect(route.method).to.be.equal('post');
     });
 
-    it('default handler should create one record', done => {
+    it('default handler should create one record', (done) => {
       expect(lair.getAll('model')).to.be.empty;
       const route = Route.post('/some-path', 'model', {}, (req, res, data) => {
         expect(data).to.be.eql({
@@ -149,10 +160,10 @@ describe('#Route', () => {
         done();
       });
       route.handler(
-        {body: {name: 'artanis'}} as Request,
+        { body: { name: 'artanis' } } as Request,
         {} as Response,
         {} as NextFunction,
-        lair,
+        lair
       );
     });
   });
@@ -166,36 +177,43 @@ describe('#Route', () => {
 
     it('default handler should throw an error if `id` is not provided', () => {
       const route = Route.put('/some-path/:id', 'model', {}, () => ({}));
-      expect(() => route.handler(
-        {params: {}} as Request,
-        {} as Response,
-        {} as NextFunction,
-        lair,
-      )).to.throw('identifier is not provided');
+      expect(() =>
+        route.handler(
+          { params: {} } as Request,
+          {} as Response,
+          {} as NextFunction,
+          lair
+        )
+      ).to.throw('identifier is not provided');
     });
 
     it('default handler should throw an error if more than one `id` is provided', () => {
       const route = Route.put('/some-path/:id', 'model', {}, () => ({}));
-      expect(() => route.handler(
-        {params: {id: '1', id2: '2'}} as unknown as Request,
-        {} as Response,
-        {} as NextFunction,
-        lair,
-      )).to.throw('identifier is not provided');
+      expect(() =>
+        route.handler(
+          { params: { id: '1', id2: '2' } } as unknown as Request,
+          {} as Response,
+          {} as NextFunction,
+          lair
+        )
+      ).to.throw('identifier is not provided');
     });
 
-    it('default handler should update record by its `id`', done => {
-      lair.createOne('model', {name: 'artanis'});
-      expect(lair.getOne('model', '1')).to.be.eql({id: '1', name: 'artanis'});
+    it('default handler should update record by its `id`', (done) => {
+      lair.createOne('model', { name: 'artanis' });
+      expect(lair.getOne('model', '1')).to.be.eql({ id: '1', name: 'artanis' });
       const route = Route.put('/some-path/:id', 'model', {}, () => {
-        expect(lair.getOne('model', '1')).to.be.eql({id: '1', name: 'alarak'});
+        expect(lair.getOne('model', '1')).to.be.eql({
+          id: '1',
+          name: 'alarak',
+        });
         done();
       });
       route.handler(
-        {params: {id: '1'}, body: {name: 'alarak'}} as unknown as Request,
+        { params: { id: '1' }, body: { name: 'alarak' } } as unknown as Request,
         {} as Response,
         {} as NextFunction,
-        lair,
+        lair
       );
     });
   });
@@ -209,36 +227,43 @@ describe('#Route', () => {
 
     it('default handler should throw an error if `id` is not provided', () => {
       const route = Route.patch('/some-path/:id', 'model', {}, () => ({}));
-      expect(() => route.handler(
-        {params: {}} as Request,
-        {} as Response,
-        {} as NextFunction,
-        lair,
-      )).to.throw('identifier is not provided');
+      expect(() =>
+        route.handler(
+          { params: {} } as Request,
+          {} as Response,
+          {} as NextFunction,
+          lair
+        )
+      ).to.throw('identifier is not provided');
     });
 
     it('default handler should throw an error if more than one `id` is provided', () => {
       const route = Route.patch('/some-path/:id', 'model', {}, () => ({}));
-      expect(() => route.handler(
-        {params: {id: '1', id2: '2'}} as unknown as Request,
-        {} as Response,
-        {} as NextFunction,
-        lair,
-      )).to.throw('identifier is not provided');
+      expect(() =>
+        route.handler(
+          { params: { id: '1', id2: '2' } } as unknown as Request,
+          {} as Response,
+          {} as NextFunction,
+          lair
+        )
+      ).to.throw('identifier is not provided');
     });
 
-    it('default handler should update record by its `id`', done => {
-      lair.createOne('model', {name: 'artanis'});
-      expect(lair.getOne('model', '1')).to.be.eql({id: '1', name: 'artanis'});
+    it('default handler should update record by its `id`', (done) => {
+      lair.createOne('model', { name: 'artanis' });
+      expect(lair.getOne('model', '1')).to.be.eql({ id: '1', name: 'artanis' });
       const route = Route.patch('/some-path/:id', 'model', {}, () => {
-        expect(lair.getOne('model', '1')).to.be.eql({id: '1', name: 'alarak'});
+        expect(lair.getOne('model', '1')).to.be.eql({
+          id: '1',
+          name: 'alarak',
+        });
         done();
       });
       route.handler(
-        {params: {id: '1'}, body: {name: 'alarak'}} as unknown as Request,
+        { params: { id: '1' }, body: { name: 'alarak' } } as unknown as Request,
         {} as Response,
         {} as NextFunction,
-        lair,
+        lair
       );
     });
   });
@@ -252,38 +277,41 @@ describe('#Route', () => {
 
     it('default handler should throw an error if `id` is not provided', () => {
       const route = Route.delete('/some-path/:id', 'model', () => ({}));
-      expect(() => route.handler(
-        {params: {}} as Request,
-        {} as Response,
-        {} as NextFunction,
-        lair,
-      )).to.throw('identifier is not provided');
+      expect(() =>
+        route.handler(
+          { params: {} } as Request,
+          {} as Response,
+          {} as NextFunction,
+          lair
+        )
+      ).to.throw('identifier is not provided');
     });
 
     it('default handler should throw an error if more than one `id` is provided', () => {
       const route = Route.delete('/some-path/:id', 'model', () => ({}));
-      expect(() => route.handler(
-        {params: {id: '1', id2: '2'}} as unknown as Request,
-        {} as Response,
-        {} as NextFunction,
-        lair,
-      )).to.throw('identifier is not provided');
+      expect(() =>
+        route.handler(
+          { params: { id: '1', id2: '2' } } as unknown as Request,
+          {} as Response,
+          {} as NextFunction,
+          lair
+        )
+      ).to.throw('identifier is not provided');
     });
 
-    it('default handler should delete record by its `id`', done => {
-      lair.createOne('model', {name: 'artanis'});
-      expect(lair.getOne('model', '1')).to.be.eql({id: '1', name: 'artanis'});
+    it('default handler should delete record by its `id`', (done) => {
+      lair.createOne('model', { name: 'artanis' });
+      expect(lair.getOne('model', '1')).to.be.eql({ id: '1', name: 'artanis' });
       const route = Route.delete('/some-path/:id', 'model', () => {
         expect(lair.getAll('model')).to.be.empty;
         done();
       });
       route.handler(
-        {params: {id: '1'}} as unknown as Request,
+        { params: { id: '1' } } as unknown as Request,
         {} as Response,
         {} as NextFunction,
-        lair,
+        lair
       );
     });
   });
-
 });

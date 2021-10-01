@@ -1,13 +1,12 @@
-import {ScheduledTask} from 'node-cron';
+import { ScheduledTask } from 'node-cron';
 import cron = require('node-cron');
 import Cron from './cron';
-import {assert} from './utils';
+import { assert } from './utils';
 
 function noop(): void {
   return null;
 }
 
-// tslint:disable-next-line:no-any
 export type tickCallback = (val: any, indx?: number) => any;
 
 export interface JobOptions {
@@ -63,7 +62,10 @@ export interface JobOptions {
  */
 export default class Job {
   public static createJob(options: JobOptions): Job {
-    assert('"options.ticksCount" must be greater than 0', options.ticksCount > 0);
+    assert(
+      '"options.ticksCount" must be greater than 0',
+      options.ticksCount > 0
+    );
     const job = new Job();
     const cronInstance = Cron.getCron();
     job.firstTick = options.firstTick || noop;
@@ -72,7 +74,9 @@ export default class Job {
     job.internalId = options.id;
     job.internalJob = cron.schedule(options.frequency, () => {
       const currentTime = new Date().getTime();
-      const endTime = options.endTime ? options.endTime : Number.POSITIVE_INFINITY;
+      const endTime = options.endTime
+        ? options.endTime
+        : Number.POSITIVE_INFINITY;
       if (currentTime > endTime) {
         return;
       }
@@ -102,7 +106,9 @@ export default class Job {
   private tick: tickCallback;
   private lastTick: tickCallback;
   private internalJob: ScheduledTask;
-  private constructor() {}
+  private constructor() {
+    // do nothing
+  }
 
   get id(): string {
     return this.internalId;
