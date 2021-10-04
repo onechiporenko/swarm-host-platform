@@ -206,7 +206,7 @@ describe('#Server integration', () => {
       );
     });
 
-    it('should add a second route', (done) => {
+    it('should add a third route', (done) => {
       server.startServer(() =>
         chai
           .request(server.server)
