@@ -1,5 +1,5 @@
-import {Factory} from 'lair-db';
+import { Factory } from 'lair-db';
 
-export default Factory.create({
-  name: 'squad',
-});
+export default class SquadFactory extends Factory {
+  static factoryName = 'squad';
+}

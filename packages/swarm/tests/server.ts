@@ -2,30 +2,28 @@ import chai = require('chai');
 import chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 const { expect } = chai;
-import { Factory, Lair } from 'lair-db/dist';
+import { Factory, Lair, field } from 'lair-db/dist';
 import Route from '../lib/route';
 import Server from '../lib/server';
 
 let lair;
 let server;
 
-const modelA = Factory.create({
-  attrs: {
-    name: Factory.field({
-      value: 'test',
-      defaultValue: 'test',
-    }),
-  },
-});
+class ModelA extends Factory {
+  static factoryName = 'a';
+  @field({
+    defaultValue: 'test',
+  })
+  name = 'test';
+}
 
-const modelB = Factory.create({
-  attrs: {
-    name: Factory.field({
-      value: 'test',
-      defaultValue: 'test',
-    }),
-  },
-});
+class ModelB extends Factory {
+  static factoryName = 'b';
+  @field({
+    defaultValue: 'test',
+  })
+  name = 'test';
+}
 
 describe('#Server', () => {
   beforeEach(() => {
@@ -80,7 +78,7 @@ describe('#Server', () => {
   describe('#addFactory', () => {
     it('should register factory in the Lair', () => {
       expect(lair.getDevInfo()).to.be.eql({});
-      Server.getServer().addFactory(modelA, 'a');
+      Server.getServer().addFactory(ModelA);
       expect(lair.getDevInfo()).to.have.property('a').that.is.an('object');
     });
   });
@@ -88,25 +86,24 @@ describe('#Server', () => {
   describe('#addFactories', () => {
     it('should register factories in the Lair', () => {
       expect(lair.getDevInfo()).to.be.eql({});
-      Server.getServer().addFactories([
-        [modelA, 'a'],
-        [modelB, 'b'],
-      ]);
+      Server.getServer().addFactories([ModelA, ModelB]);
       expect(lair.getDevInfo()).to.have.property('a').that.is.an('object');
       expect(lair.getDevInfo()).to.have.property('b').that.is.an('object');
     });
   });
 
   describe('#addFactoriesFromDir', () => {
-    it('should register factories in the Lair', () => {
+    it('should register factories in the Lair', (done) => {
       expect(lair.getDevInfo()).to.be.eql({});
-      Server.getServer().addFactoriesFromDir(
-        `${__dirname}/../tests-data/test-factories`
-      );
-      const devInfo = lair.getDevInfo();
-      expect(devInfo).to.have.property('unit').that.is.an('object');
-      expect(devInfo).to.have.property('squad').that.is.an('object');
-      expect(devInfo).to.have.property('dir').that.is.an('object');
+      Server.getServer()
+        .addFactoriesFromDir(`${__dirname}/../tests-data/test-factories`)
+        .then(() => {
+          const devInfo = lair.getDevInfo();
+          expect(devInfo).to.have.property('unit').that.is.an('object');
+          expect(devInfo).to.have.property('squad').that.is.an('object');
+          expect(devInfo).to.have.property('dir').that.is.an('object');
+          done();
+        });
     });
   });
 });
@@ -178,8 +175,10 @@ describe('#Server integration', () => {
   });
 
   describe('#addRoutesFromDir', () => {
-    beforeEach(() => {
-      server.addRoutesFromDir(`${__dirname}/../tests-data/test-routes`);
+    beforeEach((done) => {
+      server
+        .addRoutesFromDir(`${__dirname}/../tests-data/test-routes`)
+        .then(() => done());
     });
 
     it('should add a first route', (done) => {
@@ -221,8 +220,8 @@ describe('#Server integration', () => {
 
   describe('#createRecords', () => {
     beforeEach(() => {
-      server.addFactory(modelA, 'a');
-      server.addFactory(modelA, 'b');
+      server.addFactory(ModelA);
+      server.addFactory(ModelB);
       server.createRecords('a', 2);
       server.createRecords('b', 3);
       server.addRoutes([Route.get('/a', 'a'), Route.get('/b', 'b')]);
@@ -263,7 +262,7 @@ describe('#Server integration', () => {
 
   describe('#addMiddleware', () => {
     it('should add middleware', (done) => {
-      server.addFactory(modelA, 'a');
+      server.addFactory(ModelA);
       server.createRecords('a', 2);
       server.addMiddleware((req, res, next) => {
         next();
@@ -281,7 +280,7 @@ describe('#Server integration', () => {
 
   describe('#addMiddlewares', () => {
     it('should add middlewares', (done) => {
-      server.addFactory(modelA, 'a');
+      server.addFactory(ModelA);
       server.createRecords('a', 2);
       server.addMiddlewares([
         (req, res, next) => {
@@ -302,8 +301,8 @@ describe('#Server integration', () => {
   describe('#lair meta', () => {
     describe('/lair/meta', () => {
       it('should return Lair meta info', (done) => {
-        server.addFactory(modelA, 'a');
-        server.addFactory(modelA, 'b');
+        server.addFactory(ModelA);
+        server.addFactory(ModelB);
         server.createRecords('a', 2);
         server.createRecords('b', 3);
         server.startServer(() =>
@@ -316,11 +315,12 @@ describe('#Server integration', () => {
                   count: 2,
                   id: 3,
                   meta: {
+                    id: {
+                      type: 1,
+                    },
                     name: {
-                      allowedValues: [],
                       defaultValue: 'test',
                       type: 1,
-                      value: 'test',
                     },
                   },
                 },
@@ -328,11 +328,12 @@ describe('#Server integration', () => {
                   count: 3,
                   id: 4,
                   meta: {
+                    id: {
+                      type: 1,
+                    },
                     name: {
-                      allowedValues: [],
                       defaultValue: 'test',
                       type: 1,
-                      value: 'test',
                     },
                   },
                 },
@@ -345,7 +346,7 @@ describe('#Server integration', () => {
 
     describe('/lair/factories', () => {
       beforeEach(() => {
-        server.addFactory(modelA, 'a');
+        server.addFactory(ModelA);
         server.createRecords('a', 2);
       });
 

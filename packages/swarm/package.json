@@ -1,6 +1,6 @@
 {
   "name": "swarm-host",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "fake-server",
   "main": "dist/index.js",
   "typings": "./dist/index.d.ts",
@@ -8,7 +8,7 @@
     "build": "rm -rf dist && tsc",
     "build-publish": "npm run build && rm -rf dist/tests* && rm -rf dist/lib/*.js.map && cp dist/lib/* dist/. && rm -rf dist/lib",
     "test": "mocha -r ts-node/register tests/**/*.ts",
-    "lint": "eslint -c .eslintrc.json lib tests",
+    "lint": "eslint -c .eslintrc.json lib tests tests-data --fix",
     "test:remap": "remap-istanbul -i dist/coverage/coverage.json -o ./dist/coverage/coverage -t lcovonly",
     "test:cov": "istanbul cover -x \"dist/lib/express.js\" --dir ./dist/coverage ./node_modules/mocha/bin/_mocha -- dist/tests/**/*.js --report lcovonly -R spec --bail -- && npm run test:remap && cat ./dist/coverage/coverage"
   },
@@ -31,7 +31,7 @@
     "colors": "^1.4.0",
     "express": "^4.17.1",
     "fs-readdir-recursive": "^1.1.0",
-    "lair-db": "^2.1.0",
+    "lair-db": "^3.0.1",
     "methods": "^1.1.2",
     "node-cron": "^2.0.3",
     "winston": "^3.3.3"

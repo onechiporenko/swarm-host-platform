@@ -16,6 +16,28 @@ import winston = require('winston');
 import { printRoutesMap } from './express';
 import Route from './route';
 
+function isRoute(v: any): v is Route {
+  let proto = v['__proto__'];
+  while (proto) {
+    if (proto === Route) {
+      return true;
+    }
+    proto = proto['__proto__'];
+  }
+  return false;
+}
+
+function isFactory(v: any): v is Factory {
+  let proto = v['__proto__'];
+  while (proto) {
+    if (proto === Factory) {
+      return true;
+    }
+    proto = proto['__proto__'];
+  }
+  return false;
+}
+
 function getAll(req: Request, res: Response): Response {
   const { factoryName } = req.params;
   return res.json(Lair.getLair().getAll(factoryName, { depth: 1 }));
@@ -114,20 +136,24 @@ export default class Server {
     routes.map((route) => this.addRoute(route));
   }
 
-  public addRoutesFromDir(path: string): void {
-    read(path).forEach((routePath) => this.add('route', path, routePath));
+  public async addRoutesFromDir(path: string): Promise<any> {
+    return Promise.all(
+      read(path).map((routePath) => this.add('route', path, routePath))
+    );
   }
 
-  public addFactory(factory: Factory, name?: string): void {
-    this.lair.registerFactory(factory, name);
+  public addFactory(factory: Factory | typeof Factory): void {
+    this.lair.registerFactory(factory);
   }
 
-  public addFactories(factories: [Factory, string][]): void {
-    factories.map((args) => this.addFactory(...args));
+  public addFactories(factories: (Factory | typeof Factory)[]): void {
+    factories.map((factory) => this.addFactory(factory));
   }
 
-  public addFactoriesFromDir(path: string): void {
-    read(path).forEach((factoryPath) => this.add('factory', path, factoryPath));
+  public async addFactoriesFromDir(path: string): Promise<any> {
+    return Promise.all(
+      read(path).map((factoryPath) => this.add('factory', path, factoryPath))
+    );
   }
 
   public createRecords(factoryName: string, count: number): void {
@@ -212,21 +238,34 @@ export default class Server {
     }
   }
 
-  private add(type: string, parent: string, path: string): void {
+  private async add(type: string, parent: string, path: string): Promise<any> {
     if (
       (path.match(/\.ts$/) !== null || path.match(/\.js$/) !== null) &&
       path.match(/\.d\.ts$/) === null
     ) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const instance = require(`${parent}/${path}`).default;
-      if (instance) {
-        if (type === 'route' && instance instanceof Route) {
-          this.addRoute(instance);
+      return import(`${parent}/${path}`).then(
+        ({ default: classOrInstance }) => {
+          if (classOrInstance) {
+            if (
+              type === 'route' &&
+              (isRoute(classOrInstance) || classOrInstance instanceof Route)
+            ) {
+              this.addRoute(classOrInstance);
+            }
+            if (
+              type === 'factory' &&
+              (isFactory(classOrInstance) || classOrInstance instanceof Factory)
+            ) {
+              this.addFactory(classOrInstance);
+            }
+          } else {
+            this.logger.info({
+              level: 'info',
+              message: `"${parent}/${path}" doesn't have default import`,
+            });
+          }
         }
-        if (type === 'factory' && instance instanceof Factory) {
-          this.addFactory(instance);
-        }
-      }
+      );
     }
   }
 }

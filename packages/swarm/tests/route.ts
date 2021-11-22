@@ -1,23 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 import { expect } from 'chai';
-import { Factory, Lair } from 'lair-db/dist';
+import { Factory, field, Lair } from 'lair-db/dist';
 import Route from '../lib/route';
 
 let lair;
 
-const model = Factory.create({
-  attrs: {
-    name: Factory.field({
-      defaultValue: 'test',
-      value: 'test',
-    }),
-  },
-});
+class ModelFactory extends Factory {
+  static factoryName = 'model';
+  @field({
+    defaultValue: 'test',
+  })
+  name = 'test';
+}
 
 describe('#Route', () => {
   beforeEach(() => {
     lair = Lair.getLair();
-    lair.registerFactory(model, 'model');
+    lair.registerFactory(ModelFactory);
   });
 
   afterEach(() => {
