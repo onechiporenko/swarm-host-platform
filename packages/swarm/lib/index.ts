@@ -13,6 +13,10 @@ import {
   RelationshipMetaAttr,
   Relationships,
   SequenceMetaAttr,
+  field,
+  hasOne,
+  hasMany,
+  sequenceItem,
 } from 'lair-db';
 import Cron from './cron';
 import Job, { JobOptions, tickCallback } from './job';
@@ -42,4 +46,8 @@ export {
   tickCallback,
   Handler,
   CustomNext,
+  field,
+  hasOne,
+  hasMany,
+  sequenceItem,
 };
