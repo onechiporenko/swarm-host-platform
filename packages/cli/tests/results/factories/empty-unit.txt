@@ -1,7 +1,6 @@
-import {Factory} from 'swarm-host';
+import { Factory } from 'swarm-host';
 
-export default Factory.create({
-  name: 'unit',
-  attrs: {
-  }
-});
+export default UnitFactory extends Factory {
+    static factoryName = 'unit';
+}
+

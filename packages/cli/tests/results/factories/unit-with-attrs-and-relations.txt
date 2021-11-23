@@ -1,21 +1,20 @@
-import {Factory} from 'swarm-host';
+import { Factory, field, hasOne, hasMany } from 'swarm-host';
 
-export default Factory.create({
-  name: 'unit',
-  attrs: {
-    age: Factory.field({
-      value() {
-        return 0;
-      },
-      preferredType: 'number'
-    }),
-    name: Factory.field({
-      value() {
-        return '';
-      },
-      preferredType: 'string'
-    }),
-    objectives: Factory.hasMany('objective', null),
-    squad: Factory.hasOne('squad', 'units'),
-  }
-});
+export default UnitFactory extends Factory {
+    static factoryName = 'unit';
+    @field({
+        defaultValue: 0,
+        preferredType: 'number'
+    })
+    age = 0;
+    @field({
+        defaultValue: '',
+        preferredType: 'string'
+    })
+    name = '';
+    @hasMany('objective', null)
+    objectives;
+    @hasOne('squad', 'units')
+    squad;
+}
+

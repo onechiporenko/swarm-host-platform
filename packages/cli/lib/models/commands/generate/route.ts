@@ -9,7 +9,7 @@ export class GenerateRoute extends Generate {
   public writeFile(): void {
     let url: string =
       this.instance.options.url ||
-      path.join(this.instance.dir, this.instance.name);
+      path.join(this.instance.dir, this.instance.name).replace(/\\/g, '/');
     if (url[0] !== '/') {
       url = `/${url}`;
     }

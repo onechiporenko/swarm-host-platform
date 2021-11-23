@@ -1,5 +1,5 @@
 import { Argv } from 'yargs';
-import { cp, exec, echo, ls, mkdir } from 'shelljs';
+import { cp, exec, echo, ls } from 'shelljs';
 import { render } from 'ejs';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -23,8 +23,6 @@ exports.handler = (argv) => {
     console.log('`init` can be executed only in the empty dir');
     process.exit(1);
   }
-  mkdir('routes');
-  mkdir('factories');
   const p = path.parse(process.cwd());
   const projectName = p.name;
   const projectTplPath = path.join(__dirname, '../../blueprints/project/');
@@ -32,7 +30,7 @@ exports.handler = (argv) => {
     path.join(projectTplPath, 'package.json'),
     'utf-8'
   );
-  cp(path.join(projectTplPath, '/*'), '.');
+  cp('-r', path.join(projectTplPath, '/*'), '.');
   // cp skipping dot files - https://github.com/shelljs/shelljs/issues/79
   cp(path.join(projectTplPath, '/.eslintrc.json'), '.');
   cp(path.join(projectTplPath, '/.prettierrc.js'), '.');
@@ -47,5 +45,6 @@ exports.handler = (argv) => {
     exec(
       'npm i --save-dev @types/node ts-node typescript eslint eslint-config-prettier eslint-plugin-prettier prettier'
     );
+    exec('npm run lint');
   }
 };

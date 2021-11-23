@@ -1,23 +1,22 @@
-import {Factory} from 'swarm-host';
+import { <%= imports %> } from 'swarm-host';
 
-export default Factory.create({
-  name: '<%= name %>',
-  attrs: {
+export default <%= className %>Factory extends Factory {
+    static factoryName = '<%= name %>';
 <%_ attrs.forEach(function(attr){ _%>
 <%_ if (attr.attrType === 'field') { _%>
-    <%= attr.attrName %>: Factory.field({
-      value() {
-        return <%- attr.defaultValue %>;
-      },
-      preferredType: '<%= attr.valueType %>'
-    }),
+    @field({
+        defaultValue: <%- attr.defaultValue %>,
+        preferredType: '<%= attr.valueType %>'
+    })
+    <%= attr.attrName %> = <%- attr.defaultValue %>;
 <%_ } _%>
 <%_ if (attr.attrType === 'has-one') { _%>
-    <%= attr.attrName %>: Factory.hasOne('<%= attr.factory %>', <%- attr.inverseAttr %>),
+    @hasOne('<%= attr.factory %>', <%- attr.inverseAttr %>)
+    <%= attr.attrName %>;
 <%_ } _%>
 <%_ if (attr.attrType === 'has-many') { _%>
-    <%= attr.attrName %>: Factory.hasMany('<%= attr.factory %>', <%- attr.inverseAttr %>),
+    @hasMany('<%= attr.factory %>', <%- attr.inverseAttr %>)
+    <%= attr.attrName %>;
 <%_ } _%>
 <%_ }); _%>
-  }
-});
+}

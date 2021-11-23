@@ -1,12 +1,12 @@
 {
   "name": "swarm-host-cli",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "CLI for Swarm-Host",
   "main": "./dist/index.js",
   "scripts": {
     "build": "rm -rf dist && tsc && rm -rf dist/tests* && find ./dist -name \"*.js.map\" -type f -delete && cp -r dist/lib/* dist/. && rm -rf dist/lib",
     "test": "mocha -r ts-node/register \"tests/**/*.ts\" -t 3000",
-    "lint": "eslint -c .eslintrc.json lib tests"
+    "lint": "eslint -c .eslintrc.json lib tests --fix"
   },
   "keywords": [
     "cli",

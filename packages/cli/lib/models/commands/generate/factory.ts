@@ -5,6 +5,7 @@ import path = require('path');
 import { echo, mkdir } from 'shelljs';
 import { Generate } from '../generate';
 import FactoryAttr from './../../../models/factory-attr';
+import { camelize, classify } from '../../../utils/string';
 
 export class GenerateFactory extends Generate {
   public writeFile(): void {
@@ -16,6 +17,12 @@ export class GenerateFactory extends Generate {
     const attrs: FactoryAttr[] = this.instance.options.rest.map(
       (attr) => new FactoryAttr(attr)
     );
+
+    const imports = attrs
+      .map((attr) => attr.attrType)
+      .filter((type, index, list) => list.indexOf(type) === index)
+      .map((item) => camelize(item));
+    imports.unshift('Factory');
     attrs.sort((attr1, attr2) => {
       if (attr1.attrType !== attr2.attrType) {
         return attr1.attrType > attr2.attrType ? 1 : -1;
@@ -26,6 +33,8 @@ export class GenerateFactory extends Generate {
       render(tpl, {
         attrs,
         name: this.instance.name,
+        imports: imports.join(', '),
+        className: classify(this.instance.name),
       })
     ).to(this.instance.fullPath);
     console.log(colors.yellow(this.instance.relativePath), 'is created');
