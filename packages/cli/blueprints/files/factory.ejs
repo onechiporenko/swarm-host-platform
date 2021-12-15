@@ -1,6 +1,6 @@
 import { <%= imports %> } from 'swarm-host';
 
-export default <%= className %>Factory extends Factory {
+export default class <%= className %>Factory extends Factory {
     static factoryName = '<%= name %>';
 <%_ attrs.forEach(function(attr){ _%>
 <%_ if (attr.attrType === 'field') { _%>

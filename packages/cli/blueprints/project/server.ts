@@ -7,7 +7,4 @@ const server = Server.getServer();
 // server.port = 12345;
 // server.delay = 200;
 
-server.addRoutesFromDir(`${__dirname}/routes`);
-server.addFactoriesFromDir(`${__dirname}/factories`);
-
 export default server;
