@@ -1352,11 +1352,6 @@
   dependencies:
     lodash.flatmap "~4.5.0"
 
-"@swarm-host/lair@file:packages/lair":
-  version "3.1.0"
-  dependencies:
-    reflect-metadata "^0.1.13"
-
 "@tootallnate/once@1":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
