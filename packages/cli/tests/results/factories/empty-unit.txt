@@ -1,6 +1,0 @@
-import { Factory } from 'swarm-host';
-
-export default class UnitFactory extends Factory {
-    static factoryName = 'unit';
-}
-
