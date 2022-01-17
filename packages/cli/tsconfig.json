@@ -1,14 +1,5 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "es5",
-    "noImplicitAny": false,
-    "sourceMap": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "declaration": true,
-    "outDir": "dist"
-  },
+  "extends": "../../tsconfig.json",
   "exclude": [
     "node_modules",
     "blueprints"
@@ -16,5 +7,9 @@
   "include": [
     "lib",
     "tests"
-  ]
+  ],
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "."
+  }
 }

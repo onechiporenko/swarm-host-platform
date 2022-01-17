@@ -6,3 +6,5 @@ docs
 .idea
 .github
 publish.sh
+.nyc_output
+coverage
