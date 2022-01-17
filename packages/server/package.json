@@ -1,12 +1,11 @@
 {
   "name": "@swarm-host/server",
-  "version": "3.1.0",
+  "version": "4.0.0",
   "description": "fake-server",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist && tsc",
-    "build:publish": "yarn run build && rm -rf dist/tests* && rm -rf dist/lib/*.js.map && cp dist/lib/* dist/. && rm -rf dist/lib",
+    "build": "rm -rf dist && tsc && rm -rf dist/tests* && rm -rf dist/lib/*.js.map && cp dist/lib/* dist/. && rm -rf dist/lib",
     "lint": "eslint -c .eslintrc.json lib tests tests-data",
     "lint:fix": "eslint -c .eslintrc.json lib tests tests-data --fix",
     "test": "mocha -r ts-node/register tests/**/*.ts",

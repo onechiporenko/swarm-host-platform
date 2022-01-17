@@ -1,11 +1,10 @@
 {
   "name": "@swarm-host/cli",
-  "version": "3.1.0",
+  "version": "4.0.0",
   "description": "CLI for Swarm-Host",
   "main": "./dist/index.js",
   "scripts": {
-    "build": "rm -rf dist && tsc",
-    "build:publish": "yarn run build && rm -rf dist/tests* && rm -rf dist/lib/*.js.map && cp -r dist/lib/* dist/. && rm -rf dist/lib",
+    "build": "rm -rf dist && tsc && rm -rf dist/tests* && rm -rf dist/lib/*.js.map && cp -r dist/lib/* dist/. && rm -rf dist/lib",
     "test": "mocha -r ts-node/register tests/**/*.ts -t 3000",
     "test:cov": "nyc yarn run test",
     "lint": "eslint -c .eslintrc.json lib tests",
