@@ -10,7 +10,8 @@
     "lint:fix": "eslint -c .eslintrc.json lib tests --fix",
     "test": "mocha -r ts-node/register tests/**/*.ts",
     "test:cov": "nyc yarn run test",
-    "docs": "typedoc --out ./docs lib"
+    "docs": "typedoc --out ./docs lib",
+    "stryker": "stryker run"
   },
   "keywords": [
     "js",
