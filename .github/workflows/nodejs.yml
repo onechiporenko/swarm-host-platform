@@ -7,9 +7,9 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Checkout code
-      - run: |
+      - uses: actions/checkout@v2.4.0
+      - name: Install & Build
+        run: |
           yarn install
           yarn run build
       - name: Lint
@@ -21,16 +21,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: "./coverage/coverage"
-
-  mut:
-    name: Mutation Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2.4.0
-      - name: Install & Build
-        run: |
-          yarn install
-          yarn run build
       - name: Run Stryker
         run: npx lerna run --concurrency 1 --stream stryker -- -- --concurrency 3
         env:
