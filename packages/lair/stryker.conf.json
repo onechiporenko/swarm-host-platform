@@ -1,13 +1,14 @@
 {
   "testRunner": "mocha",
   "coverageAnalysis": "off",
-  "buildCommand": "npm run build",
+  "buildCommand": "yarn run build",
   "checkers": ["typescript"],
   "tsconfigFile": "tsconfig.json",
   "reporters": ["clear-text", "progress", "html"],
   "mutate": ["lib/**/*.ts", "!lib/decorators.ts"],
   "mochaOptions": {
-    "spec": [ "dist/tests/**/*.js" ]
+    "spec": [ "tests/**/*.ts" ],
+    "require": [ "ts-node/register" ]
   },
   "thresholds": {
     "break": 50,

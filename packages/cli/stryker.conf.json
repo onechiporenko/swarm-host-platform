@@ -5,7 +5,7 @@
   "checkers": ["typescript"],
   "tsconfigFile": "tsconfig.json",
   "reporters": ["clear-text", "progress", "html"],
-  "mutate": ["lib/**/*.ts", "!lib/express.ts"],
+  "mutate": ["lib/**/*.ts"],
   "mochaOptions": {
     "spec": [ "tests/**/*.ts" ],
     "require": [ "ts-node/register" ]

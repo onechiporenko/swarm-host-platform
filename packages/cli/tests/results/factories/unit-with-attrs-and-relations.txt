@@ -1,4 +1,4 @@
-import { Factory, field, hasOne, hasMany } from 'swarm-host';
+import { Factory, field, hasOne, hasMany } from '@swarm-host/server';
 
 export default class UnitFactory extends Factory {
     static factoryName = 'unit';

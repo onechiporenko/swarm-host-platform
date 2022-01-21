@@ -1,0 +1,22 @@
+name: Mutation Testing
+
+on:
+  push: ~
+  pull_request: ~
+  schedule:
+    - cron: '0 12 * * *'
+
+jobs:
+  test:
+    name: Stryker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - name: Install & Build
+        run: |
+          yarn install
+          yarn run build
+      - name: Run Stryker
+        run: npx lerna run --concurrency 1 --stream test:mut
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}

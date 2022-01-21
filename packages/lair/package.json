@@ -6,12 +6,12 @@
   "typings": "./dist/index.d.ts",
   "scripts": {
     "build": "rm -rf dist && tsc && rm -rf dist/tests && rm -rf dist/lib/*.js.map && cp dist/lib/* dist/. && rm -rf dist/lib",
-    "lint": "eslint -c .eslintrc.json lib tests",
-    "lint:fix": "eslint -c .eslintrc.json lib tests --fix",
+    "lint": "eslint lib tests",
+    "lint:fix": "eslint lib tests --fix",
     "test": "mocha -r ts-node/register tests/**/*.ts",
     "test:cov": "nyc yarn run test",
     "docs": "typedoc --out ./docs lib",
-    "stryker": "stryker run"
+    "test:mut": "stryker run"
   },
   "keywords": [
     "js",

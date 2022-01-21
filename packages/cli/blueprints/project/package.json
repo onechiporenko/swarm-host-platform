@@ -1,6 +1,6 @@
 {
   "name": "<%= name %>",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "Small description for <%= name %> goes here",
   "license": "MIT",
@@ -12,15 +12,17 @@
     "lint": "eslint -c .eslintrc.json ."
   },
   "dependencies": {
-    "swarm-host": "*"
+    "@swarm-host/server": "^4.0.0"
   },
   "devDependencies": {
-    "@types/node": "*",
-    "eslint": "*",
-    "eslint-config-prettier": "*",
-    "eslint-plugin-prettier": "*",
-    "prettier": "*",
-    "ts-node": "*",
-    "typescript": "*"
+    "@types/node": "^16.10.1",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/parser": "^5.3.1",
+    "eslint": "^8.6.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.5.1",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.5.4"
   }
 }
