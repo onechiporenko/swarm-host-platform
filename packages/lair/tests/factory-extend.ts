@@ -145,7 +145,6 @@ describe('Lair create records', () => {
           lair.createRecords('b', 1);
         });
         it('should override field', () => {
-          console.error(JSON.stringify(lair.getAll('b'), null, 2));
           expect(lair.getOne('b', '1').field).to.be.equal('b');
         });
       });
