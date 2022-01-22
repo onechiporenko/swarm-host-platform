@@ -1,0 +1,10 @@
+node_modules
+lib
+tests
+reports
+docs
+.idea
+.github
+publish.sh
+.nyc_output
+coverage

@@ -1,0 +1,30 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/cli" },
+    { "path": "packages/server" },
+    { "path": "packages/lair" }
+  ],
+  "compilerOptions": {
+    "baseUrl": "./packages",
+    "module": "commonjs",
+    "declaration": true,
+    "noImplicitAny": false,
+    "removeComments": true,
+    "noLib": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "es6",
+    "inlineSourceMap": true,
+    "lib": [
+      "es6",
+      "dom"
+    ],
+    "paths": {
+      "@swarm-host/cli": ["cli/dist"],
+      "@swarm-host/server": ["server/dist"],
+      "@swarm-host/lair": ["lair/dist"],
+      "@swarm-host/*": ["*/dist"]
+    }
+  }
+}

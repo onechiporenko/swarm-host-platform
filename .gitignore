@@ -1,0 +1,10 @@
+**/node_modules
+**/reports
+**/dist
+**/docs
+**/.stryker-tmp
+.idea
+lerna-debug.log
+npm-debug.log
+.nyc_output
+coverage

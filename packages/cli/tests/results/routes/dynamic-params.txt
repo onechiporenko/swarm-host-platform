@@ -1,0 +1,6 @@
+import { Route } from '@swarm-host/server';
+
+export default Route.createRoute('get', '/units/:unit_id/objectives/:objective_id', ({params: {unit_id, objective_id}}, res, next, lair) => {
+  res.json({});
+});
+

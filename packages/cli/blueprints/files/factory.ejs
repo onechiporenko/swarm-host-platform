@@ -1,0 +1,22 @@
+import { <%= imports %> } from '@swarm-host/server';
+
+export default class <%= className %>Factory extends Factory {
+    static factoryName = '<%= name %>';
+<%_ attrs.forEach(function(attr){ _%>
+<%_ if (attr.attrType === 'field') { _%>
+    @field({
+        defaultValue: <%- attr.defaultValue %>,
+        preferredType: '<%= attr.valueType %>'
+    })
+    <%= attr.attrName %> = <%- attr.defaultValue %>;
+<%_ } _%>
+<%_ if (attr.attrType === 'has-one') { _%>
+    @hasOne('<%= attr.factory %>', <%- attr.inverseAttr %>)
+    <%= attr.attrName %>;
+<%_ } _%>
+<%_ if (attr.attrType === 'has-many') { _%>
+    @hasMany('<%= attr.factory %>', <%- attr.inverseAttr %>)
+    <%= attr.attrName %>;
+<%_ } _%>
+<%_ }); _%>
+}

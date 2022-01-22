@@ -1,0 +1,35 @@
+{
+  "name": "@swarm-host/cli",
+  "version": "4.0.0",
+  "description": "CLI for Swarm-Host",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "rm -rf dist && tsc && rm -rf dist/tests* && rm -rf dist/lib/*.js.map && cp -r dist/lib/* dist/. && rm -rf dist/lib",
+    "test": "mocha -r ts-node/register tests/**/*.ts -t 3000",
+    "test:cov": "nyc yarn run test",
+    "lint": "eslint lib tests",
+    "lint:fix": "eslint lib tests --fix",
+    "test:mut": "exit 0"
+  },
+  "keywords": [
+    "cli",
+    "swarm-host"
+  ],
+  "author": "onechiporenko",
+  "license": "MIT",
+  "bin": {
+    "swarm-host": "./dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/onechiporenko/swarm-host-platform.git",
+    "directory": "packages/cli"
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "ejs": "^3.1.6",
+    "inquirer": "^8.1.5",
+    "shelljs": "^0.8.4",
+    "yargs": "^17.2.1"
+  }
+}

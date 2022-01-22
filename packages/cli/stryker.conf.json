@@ -1,0 +1,18 @@
+{
+  "testRunner": "mocha",
+  "coverageAnalysis": "off",
+  "buildCommand": "yarn run build",
+  "checkers": ["typescript"],
+  "tsconfigFile": "tsconfig.json",
+  "reporters": ["clear-text", "progress", "html"],
+  "mutate": ["lib/**/*.ts"],
+  "mochaOptions": {
+    "spec": [ "tests/**/*.ts" ],
+    "require": [ "ts-node/register" ]
+  },
+  "thresholds": {
+    "break": 0,
+    "high": 80,
+    "low": 60
+  }
+}

@@ -1,0 +1,14 @@
+node_modules
+lib
+tests
+reports
+docs
+.idea
+.stryker-tmp
+.github
+dist/coverage
+publish.sh
+tsconfig.json
+stryker.conf.json
+.nyc_output
+coverage

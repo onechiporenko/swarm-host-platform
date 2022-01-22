@@ -1,0 +1,31 @@
+{
+  "name": "@swarm-host/lair",
+  "version": "4.0.0",
+  "description": "JS/TS database",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
+  "scripts": {
+    "build": "rm -rf dist && tsc && rm -rf dist/tests && rm -rf dist/lib/*.js.map && cp dist/lib/* dist/. && rm -rf dist/lib",
+    "lint": "eslint lib tests",
+    "lint:fix": "eslint lib tests --fix",
+    "test": "mocha -r ts-node/register tests/**/*.ts",
+    "test:cov": "nyc yarn run test",
+    "docs": "typedoc --out ./docs lib",
+    "test:mut": "stryker run"
+  },
+  "keywords": [
+    "js",
+    "db",
+    "database"
+  ],
+  "author": "onechiporenko",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/onechiporenko/swarm-host-platform.git",
+    "directory": "packages/lair"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.1.13"
+  }
+}
