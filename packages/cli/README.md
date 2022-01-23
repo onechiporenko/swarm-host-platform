@@ -9,7 +9,7 @@ CLI for [Swarm-Host](https://github.com/onechiporenko/swarm)
 ## Install:
 
 ```bash
-npm i -g swarm-host-cli
+npm i -g @swarm-host/cli
 ```
 
 ## Usage:
@@ -30,7 +30,7 @@ File `routes/units.ts` will be created. Its content:
 
 ```typescript
 // routes/units.ts
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 
 export default Route.createRoute('get', 'units', (req, res, next, lair) => {
   res.json({});
@@ -47,7 +47,7 @@ File `routes/units/new.ts` will be created. Its content:
 
 ```typescript
 // routes/units/new.ts
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 
 export default Route.createRoute('post', 'api/v1/units', (req, res, next, lair) => {
   res.json({});
@@ -64,7 +64,7 @@ File `routes/units/unit/objectives/objective.ts` will be created. Its content:
 
 ```typescript
 //routes/units/unit/objectives/objective.ts
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 
 export default Route.createRoute('get', '/units/:unit_id/objectives/:objective_id', ({params: {unit_id, objective_id}}, res, next, lair) => {
   res.json({});
@@ -82,13 +82,11 @@ File `factories/my/unit.ts` will be created. Its content:
 
 ```typescript
 // factories/my/unit.ts
-import {Factory} from 'swarm-host';
+import { Factory } from '@swarm-host/server';
 
-export default Factory.create({
-  name: 'unit',
-  attrs: {
-  }
-});
+export default class UnitFactory extends Factory {
+  static factoryName = 'unit';
+};
 ```
 
 ### Create a new Factory with attributes:
@@ -101,27 +99,24 @@ File `factories/my/unit.ts` will be created. Its content:
 
 ```typescript
 // factories/my/unit.ts
-import {Factory} from 'swarm-host';
+import { Factory, field, hasOne, hasMany } from '@swarm-host/server';
 
-export default Factory.create({
-  name: 'unit',
-  attrs: {
-    name: Factory.field({
-      value() {
-        return '';
-      },
-      preferredType: 'string'
-    }),
-    age: Factory.field({
-      value() {
-        return 0;
-      },
-      preferredType: 'number'
-    }),
-    objectives: Factory.hasMany('objective', null),
-    squad: Factory.hasOne('squad', 'units'),
+export default class UnitFactory extends Factory {
+  static factoryName = 'unit';
+
+  @field()
+  get name() {
+    return '';
   }
-});
+
+  @field()
+  get age() {
+    return 0;
+  }
+  
+  @hasMany('objective', null) objectives;
+  @hasOne('squad', 'units') squad;
+}
 ```
 
 ### Destroy existing Factory

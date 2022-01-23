@@ -9,7 +9,7 @@
 ## Install
 
 ```bash
-npm i lair-db --save-dev
+npm i @swarm-host/lair --save-dev
 ```
 
 ## About Lair-db
@@ -21,7 +21,7 @@ Lair-db consists of two parts - Lair and Factories. Lair is a place where all da
 To get Lair instance you should use static method `getLair`:
 
 ```typescript
-import {Lair} from 'lair-db';
+import { Lair } from '@swarm-host/lair';
 
 const lair = Lair.getLair();
 ```
@@ -31,7 +31,7 @@ const lair = Lair.getLair();
 Factories are sub-classes of class `Factory`:
 
 ```typescript
-import {Lair, Factory} from 'lair-db';
+import { Lair, Factory } from '@swarm-host/lair';
 
 class UnitFactory extends Factory {
   static factoryName = 'unit';
@@ -43,7 +43,7 @@ const factoryInstance = new UnitFactory();
 Now we have a factory. Currently, it can't do any useful things. Every generated Record for this Factory will have only single property (`id`). All properties for Records are factory's attributes with `field`-decorator:
 
 ```typescript
-import {Lair, Factory, field} from 'lair-db';
+import { Lair, Factory, field } from '@swarm-host/lair';
 import * as faker from 'faker';
 
 class UnitFactory extends Factory {
@@ -66,7 +66,7 @@ const factoryInstance = new UnitFactory();
 Our factory will create Records with fields `id`, `firstName` and `lastName`. Since `faker` returns truly random values we'll get really different Records. We declared `firstName` and `lastName` as `getter`s that return some random values.
 
 ```typescript
-import {Lair, Factory, field} from 'lair-db';
+import { Lair, Factory, field } from '@swarm-host/lair';
 import * as faker from 'faker';
 
 class UnitFactory extends Factory {
@@ -125,7 +125,7 @@ Method `createRecords` **MUST** be used only for initial filling of Lair-db.
 Records of different types may be linked one to another. There is a special way to describe such links. It's called 'relationships'. Let's say we have two factories for units and squads. One unit may be in the one squad and any squad may contain many units (typical one-to-many or many-to-one relationships):
 
 ```typescript
-import {Factory, field, hasOne, hasMany} from 'lair-db';
+import { Factory, field, hasOne, hasMany } from '@swarm-host/lair';
 import * as faker from 'faker';
 
 class UnitFactory extends Factory {

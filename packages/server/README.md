@@ -20,7 +20,7 @@ npm i swarm-host --save
 
 ```typescript
 import compression = require('compression');
-import {Server} from 'swarm-host';
+import { Server } from '@swarm-host/server';
 
 // server itself
 const server = Server.getServer();
@@ -45,7 +45,7 @@ Server without any routes is useless. It's time to add them.
 Every Route is an instance of the class `Route`. It may be created by calling static method `createRoute`:
 
 ```typescript
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 Route.createRoute('get', '/all-users', (req, res, next, lair) => {
   // ...
 });
@@ -75,7 +75,7 @@ res.status(404).json({});
 Route may be added to server by calling `addRoute`:
 
 ```typescript
-import {Server, Route} from 'swarm-host';
+import { Server, Route } from '@swarm-host/server';
 const server = Server.getServer();
 server.addRoute(Route.createRoute(/*...*/)); 
 ```
@@ -85,7 +85,7 @@ server.addRoute(Route.createRoute(/*...*/));
 [Lair-db](https://github.com/onechiporenko/lair) is used like a data-storage in the Swarm-host. It has two methods to work with Lair-db. First one is a `addFactory`. It does the same as a `lair.registerFactory` and takes two parameters - factory-instance and factory-name:
 
 ```typescript
-import {Server, Factory} from 'swarm-host';
+import { Server, Factory } from '@swarm-host/server';
 
 const server = Server.getServer();
 server.addFactory(Factory.create({/* ... */}), 'factory-name');
@@ -94,7 +94,7 @@ server.addFactory(Factory.create({/* ... */}), 'factory-name');
 Second method is a `createRecords`. It's just a wrapper for `lair.createRecords`. It takes two parameters - factory name and records count to create:
 
 ```typescript
-import {Server, Factory} from 'swarm-host';
+import { Server, Factory } from '@swarm-host/server';
 
 const server = Server.getServer();
 server.createRecords('factory-name', 10);
@@ -113,14 +113,14 @@ Predefined route `get` is used to get one record or all records of the given typ
 **Multiple records:**
 
 ```typescript
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 Route.get('/all-users', 'user', {depth: 1, ignoreRelated: ['subject']});
 ```
 
 It's equal to:
 
 ```typescript
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 Route.createRoute('get', '/all-users', (req, res, next, lair) => {
   const data = lair.getAll('user', {
     depth: 1, 
@@ -133,14 +133,14 @@ Route.createRoute('get', '/all-users', (req, res, next, lair) => {
 **Single record:**
 
 ```typescript
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 Route.get('/all-users/:id', 'user', {depth: 1, ignoreRelated: ['subject']});
 ```
 
 It's equal to:
 
 ```typescript
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 Route.createRoute('get', '/all-users', (req, res, next, lair) => {
   const data = lair.getOne('user', req.params.id, {
     depth: 1, 
@@ -157,14 +157,14 @@ _Only routes with a single dynamic part are supported for `Route.get` used to ge
 Predefined route `post` is used to create a record of the given type.
 
 ```typescript
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 Route.post('/all-users', 'user', {depth: 1});
 ```
 
 It's equal to:
 
 ```typescript
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 Route.createRoute('post', '/all-users', (req, res, next, lair) => {
   const data = lair.createOne('user', req.body, {depth: 1});
   res.json(data);
@@ -176,14 +176,14 @@ Route.createRoute('post', '/all-users', (req, res, next, lair) => {
 Both predefined routes can be used to update a record of the given type by its `id`.
 
 ```typescript
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 Route.patch('/all-users/:id', 'user', {depth: 1});
 ```
 
 It's equal to:
 
 ```typescript
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 Route.createRoute('patch', '/all-users/:id', (req, res, next, lair) => {
   const data = lair.updateOne('user', req.params.id, req.body, {depth: 1});
   res.json(data);
@@ -195,14 +195,14 @@ Route.createRoute('patch', '/all-users/:id', (req, res, next, lair) => {
 Predefined route `delete` is used to delete a single record of the given type by its `id`.
 
 ```typescript
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 Route.delete('/all-users', 'user');
 ```
 
 It's equal to:
 
 ```typescript
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 Route.createRoute('delete', '/all-users/:id', (req, res, next, lair) => {
   lair.deleteOne('user', req.params.id);
   res.json({});
@@ -230,12 +230,12 @@ function handler(req, res, data, lair) {
 Both Routes bellow are doing the same:
 
 ```typescript
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 Route.get('/all-users', 'user', {depth: 1});
 ```
 
 ```typescript
-import {Route} from 'swarm-host';
+import { Route } from '@swarm-host/server';
 Route.get('/all-users', 'user', {depth: 1}, (req, res, data, lair) => {
   res.json(data);
 });
@@ -246,25 +246,29 @@ Such extra-handlers are useful to serialize data before sending them in the Resp
 ### Complex example
 
 ```typescript
-import {Server, Factory, Route} from 'swarm-host';
-const faker = require('faker'); // npm i faker --save
+import { Server, Factory, Route, field } from '@swarm-host/server';
+import { name, random } from 'faker'; // npm i faker --save
 const server = Server.getServer();
 server.namespace = '/api/v1';
 server.port = 12345;
 server.verbose = true;
 server.delay = 200;
 
-const UserFactory = Factory.create({
-  attrs: {
-    name() {
-      return faker.name.firstName();
-    },
-    age() {
-      return faker.random.number({min: 1, max: 99});
-    }
+class UserFactory extends Factory{
+  
+  static factoryName = 'user';
+  
+  @field()
+  get name() {
+    return name.firstName();
   }
-});
-server.addFactory(UserFactory, 'user');
+
+  @field()
+  get age() {
+    return random.number({min: 1, max: 99});
+  }
+}
+server.addFactory(new UserFactory());
 
 const UsersRoute = Route.createRoute('get', '/all-users', (req, res, next, lair) => {
   const users = lair.getAll('user');
