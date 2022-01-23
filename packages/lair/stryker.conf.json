@@ -6,6 +6,9 @@
   "tsconfigFile": "tsconfig.json",
   "reporters": ["clear-text", "progress", "html", "dashboard"],
   "mutate": ["lib/**/*.ts", "!lib/decorators.ts"],
+  "dashboard": {
+    "module": "lair"
+  },
   "mochaOptions": {
     "spec": [ "tests/**/*.ts" ],
     "require": [ "ts-node/register" ]

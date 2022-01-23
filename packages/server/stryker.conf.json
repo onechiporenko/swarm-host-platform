@@ -6,6 +6,9 @@
   "tsconfigFile": "tsconfig.json",
   "reporters": ["clear-text", "progress", "html", "dashboard"],
   "mutate": ["lib/**/*.ts", "!lib/express.ts"],
+  "dashboard": {
+    "module": "server"
+  },
   "mochaOptions": {
     "spec": [ "tests/**/*.ts" ],
     "require": [ "ts-node/register" ]
