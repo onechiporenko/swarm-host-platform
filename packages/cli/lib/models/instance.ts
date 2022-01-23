@@ -38,7 +38,7 @@ export class Instance {
     const p = path.parse(pathToNewInstance);
     this.name = p.name;
     this.dir = p.dir;
-    this.dirPath = path.join(process.cwd(), this.type, p.dir);
+    this.dirPath = path.join(process.cwd(), 'app', this.type, p.dir);
     this.fileName = `${p.name}.ts`;
     this.fullPath = path.join(this.dirPath, this.fileName);
     this.relativePath = path.join(this.type, p.dir, this.fileName);

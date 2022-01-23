@@ -15,7 +15,7 @@ exports.describe = 'destroy existing route';
 exports.builder = (yargs: Argv) => {
   yargs.example(
     '`swarm-host d route some/path/units`',
-    'Destroy route `routes/some/path/units`'
+    'Destroy route `app/routes/some/path/units`'
   );
   yargs.options({
     path: {

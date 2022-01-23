@@ -19,14 +19,16 @@ describe('Init Project', () => {
 
   it('should create initial files', () => {
     init(['--skip-npm']);
-    const dirContent = ls('-A', '.');
-    expect(dirContent).to.include('factories');
-    expect(dirContent).to.include('routes');
+    let dirContent = ls('-A', '.');
+    expect(dirContent).to.include('app');
     expect(dirContent).to.include('package.json');
     expect(dirContent).to.include('index.ts');
-    expect(dirContent).to.include('server.ts');
     expect(dirContent).to.include('tsconfig.json');
     expect(dirContent).to.include('.eslintrc.json');
     expect(dirContent).to.include('.prettierrc.js');
+    dirContent = ls('-A', './app');
+    expect(dirContent).to.include('factories');
+    expect(dirContent).to.include('routes');
+    expect(dirContent).to.include('server.ts');
   });
 });

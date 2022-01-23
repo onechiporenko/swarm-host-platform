@@ -7,11 +7,11 @@ exports.describe = 'generates new factory';
 exports.builder = (yargs: Argv) => {
   yargs.example(
     '`swarm-host g factory some/path/unit`',
-    'Create an empty Factory `factories/some/path/unit`'
+    'Create an empty Factory `app/factories/some/path/unit`'
   );
   yargs.example(
     '`swarm-host g factory some/path/unit name:string squad:has-one:squad`',
-    'Create a Factory `factories/some/path/unit` with two fields `name` and `squad`'
+    'Create a Factory `app/factories/some/path/unit` with two fields `name` and `squad`'
   );
   yargs.options({
     path: {

@@ -19,29 +19,29 @@ describe('Destroy Route', () => {
 
   it('should delete existing route', () => {
     generate('route', 'units');
-    expect(fileExists('routes/units.ts')).to.be.true;
+    expect(fileExists('app/routes/units.ts')).to.be.true;
     destroy('route', 'units');
-    expect(fileExists('routes/units.ts')).to.be.false;
+    expect(fileExists('app/routes/units.ts')).to.be.false;
   });
 
   it('should not delete existing route', () => {
     generate('route', 'units');
-    expect(fileExists('routes/units.ts')).to.be.true;
+    expect(fileExists('app/routes/units.ts')).to.be.true;
     destroy('route', 'units', 'n');
-    expect(fileExists('routes/units.ts')).to.be.true;
+    expect(fileExists('app/routes/units.ts')).to.be.true;
   });
 
   it('should delete existing nested route', () => {
     generate('route', 'all/units');
-    expect(fileExists('routes/all/units.ts')).to.be.true;
+    expect(fileExists('app/routes/all/units.ts')).to.be.true;
     destroy('route', 'all/units');
-    expect(fileExists('routes/all/units.ts')).to.be.false;
+    expect(fileExists('app/routes/all/units.ts')).to.be.false;
   });
 
   it('should not delete existing nested route', () => {
     generate('route', 'all/units');
-    expect(fileExists('routes/all/units.ts')).to.be.true;
+    expect(fileExists('app/routes/all/units.ts')).to.be.true;
     destroy('route', 'all/units', 'n');
-    expect(fileExists('routes/all/units.ts')).to.be.true;
+    expect(fileExists('app/routes/all/units.ts')).to.be.true;
   });
 });

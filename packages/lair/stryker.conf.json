@@ -4,7 +4,7 @@
   "buildCommand": "yarn run build",
   "checkers": ["typescript"],
   "tsconfigFile": "tsconfig.json",
-  "reporters": ["clear-text", "progress", "html"],
+  "reporters": ["clear-text", "progress", "html", "dashboard"],
   "mutate": ["lib/**/*.ts", "!lib/decorators.ts"],
   "mochaOptions": {
     "spec": [ "tests/**/*.ts" ],

@@ -41,10 +41,6 @@ exports.handler = (argv) => {
   ).to('package.json');
   if (!argv.skipNpm) {
     console.log('Installing npm dependencies...');
-    exec('npm i --save swarm-host');
-    exec(
-      'npm i --save-dev @types/node ts-node typescript eslint eslint-config-prettier eslint-plugin-prettier prettier'
-    );
-    exec('npm run lint');
+    exec('npm i');
   }
 };

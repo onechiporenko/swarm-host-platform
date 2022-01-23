@@ -21,7 +21,7 @@ describe('Generate Factory', () => {
     generate('factory', 'unit');
     expect(
       getFilesDiff(
-        'factories/unit.ts',
+        'app/factories/unit.ts',
         '../tests/results/factories/empty-unit.txt'
       )
     ).to.be.empty;
@@ -42,7 +42,7 @@ describe('Generate Factory', () => {
     );
     expect(
       getFilesDiff(
-        'factories/unit.ts',
+        'app/factories/unit.ts',
         '../tests/results/factories/unit-with-attrs-and-relations.txt'
       )
     ).to.be.empty;
@@ -53,7 +53,7 @@ describe('Generate Factory', () => {
     generate('factory', 'unit', ['name:string'], 'n');
     expect(
       getFilesDiff(
-        'factories/unit.ts',
+        'app/factories/unit.ts',
         '../tests/results/factories/empty-unit.txt'
       )
     ).to.be.empty;
@@ -68,7 +68,7 @@ describe('Generate Factory', () => {
     ]);
     expect(
       getFilesDiff(
-        'factories/some/unit.ts',
+        'app/factories/some/unit.ts',
         '../tests/results/factories/unit-with-attrs-and-relations.txt'
       )
     ).to.be.empty;

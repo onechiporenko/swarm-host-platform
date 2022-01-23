@@ -7,11 +7,11 @@ exports.describe = 'generates new route';
 exports.builder = (yargs: Argv) => {
   yargs.example(
     '`swarm-host g route some/path/units`',
-    'Create a Route `routes/some/path/units` to handle GET-request to `/some/path/units`'
+    'Create a Route `app/routes/some/path/units` to handle GET-request to `/some/path/units`'
   );
   yargs.example(
     '`swarm-host g route some/path/units/create --method=post --url=units/create`',
-    'Create a Route `routes/some/path/units/create` to handle POST-request to `/units/create`'
+    'Create a Route `app/routes/some/path/units/create` to handle POST-request to `/units/create`'
   );
   yargs.options({
     method: {

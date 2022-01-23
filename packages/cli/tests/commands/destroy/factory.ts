@@ -18,29 +18,29 @@ describe('Destroy Factory', () => {
 
   it('should delete existing factory', () => {
     generate('factory', 'unit');
-    expect(fileExists('factories/unit.ts')).to.be.true;
+    expect(fileExists('app/factories/unit.ts')).to.be.true;
     destroy('factory', 'unit');
-    expect(fileExists('factories/unit.ts')).to.be.false;
+    expect(fileExists('app/factories/unit.ts')).to.be.false;
   });
 
   it('should not delete existing factory', () => {
     generate('factory', 'unit');
-    expect(fileExists('factories/unit.ts')).to.be.true;
+    expect(fileExists('app/factories/unit.ts')).to.be.true;
     destroy('factory', 'unit', 'n');
-    expect(fileExists('factories/unit.ts')).to.be.true;
+    expect(fileExists('app/factories/unit.ts')).to.be.true;
   });
 
   it('should delete existing nested factory', () => {
     generate('factory', 'some/path/unit');
-    expect(fileExists('factories/some/path/unit.ts')).to.be.true;
+    expect(fileExists('app/factories/some/path/unit.ts')).to.be.true;
     destroy('factory', 'some/path/unit');
-    expect(fileExists('factories/some/path/unit.ts')).to.be.false;
+    expect(fileExists('app/factories/some/path/unit.ts')).to.be.false;
   });
 
   it('should not delete existing nested factory', () => {
     generate('factory', 'some/path/unit');
-    expect(fileExists('factories/some/path/unit.ts')).to.be.true;
+    expect(fileExists('app/factories/some/path/unit.ts')).to.be.true;
     destroy('factory', 'some/path/unit', 'n');
-    expect(fileExists('factories/some/path/unit.ts')).to.be.true;
+    expect(fileExists('app/factories/some/path/unit.ts')).to.be.true;
   });
 });

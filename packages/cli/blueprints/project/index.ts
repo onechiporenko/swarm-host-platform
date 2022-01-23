@@ -1,7 +1,7 @@
-import server from './server';
+import server from './app/server';
 
-server.addRoutesFromDir(`${__dirname}/routes`).then(() => {
-  server.addFactoriesFromDir(`${__dirname}/factories`).then(() => {
+server.addRoutesFromDir(`${__dirname}/app/routes`).then(() => {
+  server.addFactoriesFromDir(`${__dirname}/app/factories`).then(() => {
     server.startServer();
   });
 });

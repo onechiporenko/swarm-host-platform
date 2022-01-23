@@ -15,7 +15,7 @@ exports.describe = 'destroy existing factory';
 exports.builder = (yargs: Argv) => {
   yargs.example(
     '`swarm-host d factory some/path/unit`',
-    'Destroy factory `factories/some/path/unit`'
+    'Destroy factory `app/factories/some/path/unit`'
   );
   yargs.options({
     path: {

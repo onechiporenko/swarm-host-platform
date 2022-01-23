@@ -21,7 +21,7 @@ describe('Generate Route', () => {
     generate('route', 'units');
     expect(
       getFilesDiff(
-        'routes/units.ts',
+        'app/routes/units.ts',
         '../tests/results/routes/default-units.txt'
       )
     ).to.be.empty;
@@ -31,7 +31,7 @@ describe('Generate Route', () => {
     generate('route', 'units/new', ['--url=api/v1/units', '--method=post']);
     expect(
       getFilesDiff(
-        'routes/units/new.ts',
+        'app/routes/units/new.ts',
         '../tests/results/routes/post-new-user.txt'
       )
     ).to.be.empty;
@@ -43,7 +43,7 @@ describe('Generate Route', () => {
     ]);
     expect(
       getFilesDiff(
-        'routes/units/unit/objectives/objective.ts',
+        'app/routes/units/unit/objectives/objective.ts',
         '../tests/results/routes/dynamic-params.txt'
       )
     ).to.be.empty;
