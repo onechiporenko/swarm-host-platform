@@ -1,4 +1,4 @@
-import { generate, getFilesDiff, getTmpDir } from '../../utils/utils';
+import { fileExists, generate, getFilesDiff, getTmpDir } from '../../utils/utils';
 import { expect } from 'chai';
 import shell = require('shelljs');
 import { cd } from 'shelljs';
@@ -19,6 +19,7 @@ describe('Generate Route', () => {
 
   it('should create default route', () => {
     generate('route', 'units');
+    expect(fileExists('app/routes/units.ts')).to.be.true;
     expect(
       getFilesDiff(
         'app/routes/units.ts',
@@ -29,6 +30,7 @@ describe('Generate Route', () => {
 
   it('should create a route with custom url and method', () => {
     generate('route', 'units/new', ['--url=api/v1/units', '--method=post']);
+    expect(fileExists('app/routes/units/new.ts')).to.be.true;
     expect(
       getFilesDiff(
         'app/routes/units/new.ts',
@@ -41,6 +43,7 @@ describe('Generate Route', () => {
     generate('route', 'units/unit/objectives/objective', [
       '--url=units/:unit_id/objectives/:objective_id',
     ]);
+    expect(fileExists('app/routes/units/unit/objectives/objective.ts')).to.be.true;
     expect(
       getFilesDiff(
         'app/routes/units/unit/objectives/objective.ts',

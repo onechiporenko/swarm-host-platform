@@ -1,4 +1,4 @@
-import { generate, getFilesDiff, getTmpDir } from '../../utils/utils';
+import { fileExists, generate, getFilesDiff, getTmpDir } from '../../utils/utils';
 import { expect } from 'chai';
 import shell = require('shelljs');
 import { cd } from 'shelljs';
@@ -19,6 +19,7 @@ describe('Generate Factory', () => {
 
   it('should create an empty factory', () => {
     generate('factory', 'unit');
+    expect(fileExists('app/factories/unit.ts')).to.be.true;
     expect(
       getFilesDiff(
         'app/factories/unit.ts',
@@ -40,6 +41,7 @@ describe('Generate Factory', () => {
       ],
       'y'
     );
+    expect(fileExists('app/factories/unit.ts')).to.be.true;
     expect(
       getFilesDiff(
         'app/factories/unit.ts',
@@ -51,6 +53,7 @@ describe('Generate Factory', () => {
   it('should not override existing factory', () => {
     generate('factory', 'unit');
     generate('factory', 'unit', ['name:string'], 'n');
+    expect(fileExists('app/factories/unit.ts')).to.be.true;
     expect(
       getFilesDiff(
         'app/factories/unit.ts',
@@ -66,6 +69,7 @@ describe('Generate Factory', () => {
       'squad:has-one:squad:units',
       'objectives:has-many:objective',
     ]);
+    expect(fileExists('app/factories/some/unit.ts')).to.be.true;
     expect(
       getFilesDiff(
         'app/factories/some/unit.ts',
