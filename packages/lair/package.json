@@ -1,6 +1,6 @@
 {
   "name": "@swarm-host/lair",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "JS/TS database",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
