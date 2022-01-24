@@ -254,7 +254,7 @@ server.port = 12345;
 server.verbose = true;
 server.delay = 200;
 
-class UserFactory extends Factory{
+class UserFactory extends Factory {
   
   static factoryName = 'user';
   

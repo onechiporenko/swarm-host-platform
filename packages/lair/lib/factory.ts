@@ -122,7 +122,7 @@ export function field<T>(fieldOptions: FieldOptions<T> = {}): any {
     descriptor: PropertyDescriptor
   ): any {
     assert(
-      `Decorator "field" must be used only for instance properties (now it's used for "${propertyKey}")`,
+      `Decorator "field" must be used only for properties (now it's used for "${propertyKey}")`,
       !!target.constructor
     );
     setupFactoryMeta(target.constructor);
