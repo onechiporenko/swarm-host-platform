@@ -31,5 +31,9 @@
     "inquirer": "^8.1.5",
     "shelljs": "^0.8.4",
     "yargs": "^17.2.1"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "fe94a138f8e9d7a3e1f26c90ae0fc1e0c523ad4c"
 }

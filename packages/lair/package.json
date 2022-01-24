@@ -27,5 +27,9 @@
   },
   "dependencies": {
     "reflect-metadata": "^0.1.13"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "fe94a138f8e9d7a3e1f26c90ae0fc1e0c523ad4c"
 }

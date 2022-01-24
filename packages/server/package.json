@@ -32,5 +32,9 @@
     "methods": "^1.1.2",
     "node-cron": "^2.0.3",
     "winston": "^3.3.3"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "fe94a138f8e9d7a3e1f26c90ae0fc1e0c523ad4c"
 }
