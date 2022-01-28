@@ -175,13 +175,11 @@ export default class Server {
     this.addLairMetaRoutes();
     this.addAppRoutes();
     this.printRoutesMap();
-    this.internalServer = this.expressApp.listen(this.port, () =>
-      clb ? clb() : null
-    );
+    this.internalServer = this.expressApp.listen(this.port, clb);
   }
 
-  public stopServer(clb?: () => void): void {
-    this.internalServer.close(() => (clb ? clb() : null));
+  public stopServer(clb?: () => void): any {
+    return this.internalServer.close(clb);
   }
 
   private addLairMetaRoutes(): void {

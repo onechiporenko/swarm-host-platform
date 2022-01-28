@@ -1,4 +1,9 @@
-import { fileExists, generate, getFilesDiff, getTmpDir } from '../../utils/utils';
+import {
+  fileExists,
+  generate,
+  getFilesDiff,
+  getTmpDir,
+} from '../../utils/utils';
 import { expect } from 'chai';
 import shell = require('shelljs');
 import { cd } from 'shelljs';

@@ -1,4 +1,9 @@
-import { fileExists, generate, getFilesDiff, getTmpDir } from '../../utils/utils';
+import {
+  fileExists,
+  generate,
+  getFilesDiff,
+  getTmpDir,
+} from '../../utils/utils';
 import { expect } from 'chai';
 import shell = require('shelljs');
 import { cd } from 'shelljs';
@@ -43,7 +48,8 @@ describe('Generate Route', () => {
     generate('route', 'units/unit/objectives/objective', [
       '--url=units/:unit_id/objectives/:objective_id',
     ]);
-    expect(fileExists('app/routes/units/unit/objectives/objective.ts')).to.be.true;
+    expect(fileExists('app/routes/units/unit/objectives/objective.ts')).to.be
+      .true;
     expect(
       getFilesDiff(
         'app/routes/units/unit/objectives/objective.ts',

@@ -1,10 +1,7 @@
 # Swarm-Host-CLI
 
-[![CI](https://github.com/onechiporenko/swarm-host-cli/actions/workflows/nodejs.yml/badge.svg)](https://github.com/onechiporenko/swarm-host-cli/actions/workflows/nodejs.yml)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/09abde586a6a4f24b859a5e4b3f57472)](https://www.codacy.com/app/cv_github/swarm-host-cli?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=onechiporenko/swarm-host-cli&amp;utm_campaign=Badge_Grade)
-[![npm version](https://badge.fury.io/js/swarm-host-cli.svg)](https://badge.fury.io/js/swarm-host-cli)
-
-CLI for [Swarm-Host](https://github.com/onechiporenko/swarm)
+[![npm version](https://badge.fury.io/js/@swarm-host%2Fcli.svg)](https://badge.fury.io/js/@swarm-host%2Fcli)
+[![CI](https://github.com/onechiporenko/swarm-host-platform/actions/workflows/nodejs.yml/badge.svg)](https://github.com/onechiporenko/swarm-host-platform/actions/workflows/nodejs.yml)
 
 ## Install:
 

@@ -6,7 +6,7 @@
     "lint": "eslint . --resolve-plugins-relative-to . --ext .ts",
     "lint:fix": "eslint . --resolve-plugins-relative-to . --ext .ts --fix",
     "build": "lerna run build",
-    "test": "lerna run test --stream --concurrency 2"
+    "test": "lerna run test --stream --concurrency 1"
   },
   "workspaces": [
     "packages/*"

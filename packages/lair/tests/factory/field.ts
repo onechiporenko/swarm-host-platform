@@ -10,7 +10,7 @@ describe('Factory', () => {
           @field({
             defaultValue() {
               return true;
-            }
+            },
           })
           invalidField;
         }

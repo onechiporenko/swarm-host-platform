@@ -1,10 +1,8 @@
 # Lair-db
 
-[![CI](https://github.com/onechiporenko/lair/actions/workflows/nodejs.yml/badge.svg)](https://github.com/onechiporenko/lair/actions/workflows/nodejs.yml)
-[![npm version](https://badge.fury.io/js/lair-db.svg)](https://badge.fury.io/js/lair-db)
-[![npm version](https://img.shields.io/npm/dm/lair-db.svg)](https://npmjs.com/package/lair-db)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a308984984ff4f9a826a5b34be2cc46a)](https://www.codacy.com/app/cv_github/lair)
-[![Coverage Status](https://coveralls.io/repos/github/onechiporenko/lair/badge.svg?branch=master)](https://coveralls.io/github/onechiporenko/lair?branch=master)
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fonechiporenko%2Fswarm-host-platform%2Fmaster%3Fmodule%3Dlair)](https://dashboard.stryker-mutator.io/reports/github.com/onechiporenko/swarm-host-platform/master?module=lair)
+[![npm version](https://badge.fury.io/js/@swarm-host%2Flair.svg)](https://badge.fury.io/js/@swarm-host%2Flair)
+[![CI](https://github.com/onechiporenko/swarm-host-platform/actions/workflows/nodejs.yml/badge.svg)](https://github.com/onechiporenko/swarm-host-platform/actions/workflows/nodejs.yml)
 
 ## Install
 
