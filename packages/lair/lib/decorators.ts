@@ -64,7 +64,9 @@ export function verbose(
       )
       .join(', ');
     const msg = `${key} (args - [${strArgs}]) execution time`;
-    console.time(msg);
+    if (this.verbose) {
+      console.time(msg);
+    }
     const result = originalMethod.apply(this, args);
     if (this.verbose) {
       console.timeEnd(msg);

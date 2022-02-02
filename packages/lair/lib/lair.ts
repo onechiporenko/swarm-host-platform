@@ -87,7 +87,7 @@ export interface RelatedFor {
 export class Lair {
   /**
    * Lair implements singleton-pattern
-   * Use this method to get it's instance
+   * Use this method to get its instance
    */
   public static getLair(): Lair {
     if (!Lair.instance) {
