@@ -44,4 +44,12 @@ describe('Destroy Route', () => {
     destroy('route', 'all/units', 'n');
     expect(fileExists('app/routes/all/units.ts')).to.be.true;
   });
+
+  it('command should fail because of invalid path', () => {
+    const cmdResult = destroy('route', 'a/../b');
+    expect(cmdResult.status).to.equal(1);
+    expect(cmdResult.stderr).to.contain(
+      'Path should not contain "..". You passed "a/../b"'
+    );
+  });
 });

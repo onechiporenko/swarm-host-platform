@@ -1,4 +1,5 @@
 import child = require('child_process');
+import { SpawnSyncReturns } from 'child_process';
 import { exec, ShellString, test } from 'shelljs';
 
 export const getTmpDir = (): string =>
@@ -8,7 +9,8 @@ export const execConfirm = (
   cmd: string,
   args: string[],
   input: string
-): Buffer => child.execFileSync(cmd, args, { input });
+): SpawnSyncReturns<string> =>
+  child.spawnSync(cmd, args, { input, encoding: 'utf8' });
 
 export const init = (args: string[] = []): ShellString =>
   exec(`node ../dist/index.js init ${args.join(' ')}`);
@@ -18,7 +20,7 @@ export const generate = (
   path: string,
   args: string[] = [],
   input?: string
-): ShellString | Buffer => {
+): ShellString | SpawnSyncReturns<string> => {
   if (input) {
     return execConfirm(
       'node',
@@ -26,12 +28,16 @@ export const generate = (
       input
     );
   }
-  exec(`node ../dist/index.js g ${type} ${path} ${args.join(' ')}`, {
+  return exec(`node ../dist/index.js g ${type} ${path} ${args.join(' ')}`, {
     silent: true,
   });
 };
 
-export const destroy = (type: string, path: string, input = 'y'): Buffer =>
+export const destroy = (
+  type: string,
+  path: string,
+  input = 'y'
+): SpawnSyncReturns<string> =>
   execConfirm('node', ['../dist/index.js', 'd', type, path], input);
 
 export const fileExists = (path: string): boolean => test('-e', path);

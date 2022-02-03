@@ -43,4 +43,12 @@ describe('Destroy Factory', () => {
     destroy('factory', 'some/path/unit', 'n');
     expect(fileExists('app/factories/some/path/unit.ts')).to.be.true;
   });
+
+  it('command should fail because of invalid path', () => {
+    const cmdResult = destroy('factory', 'a/../b');
+    expect(cmdResult.status).to.equal(1);
+    expect(cmdResult.stderr).to.contain(
+      'Path should not contain "..". You passed "a/../b"'
+    );
+  });
 });

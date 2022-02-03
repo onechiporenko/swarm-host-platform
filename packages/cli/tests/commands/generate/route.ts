@@ -6,7 +6,7 @@ import {
 } from '../../utils/utils';
 import { expect } from 'chai';
 import shell = require('shelljs');
-import { cd } from 'shelljs';
+import { cd, ShellString } from 'shelljs';
 
 let tmpDir;
 
@@ -56,5 +56,13 @@ describe('Generate Route', () => {
         '../tests/results/routes/dynamic-params.txt'
       )
     ).to.be.empty;
+  });
+
+  it('command should fail because of invalid path', () => {
+    const cmdResult = generate('route', 'a/../b') as ShellString;
+    expect(cmdResult.code).to.equal(1);
+    expect(cmdResult.stderr).to.contain(
+      'Path should not contain "..". You passed "a/../b"'
+    );
   });
 });

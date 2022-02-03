@@ -76,7 +76,10 @@ export class GenerateFactory extends Generate {
         attrs,
         name: this.instance.name,
         imports,
-        customImport: imports.length && customImport.length ? `\n${customImport}` : customImport,
+        customImport:
+          imports.length && customImport.length
+            ? `\n${customImport}`
+            : customImport,
         factory,
         className: classify(this.instance.name),
       })
