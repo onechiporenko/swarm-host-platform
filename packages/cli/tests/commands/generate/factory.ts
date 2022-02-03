@@ -82,4 +82,32 @@ describe('Generate Factory', () => {
       )
     ).to.be.empty;
   });
+
+  it('should create an empty factory extends another one', () => {
+    generate('factory', 'child', ['--extends=parent']);
+    expect(fileExists('app/factories/child.ts')).to.be.true;
+    expect(
+      getFilesDiff(
+        'app/factories/child.ts',
+        '../tests/results/factories/empty-child-extends-parent.txt'
+      )
+    ).to.be.empty;
+  });
+
+  it('should create a factory with attributes and relations extends another one', () => {
+    generate('factory', 'child', [
+      '--extends=parent',
+      'name:string',
+      'age:number',
+      'squad:has-one:squad:units',
+      'objectives:has-many:objective',
+    ]);
+    expect(fileExists('app/factories/child.ts')).to.be.true;
+    expect(
+      getFilesDiff(
+        'app/factories/child.ts',
+        '../tests/results/factories/child-extends-parent.txt'
+      )
+    ).to.be.empty;
+  });
 });

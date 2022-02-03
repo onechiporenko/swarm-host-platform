@@ -13,12 +13,16 @@ exports.builder = (yargs: Argv) => {
     '`swarm-host g factory some/path/unit name:string squad:has-one:squad`',
     'Create a Factory `app/factories/some/path/unit` with two fields `name` and `squad`'
   );
+  yargs.example(
+    '`swarm-host g factory child --extends=parent`',
+    'Create an empty Factory `app/factories/child` extends `app/factories/parent`'
+  );
   yargs.options({
     path: {
       describe: 'path to factory',
     },
-    rest: {
-      describe: 'list of attributes for factory',
+    extends: {
+      describe: 'User defined factory to use as a parent class',
     },
   });
 };
