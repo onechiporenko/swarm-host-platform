@@ -1,7 +1,7 @@
 {
   "testRunner": "mocha",
   "coverageAnalysis": "off",
-  "buildCommand": "yarn run build",
+  "buildCommand": "yarn run build:mut",
   "checkers": ["typescript"],
   "tsconfigFile": "tsconfig.json",
   "reporters": ["clear-text", "progress", "html", "dashboard"],
@@ -11,7 +11,7 @@
   },
   "mochaOptions": {
     "spec": [ "tests/**/*.ts" ],
-    "require": [ "ts-node/register" ]
+    "require": [ "ts-node/register", "tests/mut-hooks.mjs" ]
   },
   "thresholds": {
     "break": 0,
