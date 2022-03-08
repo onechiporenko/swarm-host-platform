@@ -10,7 +10,8 @@
     "test:cov": "nyc yarn run test",
     "lint": "eslint lib tests",
     "lint:fix": "eslint lib tests --fix",
-    "test:mut": "stryker run"
+    "test:mut": "stryker run",
+    "prepublishOnly": "yarn build"
   },
   "keywords": [
     "cli",
