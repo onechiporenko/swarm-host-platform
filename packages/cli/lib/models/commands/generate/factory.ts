@@ -11,7 +11,13 @@ export class GenerateFactory extends Generate {
   getCustomFactoryNameToExtend(path: string): string {
     const customFactoryName = path
       .split('/')
-      .map((p) => p.replace(/[^\d\w-]/g, '').split('-').map(i => classify(i)).join(''))
+      .map((p) =>
+        p
+          .replace(/[^\d\w-]/g, '')
+          .split('-')
+          .map((i) => classify(i))
+          .join('')
+      )
       .join('');
     return `${customFactoryName}Factory`;
   }

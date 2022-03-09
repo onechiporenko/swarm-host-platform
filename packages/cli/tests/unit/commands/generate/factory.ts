@@ -11,23 +11,25 @@ describe('#GenerateFactory', () => {
     [
       {
         input: 'some/nested/path',
-        output: 'SomeNestedPathFactory'
+        output: 'SomeNestedPathFactory',
       },
       {
         input: 'path',
-        output: 'PathFactory'
+        output: 'PathFactory',
       },
       {
         input: 'some-long-path',
-        output: 'SomeLongPathFactory'
+        output: 'SomeLongPathFactory',
       },
       {
         input: 'some/nested-very/long-path',
-        output: 'SomeNestedVeryLongPathFactory'
-      }
-    ].forEach(test => {
+        output: 'SomeNestedVeryLongPathFactory',
+      },
+    ].forEach((test) => {
       it(test.input, () => {
-        expect(generateFactory.getCustomFactoryNameToExtend(test.input)).to.equal(test.output);
+        expect(
+          generateFactory.getCustomFactoryNameToExtend(test.input)
+        ).to.equal(test.output);
       });
     });
   });
