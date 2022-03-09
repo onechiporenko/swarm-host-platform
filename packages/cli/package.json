@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc && rm -rf dist/tests* && rm -rf dist/lib/*.js.map && cp -r dist/lib/* dist/. && rm -rf dist/lib",
     "build:mut": "rm -rf dist && tsc --skipLibCheck && rm -rf dist/tests* && rm -rf dist/lib/*.js.map && cp -r dist/lib/* dist/. && rm -rf dist/lib",
-    "test": "mocha -r ts-node/register tests/**/*.ts -t 3000",
+    "test": "mocha -r ts-node/register \"tests/**/*.ts\" -t 3000",
     "test:cov": "nyc yarn run test",
     "lint": "eslint lib tests",
     "lint:fix": "eslint lib tests --fix",

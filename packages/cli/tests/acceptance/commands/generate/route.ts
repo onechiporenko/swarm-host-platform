@@ -28,7 +28,7 @@ describe('Generate Route', () => {
     expect(
       getFilesDiff(
         'app/routes/units.ts',
-        '../tests/results/routes/default-units.txt'
+        '../tests/acceptance/results/routes/default-units.txt'
       )
     ).to.be.empty;
   });
@@ -39,7 +39,7 @@ describe('Generate Route', () => {
     expect(
       getFilesDiff(
         'app/routes/units/new.ts',
-        '../tests/results/routes/post-new-user.txt'
+        '../tests/acceptance/results/routes/post-new-user.txt'
       )
     ).to.be.empty;
   });
@@ -53,7 +53,7 @@ describe('Generate Route', () => {
     expect(
       getFilesDiff(
         'app/routes/units/unit/objectives/objective.ts',
-        '../tests/results/routes/dynamic-params.txt'
+        '../tests/acceptance/results/routes/dynamic-params.txt'
       )
     ).to.be.empty;
   });

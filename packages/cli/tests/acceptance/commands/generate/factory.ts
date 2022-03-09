@@ -28,7 +28,7 @@ describe('Generate Factory', () => {
     expect(
       getFilesDiff(
         'app/factories/unit.ts',
-        '../tests/results/factories/empty-unit.txt'
+        '../tests/acceptance/results/factories/empty-unit.txt'
       )
     ).to.be.empty;
   });
@@ -50,7 +50,7 @@ describe('Generate Factory', () => {
     expect(
       getFilesDiff(
         'app/factories/unit.ts',
-        '../tests/results/factories/unit-with-attrs-and-relations.txt'
+        '../tests/acceptance/results/factories/unit-with-attrs-and-relations.txt'
       )
     ).to.be.empty;
   });
@@ -62,7 +62,7 @@ describe('Generate Factory', () => {
     expect(
       getFilesDiff(
         'app/factories/unit.ts',
-        '../tests/results/factories/empty-unit.txt'
+        '../tests/acceptance/results/factories/empty-unit.txt'
       )
     ).to.be.empty;
   });
@@ -78,7 +78,7 @@ describe('Generate Factory', () => {
     expect(
       getFilesDiff(
         'app/factories/some/unit.ts',
-        '../tests/results/factories/unit-with-attrs-and-relations.txt'
+        '../tests/acceptance/results/factories/unit-with-attrs-and-relations.txt'
       )
     ).to.be.empty;
   });
@@ -89,7 +89,7 @@ describe('Generate Factory', () => {
     expect(
       getFilesDiff(
         'app/factories/child.ts',
-        '../tests/results/factories/empty-child-extends-parent.txt'
+        '../tests/acceptance/results/factories/empty-child-extends-parent.txt'
       )
     ).to.be.empty;
   });
@@ -106,7 +106,7 @@ describe('Generate Factory', () => {
     expect(
       getFilesDiff(
         'app/factories/child.ts',
-        '../tests/results/factories/child-extends-parent.txt'
+        '../tests/acceptance/results/factories/child-extends-parent.txt'
       )
     ).to.be.empty;
   });
