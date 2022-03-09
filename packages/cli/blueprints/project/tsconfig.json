@@ -8,10 +8,6 @@
     "experimentalDecorators": true,
     "declaration": false,
     "outDir": "dist",
-    "baseUrl": "./",
-    "paths": {
-      "*": ["app/*"]
-    }
   },
   "exclude": [
     "node_modules"
