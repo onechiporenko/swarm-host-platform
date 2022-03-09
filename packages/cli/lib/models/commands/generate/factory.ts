@@ -8,6 +8,20 @@ import FactoryAttr from './../../../models/factory-attr';
 import { camelize, classify } from '../../../utils/string';
 
 export class GenerateFactory extends Generate {
+  getRelativePathForExtend(childPath, parentPath): string {
+    let child = childPath.split('/');
+    child.pop();
+    child = child.join('/');
+    let parent = parentPath.split('/');
+    const parentFactoryName = parent.pop();
+    parent = parent.join('/');
+    let relativePath = `${path.relative(child, parent)}/${parentFactoryName}`;
+    if (path.isAbsolute(relativePath)) {
+      relativePath = `.${relativePath}`;
+    }
+    return relativePath.indexOf('.') === 0 ? relativePath : `./${relativePath}`;
+  }
+
   getCustomFactoryNameToExtend(path: string): string {
     const customFactoryName = path
       .split('/')
@@ -24,9 +38,13 @@ export class GenerateFactory extends Generate {
 
   getCustomFactoryImportString(
     customFactoryName: string,
-    importSubPath: string
+    childPath: string,
+    parentPath: string
   ): string {
-    return `import ${customFactoryName} from 'app/factories/${importSubPath}';`;
+    return `import ${customFactoryName} from '${this.getRelativePathForExtend(
+      childPath,
+      parentPath
+    )}';`;
   }
 
   getSwarmHostImportString(imports: string[]): string {
@@ -62,6 +80,7 @@ export class GenerateFactory extends Generate {
       );
       customImport = this.getCustomFactoryImportString(
         factory,
+        this.instance.pathToNewInstance,
         this.instance.options.extends
       );
     }

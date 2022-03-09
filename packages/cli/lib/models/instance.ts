@@ -10,6 +10,7 @@ export interface InstanceOptions {
 
 export class Instance {
   public options: InstanceOptions;
+  public pathToNewInstance: string;
   public name: string;
   public dir: string;
   public fileName: string;
@@ -37,6 +38,7 @@ export class Instance {
 
   public parsePath(pathToNewInstance: string): void {
     const p = path.parse(pathToNewInstance);
+    this.pathToNewInstance = pathToNewInstance;
     this.name = p.name;
     this.dir = p.dir;
     this.dirPath = path.join(process.cwd(), 'app', this.type, p.dir);

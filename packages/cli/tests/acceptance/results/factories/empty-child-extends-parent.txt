@@ -1,4 +1,4 @@
-import ParentFactory from 'app/factories/parent';
+import ParentFactory from './parent';
 
 export default class ChildFactory extends ParentFactory {
     static factoryName = 'child';
