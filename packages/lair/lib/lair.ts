@@ -323,7 +323,7 @@ export class Lair {
     options: CRUDOptions = {}
   ): LairRecord {
     const opts = getDefaultCrudOptions(options);
-    const record = this.getOne(factoryName, id);
+    const record = this.getOne(factoryName, id, { depth: 1 });
     assert(
       `Record of "${factoryName}" with id "${id}" doesn't exist`,
       !!record
