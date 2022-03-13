@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { expect, Assertion } from 'chai';
 import {
   CreateRecordExtraData,
   Factory,
@@ -248,6 +248,119 @@ describe('Lair', () => {
         });
       });
 
+      describe('negative value is returned for @hasOne', () => {
+        class TestCreateRelatedHasOneReturnNegativeValueAFactory extends Factory {
+          static factoryName =
+            'test-create-related-has-one-return-negative-value-a';
+          @hasOne('test-create-related-return-has-one-negative-value-b', null, {
+            createRelated() {
+              return -1;
+            },
+          })
+          b;
+        }
+
+        class TestCreateRelatedHasOneReturnNegativeValueBFactory extends Factory {
+          static factoryName =
+            'test-create-related-has-one-return-negative-value-b';
+        }
+
+        beforeEach(() => {
+          lair.registerFactory(
+            TestCreateRelatedHasOneReturnNegativeValueAFactory
+          );
+          lair.registerFactory(
+            TestCreateRelatedHasOneReturnNegativeValueBFactory
+          );
+        });
+
+        it('should throw an error', () => {
+          expect(() =>
+            lair.createRecords(
+              'test-create-related-has-one-return-negative-value-a',
+              1
+            )
+          ).to.throw(
+            `"createRelated" for "test-create-related-has-one-return-negative-value-a.b" is negative value`
+          );
+        });
+      });
+
+      describe('negative value is returned for @hasMany', () => {
+        class TestCreateRelatedHasManyReturnNegativeValueAFactory extends Factory {
+          static factoryName =
+            'test-create-related-has-many-return-negative-value-a';
+          @hasMany(
+            'test-create-related-has-many-return-negative-value-b',
+            null,
+            {
+              createRelated() {
+                return -1;
+              },
+            }
+          )
+          b;
+        }
+
+        class TestCreateRelatedHasManyReturnNegativeValueBFactory extends Factory {
+          static factoryName =
+            'test-create-related-has-many-return-negative-value-b';
+        }
+
+        beforeEach(() => {
+          lair.registerFactory(
+            TestCreateRelatedHasManyReturnNegativeValueAFactory
+          );
+          lair.registerFactory(
+            TestCreateRelatedHasManyReturnNegativeValueBFactory
+          );
+        });
+
+        it('should throw an error', () => {
+          expect(() =>
+            lair.createRecords(
+              'test-create-related-has-many-return-negative-value-a',
+              1
+            )
+          ).to.throw(
+            `"createRelated" for "test-create-related-has-many-return-negative-value-a.b" is negative value`
+          );
+        });
+      });
+
+      describe.only('`createRelated` for @hasOne', () => {
+        class TestCreateRelatedAFactory extends Factory {
+          static factoryName = 'test-create-related-a';
+          @hasOne('test-create-related-b', null, {
+            createRelated() {
+              return 0;
+            },
+          })
+          b;
+        }
+        class TestCreateRelatedBFactory extends Factory {
+          static factoryName = 'test-create-related-b';
+        }
+
+        beforeEach(() => {
+          lair.registerFactory(new TestCreateRelatedAFactory());
+          lair.registerFactory(new TestCreateRelatedBFactory());
+          lair.createRecords('test-create-related-a', 1);
+        });
+
+        it('should allow return 0 and not create related records', () => {
+          Assertion.expectExpects(2);
+          expect(lair.getOne('test-create-related-a', '1')).to.be.eql({
+            id: '1',
+            b: null,
+          });
+          expect(lair.getAll('test-create-related-b')).to.have.property(
+            'length',
+            0
+          );
+        });
+      });
+
       describe('related factories chains', () => {
         describe('a-b-a', () => {
           class FactoryAbaA extends Factory {
@@ -391,40 +504,6 @@ describe('Lair', () => {
           }
           lair.registerFactory(new FactoryFunctionContextA());
           lair.registerFactory(new FactoryFunctionContextB());
-          lair.createRecords('a', 1);
-          expect(lair.getAll('b').map((r) => r.id)).to.be.eql(['1']);
-        });
-
-        it('parent-related records are available in the context', () => {
-          class ParentRelatedContextFactoryA extends Factory {
-            static factoryName = 'a';
-            @hasOne('b', 'a', {
-              createRelated(): number {
-                expect(this.id).to.be.equal('1');
-                expect(this.c).to.be.equal('some val');
-                return 1;
-              },
-            })
-            b;
-            @field() c = 'some val';
-          }
-          class ParentRelatedContextFactoryB extends Factory {
-            static factoryName = 'b';
-            @hasOne('a', 'b') a;
-            @hasOne('c', null, {
-              createRelated(): number {
-                expect(this.a.id).to.be.equal('1');
-                return 1;
-              },
-            })
-            c;
-          }
-          class ParentRelatedContextFactoryC extends Factory {
-            static factoryName = 'c';
-          }
-          lair.registerFactory(new ParentRelatedContextFactoryA());
-          lair.registerFactory(new ParentRelatedContextFactoryB());
-          lair.registerFactory(new ParentRelatedContextFactoryC());
           lair.createRecords('a', 1);
           expect(lair.getAll('b').map((r) => r.id)).to.be.eql(['1']);
         });

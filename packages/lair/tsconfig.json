@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["lib", "tests"],
+  "include": ["lib", "tests", "../../node_modules/chai-assertions-count/index.d.ts"],
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "."

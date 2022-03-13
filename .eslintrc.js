@@ -43,6 +43,7 @@ module.exports = {
     ],
     'mocha-cleanup/asserts-limit': 0,
     'mocha-cleanup/complexity-it': 0,
-    'mocha-cleanup/no-outside-declaration': 0
+    'mocha-cleanup/no-outside-declaration': 0,
+    'mocha-cleanup/top-level-assertions': 1,
   }
 }

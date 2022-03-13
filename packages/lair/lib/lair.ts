@@ -447,8 +447,22 @@ export class Lair {
           return;
         }
         const fName = (meta[attrName] as RelationshipMetaAttr).factoryName;
+        const calculatedRelatedCount = getOrCalcValue<number>(
+          createRelated,
+          record,
+          record.id
+        );
+        assert(
+          `"createRelated" for "${factoryName}.${attrName}" is negative value`,
+          calculatedRelatedCount >= 0
+        );
+        const calculatedRelatedCountIsValidForHasOne =
+          calculatedRelatedCount === 0 || calculatedRelatedCount === 1;
+
         const relatedCount = isHasMany
-          ? getOrCalcValue<number>(createRelated, record, record.id)
+          ? calculatedRelatedCount
+          : calculatedRelatedCountIsValidForHasOne
+          ? calculatedRelatedCount
           : 1;
         const relatedRecords = this.internalCreateRecords(
           fName,
@@ -458,7 +472,9 @@ export class Lair {
         );
         this.db[factoryName][record.id][attrName] = isHasMany
           ? relatedRecords
-          : relatedRecords[0];
+          : relatedRecords.length
+          ? relatedRecords[0]
+          : null;
       });
       this.relationships.recalculateRelationshipsForRecord(
         factoryName,

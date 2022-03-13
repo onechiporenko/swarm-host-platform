@@ -1385,7 +1385,14 @@
     "@types/connect" "*"
     "@types/node" "*"
 
-"@types/chai@4", "@types/chai@^4.2.22":
+"@types/chai-spies@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@types/chai-spies/-/chai-spies-1.0.3.tgz#a52dc61af3853ec9b80965040811d15dfd401542"
+  integrity sha512-RBZjhVuK7vrg4rWMt04UF5zHYwfHnpk5mIWu3nQvU3AKGDixXzSjZ6v0zke6pBcaJqMv3IBZ5ibLWPMRDL0sLw==
+  dependencies:
+    "@types/chai" "*"
+
+"@types/chai@*", "@types/chai@4", "@types/chai@^4.2.22":
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.3.0.tgz#23509ebc1fa32f1b4d50d6a66c4032d5b8eaabdc"
   integrity sha512-/ceqdqeRraGolFTcfoXNiqjyQhZzbINDngeoAq9GoHa8PPK1yNzTaxWjA6BFWp5Ua9JpXEMSS4s5i9tS0hOJtw==
@@ -2143,6 +2150,11 @@ caseless@~0.12.0:
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
 
+chai-assertions-count@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/chai-assertions-count/-/chai-assertions-count-0.0.1.tgz#9d8f5977e3745070b0d7a382e80816710ba5a031"
+  integrity sha512-fPKvC5eGDQN5TUzL5ZnpoU10tIKX0XtElGglCQcAwHbFzfXFWeMhT4AbludRYka83gv8tjZppELxEeWDB8KOEQ==
+
 chai-http@^4.3.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/chai-http/-/chai-http-4.3.0.tgz#3c37c675c1f4fe685185a307e345de7599337c1a"
@@ -2155,6 +2167,11 @@ chai-http@^4.3.0:
     methods "^1.1.2"
     qs "^6.5.1"
     superagent "^3.7.0"
+
+chai-spies@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/chai-spies/-/chai-spies-1.0.0.tgz#d16b39336fb316d03abf8c375feb23c0c8bb163d"
+  integrity sha512-elF2ZUczBsFoP07qCfMO/zeggs8pqCf3fZGyK5+2X4AndS8jycZYID91ztD9oQ7d/0tnS963dPkd0frQEThDsg==
 
 chai@^4.3.4:
   version "4.3.4"
@@ -2925,10 +2942,9 @@ eslint-config-prettier@^8.3.0:
   resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-8.3.0.tgz#f7471b20b6fe8a9a9254cc684454202886a2dd7a"
   integrity sha512-BgZuLUSeKzvlL/VUjx/Yb787VQ26RU3gGjA3iiFvdsp/2bMfVIWUVP7tjxtjS0e+HP409cPlPvNkQloz8C91ew==
 
-eslint-plugin-mocha-cleanup@^1.10.0:
+"eslint-plugin-mocha-cleanup@https://github.com/onechiporenko/eslint-plugin-mocha-cleanup.git#master":
   version "1.10.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-mocha-cleanup/-/eslint-plugin-mocha-cleanup-1.10.0.tgz#ac97fe7f88f31cdeab7b4f35aafe3272f80b8c99"
-  integrity sha512-ueCrv1wl3qAEqLJI9lfhdJdVKOa/dCo8Ozot/PX8pcBq72gsJszkuqmB0HfnxmFu2LsbZnmW65Yv/Sd3ipOMbQ==
+  resolved "https://github.com/onechiporenko/eslint-plugin-mocha-cleanup.git#278b86d7f9b14e388cbe52f9a186bd34c72e5ec5"
   dependencies:
     requireindex "~1.2.0"
 
