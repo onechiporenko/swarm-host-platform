@@ -69,8 +69,9 @@ export class Relationships {
     const sourceMeta = this.meta[factoryName];
     const attrMeta = sourceMeta[attrName] as RelationshipMetaAttr;
     if (
-      attrMeta.type !== MetaAttrType.HAS_ONE &&
-      attrMeta.type !== MetaAttrType.HAS_MANY
+      !attrMeta ||
+      (attrMeta.type !== MetaAttrType.HAS_ONE &&
+        attrMeta.type !== MetaAttrType.HAS_MANY)
     ) {
       return;
     }
@@ -393,6 +394,14 @@ export class Relationships {
     return !!f[id];
   }
 
+  /**
+   * Update relations for records related like one-to-one.
+   *
+   * * Allows dropping relation (with `distRecordId` null).
+   * * Allows updating relation (with `distRecordId` not null).
+   *
+   * Also drops relation for `a1` in case `a1 - b1`, when new `a2 - b1` is set.
+   */
   protected updateOneToOne(
     sourceFactoryName: string,
     sourceRecordId: string,
@@ -410,7 +419,12 @@ export class Relationships {
     );
     if (distRecordId) {
       this.addRecord(distFactoryName, distRecordId);
+      const oldDistId =
+        this.relationships[distFactoryName][distRecordId][distAttrName];
       this.setOne(distFactoryName, distRecordId, distAttrName, sourceRecordId);
+      if (typeof oldDistId === 'string') {
+        this.setOne(sourceFactoryName, oldDistId, sourceAttrName, null);
+      }
     } else {
       this.dropRelationship(distFactoryName, distAttrName, sourceRecordId);
     }
@@ -427,9 +441,22 @@ export class Relationships {
     distRecordIds = distRecordIds || [];
     this.addRecord(sourceFactoryName, sourceRecordId);
     if (distRecordIds) {
-      distRecordIds.forEach((distRecordId) =>
-        this.addRecord(distFactoryName, distRecordId)
-      );
+      distRecordIds.forEach((distRecordId) => {
+        this.addRecord(distFactoryName, distRecordId);
+        const sourceIdToUnset = this.getOne(
+          distFactoryName,
+          distRecordId,
+          distAttrName
+        );
+        if (sourceIdToUnset) {
+          this.removeFromMany(
+            sourceFactoryName,
+            sourceIdToUnset,
+            sourceAttrName,
+            distRecordId
+          );
+        }
+      });
     }
     const oldDistIds = this.getMany(
       sourceFactoryName,
@@ -484,24 +511,12 @@ export class Relationships {
     }
     if (distRecordId) {
       this.addRecord(distFactoryName, distRecordId);
-      const currentRelationship =
-        this.relationships[distFactoryName][distRecordId][distAttrName];
-      if (currentRelationship) {
-        const valueToSet =
-          isArray(currentRelationship) && currentRelationship.length
-            ? currentRelationship.indexOf(sourceRecordId) === -1
-              ? currentRelationship
-              : currentRelationship.filter((v) => v !== sourceRecordId)
-            : [sourceRecordId];
-        this.setMany(distFactoryName, distRecordId, distAttrName, valueToSet);
-      } else {
-        this.addToMany(
-          distFactoryName,
-          distRecordId,
-          distAttrName,
-          sourceRecordId
-        );
-      }
+      this.addToMany(
+        distFactoryName,
+        distRecordId,
+        distAttrName,
+        sourceRecordId
+      );
     }
   }
 

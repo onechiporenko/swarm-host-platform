@@ -361,7 +361,26 @@ class SquadFactory extends Factory {
 }
 ```
 
-Now every created `squad` will have 1 - 10 related units.
+### Use existing records as related
+
+It's possible to use already existing records as related:
+
+```typescript
+class SquadFactory extends Factory {
+  static factoryName = 'squad';
+  
+  @hasMany('unit', 'squad', {
+    useExistingAsRelated() { // can be a number or callback with number returned
+      return faker.random.number({min: 1, max: 10});
+    }
+  })
+  units;
+}
+```
+
+Restrictions:
+
+* Extra records `unit` won't be created if there are less existing records than needed.
 
 ### Check if Factory creates records in the scope of "createRelated" for another Factory
 
@@ -595,7 +614,7 @@ class ChildFactory extends Parent2Factory {
 }
 ```
 
-**IMPORTANT** All parent-factories must be registered in the Lair BEFORE any record of child-factory is create.  
+**IMPORTANT** All parent-factories must be registered in the Lair BEFORE any record of child-factory is created.  
 
 ### Ignore related factories
 

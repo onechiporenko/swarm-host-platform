@@ -44,6 +44,7 @@ export interface RelationshipMetaAttr extends MetaAttr {
   reflexive: boolean;
   reflexiveDepth: number;
   createRelated?: number | ((id: string) => number);
+  useExistingAsRelated?: number | ((id: string) => number);
 }
 
 export interface FieldMetaAttr<T> extends MetaAttr {
@@ -58,6 +59,7 @@ export interface RelationshipOptions {
   reflexive?: boolean;
   depth?: number;
   createRelated?: number | ((id: string) => number);
+  useExistingAsRelated?: number | ((id: string) => number);
 }
 
 export interface SequenceItemOptions {
@@ -199,6 +201,9 @@ export function hasOne(
     if (options?.createRelated) {
       propertyKeyMeta.createRelated = options?.createRelated;
     }
+    if (options?.useExistingAsRelated) {
+      propertyKeyMeta.useExistingAsRelated = options?.useExistingAsRelated;
+    }
     updateFactoryMeta(target.constructor, propertyKey, propertyKeyMeta);
   };
 }
@@ -233,6 +238,9 @@ export function hasMany(
     } as RelationshipMetaAttr;
     if (options?.createRelated) {
       propertyKeyMeta.createRelated = options?.createRelated;
+    }
+    if (options?.useExistingAsRelated) {
+      propertyKeyMeta.useExistingAsRelated = options?.useExistingAsRelated;
     }
     updateFactoryMeta(target.constructor, propertyKey, propertyKeyMeta);
   };

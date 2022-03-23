@@ -863,5 +863,281 @@ describe('Lair', () => {
         });
       });
     });
+
+    describe('#useExistingAsRelated', () => {
+      describe('no records for related factories', () => {
+        class FooFactoryToTestUseExistingAsRelatedNoRecordsFactory extends Factory {
+          static factoryName = 'foo';
+          @hasMany('bar', 'foo', {
+            useExistingAsRelated: 2,
+          })
+          bar;
+          @hasOne('baz', 'foo', {
+            useExistingAsRelated: 1,
+          })
+          baz;
+        }
+        class BarFactoryToTestUseExistingAsRelatedNoRecordsFactory extends Factory {
+          static factoryName = 'bar';
+        }
+        class BazFactoryToTestUseExistingAsRelatedNoRecordsFactory extends Factory {
+          static factoryName = 'baz';
+        }
+
+        beforeEach(() => {
+          lair.registerFactory(
+            FooFactoryToTestUseExistingAsRelatedNoRecordsFactory
+          );
+          lair.registerFactory(
+            BarFactoryToTestUseExistingAsRelatedNoRecordsFactory
+          );
+          lair.registerFactory(
+            BazFactoryToTestUseExistingAsRelatedNoRecordsFactory
+          );
+          lair.createRecords('foo', 1);
+        });
+
+        it('fields `bar` and `baz` are empty', () => {
+          const fooRecord = lair.getOne('foo', 1);
+          expect(fooRecord.bar).to.be.eql([]);
+          expect(fooRecord.baz).to.be.null;
+        });
+      });
+
+      describe('should update OneToOne for already existing records', () => {
+        class FooFactoryToTestUseExistingAsRelatedNoUpdateOneToOneFactory extends Factory {
+          static factoryName = 'foo';
+          @hasOne('bar', 'foo', {
+            useExistingAsRelated: 1,
+          })
+          bar;
+        }
+        class BarFactoryToTestUseExistingAsRelatedNoUpdateOneToOneFactory extends Factory {
+          static factoryName = 'bar';
+          @hasOne('foo', 'bar', {
+            createRelated: 0,
+          })
+          foo;
+        }
+
+        beforeEach(() => {
+          lair.registerFactory(
+            FooFactoryToTestUseExistingAsRelatedNoUpdateOneToOneFactory
+          );
+          lair.registerFactory(
+            BarFactoryToTestUseExistingAsRelatedNoUpdateOneToOneFactory
+          );
+          lair.createRecords('bar', 1);
+          lair.createRecords('foo', 1);
+        });
+
+        it('relations are updated', () => {
+          let firstFooRecord = lair.getOne('foo', 1);
+          let firstBarRecord = lair.getOne('bar', 1);
+          expect(firstFooRecord.bar).to.have.property(
+            'id',
+            '1',
+            'foo#1 is related with bar#1'
+          );
+          expect(firstBarRecord.foo).to.have.property(
+            'id',
+            '1',
+            'bar#1 is related with foo#1'
+          );
+          lair.createRecords('foo', 1);
+          firstFooRecord = lair.getOne('foo', 1);
+          const secondFooRecord = lair.getOne('foo', 2);
+          firstBarRecord = lair.getOne('bar', 1);
+          expect(firstFooRecord.bar, 'foo#1 is not related with any bar').to.be
+            .null;
+          expect(secondFooRecord.bar).to.have.property(
+            'id',
+            '1',
+            'foo#2 is related with bar#1'
+          );
+          expect(firstBarRecord.foo).to.have.property(
+            'id',
+            '2',
+            'bar#1 is related with foo#2'
+          );
+        });
+      });
+
+      describe('should update ManyToOne for already existing records', () => {
+        class FooFactoryToTestUseExistingAsRelatedNoUpdateHasManyFactory extends Factory {
+          static factoryName = 'foo';
+          @hasMany('bar', 'foo', {
+            useExistingAsRelated: 1,
+          })
+          bar;
+        }
+        class BarFactoryToTestUseExistingAsRelatedNoUpdateHasManyFactory extends Factory {
+          static factoryName = 'bar';
+          @hasOne('foo', 'bar', {
+            createRelated: 0,
+          })
+          foo;
+        }
+
+        beforeEach(() => {
+          lair.registerFactory(
+            FooFactoryToTestUseExistingAsRelatedNoUpdateHasManyFactory
+          );
+          lair.registerFactory(
+            BarFactoryToTestUseExistingAsRelatedNoUpdateHasManyFactory
+          );
+          lair.createRecords('bar', 1);
+          lair.createRecords('foo', 1);
+        });
+
+        it('relations are updated', () => {
+          let firstFooRecord = lair.getOne('foo', 1);
+          let firstBarRecord = lair.getOne('bar', 1);
+          expect(firstFooRecord.bar.map((b) => b.id)).to.be.eql(
+            ['1'],
+            'foo#1 is related with bar#1'
+          );
+          expect(firstBarRecord.foo).to.have.property(
+            'id',
+            '1',
+            'bar#1 is related with foo#1'
+          );
+          lair.createRecords('foo', 1);
+          firstFooRecord = lair.getOne('foo', 1);
+          const secondFooRecord = lair.getOne('foo', 2);
+          firstBarRecord = lair.getOne('bar', 1);
+          expect(firstFooRecord.bar).to.be.eql(
+            [],
+            'foo#1 is not related with bar#1'
+          );
+          expect(secondFooRecord.bar.map((b) => b.id)).to.be.eql(
+            ['1'],
+            'foo#2 is related with bar#1'
+          );
+          expect(firstBarRecord.foo).to.have.property(
+            'id',
+            '2',
+            'bar#1 is related with foo#2'
+          );
+        });
+      });
+
+      describe('should update OneToMany for already existing records', () => {
+        class FooFactoryToTestUseExistingAsRelatedNoUpdateOneToManyFactory extends Factory {
+          static factoryName = 'foo';
+          @hasOne('bar', 'foo', {
+            useExistingAsRelated: 1,
+          })
+          bar;
+        }
+        class BarFactoryToTestUseExistingAsRelatedNoUpdateOneToManyFactory extends Factory {
+          static factoryName = 'bar';
+          @hasMany('foo', 'bar', {
+            createRelated: 0,
+          })
+          foo;
+        }
+
+        beforeEach(() => {
+          lair.registerFactory(
+            FooFactoryToTestUseExistingAsRelatedNoUpdateOneToManyFactory
+          );
+          lair.registerFactory(
+            BarFactoryToTestUseExistingAsRelatedNoUpdateOneToManyFactory
+          );
+          lair.createRecords('bar', 1);
+          lair.createRecords('foo', 1);
+        });
+
+        it('relations are updated', () => {
+          let firstFooRecord = lair.getOne('foo', 1);
+          let firstBarRecord = lair.getOne('bar', 1);
+          expect(firstFooRecord.bar).to.have.property(
+            'id',
+            '1',
+            'foo#1 is related with bar#1'
+          );
+          expect(firstBarRecord.foo.map((f) => f.id)).to.be.eql(
+            ['1'],
+            'bar#1 is related with foo#1'
+          );
+          lair.createRecords('foo', 1);
+          firstFooRecord = lair.getOne('foo', 1);
+          const secondFooRecord = lair.getOne('foo', 2);
+          firstBarRecord = lair.getOne('bar', 1);
+          expect(firstFooRecord.bar).to.have.property(
+            'id',
+            '1',
+            'foo#1 is related with bar#1'
+          );
+          expect(secondFooRecord.bar).to.have.property(
+            'id',
+            '1',
+            'foo#2 is related with bar#1'
+          );
+          expect(firstBarRecord.foo.map((f) => f.id)).to.be.eql(
+            ['1', '2'],
+            'bar#1 is related with foo#1 and foo#2'
+          );
+        });
+      });
+
+      describe('should update ManyToMany for already existing records', () => {
+        class FooFactoryToTestUseExistingAsRelatedNoUpdateManyToManyFactory extends Factory {
+          static factoryName = 'foo';
+          @hasMany('bar', 'foo', {
+            useExistingAsRelated: 1,
+          })
+          bar;
+        }
+        class BarFactoryToTestUseExistingAsRelatedNoUpdateManyToManyFactory extends Factory {
+          static factoryName = 'bar';
+          @hasMany('foo', 'bar', {
+            createRelated: 0,
+          })
+          foo;
+        }
+
+        beforeEach(() => {
+          lair.registerFactory(
+            FooFactoryToTestUseExistingAsRelatedNoUpdateManyToManyFactory
+          );
+          lair.registerFactory(
+            BarFactoryToTestUseExistingAsRelatedNoUpdateManyToManyFactory
+          );
+          lair.createRecords('bar', 1);
+          lair.createRecords('foo', 1);
+        });
+
+        it('relations are updated', () => {
+          let firstFooRecord = lair.getOne('foo', 1);
+          let firstBarRecord = lair.getOne('bar', 1);
+          expect(firstFooRecord.bar.map((b) => b.id)).to.be.eql(
+            ['1'],
+            'foo#1 is related with bar#1'
+          );
+          expect(firstBarRecord.foo.map((f) => f.id)).to.be.eql(
+            ['1'],
+            'bar#1 is related with foo#1'
+          );
+          lair.createRecords('foo', 1);
+          firstFooRecord = lair.getOne('foo', 1);
+          const secondFooRecord = lair.getOne('foo', 2);
+          firstBarRecord = lair.getOne('bar', 1);
+          expect(firstFooRecord.bar.map((b) => b.id)).to.be.eql(
+            ['1'],
+            'foo#1 is related with bar#1'
+          );
+          expect(secondFooRecord.bar.map((b) => b.id)).to.be.eql(
+            ['1'],
+            'foo#2 is related with bar#1'
+          );
+          expect(firstBarRecord.foo.map((f) => f.id)).to.be.eql(
+            ['1', '2'],
+            'bar#1 is related with foo#1 and foo#2'
+          );
+        });
+      });
+    });
   });
 });

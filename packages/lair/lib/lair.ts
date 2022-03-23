@@ -443,19 +443,40 @@ export class Lair {
       keys(meta).forEach((attrName) => {
         const isHasMany = meta[attrName].type === MetaAttrType.HAS_MANY;
         const createRelated = meta[attrName].createRelated;
-        if (!createRelated) {
+        const useExistingAsRelated = meta[attrName].useExistingAsRelated;
+        if (!createRelated && !useExistingAsRelated) {
           return;
         }
         const fName = (meta[attrName] as RelationshipMetaAttr).factoryName;
-        const relatedCount = isHasMany
-          ? getOrCalcValue<number>(createRelated, record, record.id)
-          : 1;
-        const relatedRecords = this.internalCreateRecords(
-          fName,
-          relatedCount,
-          { factoryName, attrName },
-          [...relatedChain, factoryName]
-        );
+        let relatedCount;
+        let relatedRecords = [];
+        if (createRelated) {
+          relatedCount = isHasMany
+            ? getOrCalcValue<number>(createRelated, record, record.id)
+            : 1;
+          relatedRecords = this.internalCreateRecords(
+            fName,
+            relatedCount,
+            { factoryName, attrName },
+            [...relatedChain, factoryName]
+          );
+        }
+        if (useExistingAsRelated) {
+          relatedCount = isHasMany
+            ? getOrCalcValue<number>(useExistingAsRelated, record, record.id)
+            : 1;
+          const existingRecords = Object.values(this.db[fName]);
+          if (existingRecords.length < relatedCount) {
+            console.warn(
+              `Attr "${factoryName}.${attrName}" requires ${relatedCount} records of "${fName}", however only ${existingRecords.length} are available.`
+            );
+            relatedRecords = existingRecords;
+          } else {
+            relatedRecords = existingRecords
+              .sort(() => Math.random() - 0.5)
+              .slice(0, relatedCount);
+          }
+        }
         this.db[factoryName][record.id][attrName] = isHasMany
           ? relatedRecords
           : relatedRecords[0];
