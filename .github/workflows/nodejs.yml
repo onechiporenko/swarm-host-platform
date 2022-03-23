@@ -15,7 +15,7 @@ jobs:
       - name: Lint
         run: yarn run lint:fix
       - name: Test Coverage
-        run: npx lerna run --concurrency 1 --stream test:cov
+        run: npx lerna run --concurrency 1 --stream test
 
   test-macos:
     name: Tests MacOS
@@ -26,10 +26,10 @@ jobs:
         run: |
           yarn install
           yarn run build
-          - name: Lint
-            run: yarn run lint
-          - name: Test Coverage
-            run: npx lerna run --concurrency 1 --stream test
+      - name: Lint
+        run: yarn run lint
+      - name: Test Coverage
+        run: npx lerna run --concurrency 1 --stream test
 
   test-ubuntu:
     name: Tests Ubuntu
@@ -40,7 +40,7 @@ jobs:
         run: |
           yarn install
           yarn run build
-          - name: Lint
-            run: yarn run lint
-          - name: Test Coverage
-            run: npx lerna run --concurrency 1 --stream test:cov
+      - name: Lint
+        run: yarn run lint
+      - name: Test Coverage
+        run: npx lerna run --concurrency 1 --stream test:cov
