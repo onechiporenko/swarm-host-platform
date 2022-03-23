@@ -26,6 +26,10 @@ describe('#GenerateFactory', () => {
         input: 'some/nested-very/long-path',
         output: 'SomeNestedVeryLongPathFactory',
       },
+      {
+        input: 'some-very-long-name',
+        output: 'SomeVeryLongNameFactory',
+      },
     ].forEach((test) => {
       it(test.input, () => {
         expect(

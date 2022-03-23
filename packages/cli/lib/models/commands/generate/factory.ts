@@ -15,7 +15,9 @@ export class GenerateFactory extends Generate {
     let parent = parentPath.split('/');
     const parentFactoryName = parent.pop();
     parent = parent.join('/');
-    let relativePath = `${path.relative(child, parent)}/${parentFactoryName}`;
+    let relativePath = `${path
+      .relative(child, parent)
+      .replace(/\\/g, '/')}/${parentFactoryName}`;
     if (path.isAbsolute(relativePath)) {
       relativePath = `.${relativePath}`;
     }
