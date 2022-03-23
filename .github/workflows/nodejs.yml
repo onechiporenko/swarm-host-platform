@@ -3,14 +3,9 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  test:
-    name: Tests
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
-
+  test-win:
+    name: Tests Win
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2.4.0
       - name: Install & Build
@@ -18,6 +13,34 @@ jobs:
           yarn install
           yarn run build
       - name: Lint
-        run: yarn run lint
+        run: yarn run lint:fix
       - name: Test Coverage
         run: npx lerna run --concurrency 1 --stream test:cov
+
+  test-macos:
+    name: Tests MacOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - name: Install & Build
+      run: |
+        yarn install
+        yarn run build
+        - name: Lint
+          run: yarn run lint
+        - name: Test Coverage
+          run: npx lerna run --concurrency 1 --stream test
+
+  test-ubuntu:
+    name: Tests Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - name: Install & Build
+      run: |
+        yarn install
+        yarn run build
+        - name: Lint
+          run: yarn run lint
+        - name: Test Coverage
+          run: npx lerna run --concurrency 1 --stream test:cov
