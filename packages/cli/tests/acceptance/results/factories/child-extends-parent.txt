@@ -3,18 +3,22 @@ import ParentFactory from './parent';
 
 export default class ChildFactory extends ParentFactory {
     static factoryName = 'child';
+
     @field({
         defaultValue: 0,
         preferredType: 'number'
     })
     age = 0;
+
     @field({
         defaultValue: '',
         preferredType: 'string'
     })
     name = '';
+
     @hasMany('objective', null)
     objectives;
+
     @hasOne('squad', 'units')
     squad;
 }

@@ -10,6 +10,7 @@
     "start": "npm run build && node dist/index.js",
     "build": "rm -rf dist && tsc",
     "lint": "eslint -c .eslintrc.json .",
+    "lint:fix": "eslint -c .eslintrc.json . --fix",
     "test": "mocha -r ts-node/register -r mocha-global.ts --recursive \"tests/**/*.ts\""
   },
   "dependencies": {

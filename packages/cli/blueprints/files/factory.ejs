@@ -3,6 +3,7 @@
 export default class <%= className %>Factory extends <%= factory %> {
     static factoryName = '<%= name %>';
 <%_ attrs.forEach(function(attr){ _%>
+
 <%_ if (attr.attrType === 'field') { _%>
     @field({
         defaultValue: <%- attr.defaultValue %>,
