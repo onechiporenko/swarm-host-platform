@@ -25,7 +25,8 @@
     "start": "ember serve",
     "test": "ember test",
     "test:e": "npm-run-all lint test:*",
-    "test:ember": "ember test"
+    "test:ember": "ember test",
+    "test:mut": "exit 0"
   },
   "devDependencies": {
     "@ember/optional-features": "^2.0.0",
