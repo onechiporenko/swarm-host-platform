@@ -1,0 +1,46 @@
+<BsNavbar as |navbar|>
+  <navbar.content>
+    <navbar.nav as |nav|>
+      <nav.item class="navbar-brand">
+        {{this.factory}}
+      </nav.item>
+    </navbar.nav>
+    <form class="navbar-form">
+      <BsButton @type="primary" @icon="glyphicon glyphicon-plus-sign" @onClick={{this.onAddRow}}>Add</BsButton>
+    </form>
+  </navbar.content>
+</BsNavbar>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-2">
+      <BsNav @type="pills" @stacked={{true}} class="factory-nav" as |nav|>
+        {{#each this.tableColumns.factoryNames as |factoryName|}}
+          <nav.item>
+            <nav.linkTo @route="index" @query={{hash factory=factoryName}}>{{factoryName}}</nav.linkTo>
+          </nav.item>
+        {{/each}}
+      </BsNav>
+    </div>
+    <div class="col-md-10">
+      {{#if this.isLoading}}
+        <p>...Loading...</p>
+      {{else}}
+        <ModelsTable
+          @data={{this.model}}
+          @columns={{this.columns}}
+          @themeInstance={{this.themeInstance}}
+          @columnComponents={{hash
+            table-cell=(component "table-cell")
+            attr-cell-edit=(component "attr-cell-edit")
+            belongs-to-cell-edit=(component "belongs-to-cell-edit")
+            has-many-cell-edit=(component "has-many-cell-edit")
+            edit-row=(component "models-table/themes/default/cell-edit-toggle" onSaveRow=this.onSaveRow onCancelRow=this.onCancelRow)
+            delete-row=(component "delete-row" deleteRowAction=this.onDeleteRow)
+          }}
+        />
+      {{/if}}
+      {{outlet}}
+    </div>
+  </div>
+</div>

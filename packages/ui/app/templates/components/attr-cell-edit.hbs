@@ -1,0 +1,30 @@
+{{#if this.useCheckbox}}
+  <Input
+    @type="checkbox"
+    @checked={{get @record @column.propertyName}}
+  />
+{{else}}
+  {{#if this.useDropdown}}
+    <PowerSelect @selected={{get @record @column.propertyName}} @options={{this.attrMeta.allowedValues}} @onChange={{this.updateCellValue}} as |option|>
+      {{option}}
+    </PowerSelect>
+    {{yield}}
+  {{else}}
+    {{#if this.useTextarea}}
+      <Textarea
+        rows="8"
+        cols="4"
+        class={{@themeInstance.input}}
+        @value={{get @record @column.propertyName}}
+        {{on "input" this.updateCellValue}}
+      />
+    {{else}}
+      <Input
+        @type="text"
+        @value={{get @record @column.propertyName}}
+        class={{@themeInstance.input}}
+        {{on "input" this.updateCellValue}}
+      />
+    {{/if}}
+  {{/if}}
+{{/if}}

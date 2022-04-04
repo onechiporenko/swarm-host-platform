@@ -1,0 +1,12 @@
+@import "ember-bootstrap/bootstrap";
+@import "ember-power-select";
+
+pre {
+  white-space: pre-wrap;
+}
+
+thead {
+  td, th {
+    min-width: 80px;
+  }
+}

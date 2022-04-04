@@ -3,7 +3,8 @@
   "references": [
     { "path": "packages/cli" },
     { "path": "packages/server" },
-    { "path": "packages/lair" }
+    { "path": "packages/lair" },
+    { "path": "packages/ui" },
   ],
   "compilerOptions": {
     "baseUrl": "./packages",
@@ -24,6 +25,7 @@
       "@swarm-host/cli": ["cli/dist"],
       "@swarm-host/server": ["server/dist"],
       "@swarm-host/lair": ["lair/dist"],
+      "@swarm-host/ui": ["ui/dist"],
       "@swarm-host/*": ["*/dist"]
     }
   }

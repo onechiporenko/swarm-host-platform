@@ -1,0 +1,9 @@
+<PowerSelectMultiple
+  @selected={{get @record @column.propertyName}}
+  @options={{this.options}}
+  @searchField="id"
+  @onChange={{this.updateCellValue}}
+  as |option|>
+  {{option.id}}
+</PowerSelectMultiple>
+{{yield}}
