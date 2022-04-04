@@ -17,7 +17,7 @@
   "scripts": {
     "build": "ember build --environment=production",
     "lint": "yarn run lint:hbs && yarn run lint:js",
-    "lint:fix": "npm-run-all --aggregate-output --continue-on-error --parallel lint:*:fix",
+    "lint:fix": "yarn run lint:hbs:fix && yarn run lint:js:fix",
     "lint:hbs": "ember-template-lint .",
     "lint:hbs:fix": "ember-template-lint . --fix",
     "lint:js": "eslint . --cache",
