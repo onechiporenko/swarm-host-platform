@@ -14,7 +14,7 @@
     "test": "mocha -r ts-node/register -r mocha-global.ts --recursive \"tests/**/*.ts\""
   },
   "dependencies": {
-    "@swarm-host/server": "^4.3.0"
+    "@swarm-host/server": "^4.5.0"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",
