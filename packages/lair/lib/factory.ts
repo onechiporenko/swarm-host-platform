@@ -27,6 +27,7 @@ export interface Meta {
 
 export interface MetaAttr {
   type: MetaAttrType;
+  extras?: Record<string, any>;
   [prop: string]: any;
 }
 
