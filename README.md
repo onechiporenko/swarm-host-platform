@@ -43,3 +43,4 @@ Check your server `http://localhost:54321`.
 * [CLI](https://github.com/onechiporenko/swarm-host-platform/tree/master/packages/cli)
 * [Lair](https://github.com/onechiporenko/swarm-host-platform/tree/master/packages/lair)
 * [Server](https://github.com/onechiporenko/swarm-host-platform/tree/master/packages/server)
+* [UI](https://github.com/onechiporenko/swarm-host-platform/tree/master/packages/ui)
