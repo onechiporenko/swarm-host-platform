@@ -1,57 +1,33 @@
-# ui
+# UI
 
-This README outlines the details of collaborating on this Ember application.
-A short introduction of this app could easily go here.
+Default UI for `@swarm-host/server` that allows to do CRUD-operations.
 
-## Prerequisites
+## Install
 
-You will need the following things properly installed on your computer.
+```shell
+git clone git@github.com:onechiporenko/swarm-host-platform.git
+```
 
-* [Git](https://git-scm.com/)
-* [Node.js](https://nodejs.org/)
-* [Yarn](https://yarnpkg.com/)
-* [Ember CLI](https://cli.emberjs.com/release/)
-* [Google Chrome](https://google.com/chrome/)
+## Usage
 
-## Installation
+Start your server:
 
-* `git clone <repository-url>` this repository
-* `cd ui`
-* `yarn install`
+```shell
+cd you-server-dir
+yarn run start
+```
 
-## Running / Development
+> It's a default command if your server was created via `@swarm-host/cli`.
 
-* `ember serve`
-* Visit your app at [http://localhost:4200](http://localhost:4200).
-* Visit your tests at [http://localhost:4200/tests](http://localhost:4200/tests).
+Start this UI:
 
-### Code Generators
+```shell
+cd swarm-host-platform/packages/ui
+yarn run start
+```
 
-Make use of the many generators for code, try `ember help generate` for more details
+Open browser and go to `http://localhost:4200`.
 
-### Running Tests
+## Settings
 
-* `ember test`
-* `ember test --server`
-
-### Linting
-
-* `yarn lint`
-* `yarn lint:fix`
-
-### Building
-
-* `ember build` (development)
-* `ember build --environment production` (production)
-
-### Deploying
-
-Specify what it takes to deploy your app.
-
-## Further Reading / Useful Links
-
-* [ember.js](https://emberjs.com/)
-* [ember-cli](https://cli.emberjs.com/release/)
-* Development Browser Extensions
-  * [ember inspector for chrome](https://chrome.google.com/webstore/detail/ember-inspector/bmdblncegkenkacieihfhpjfppoconhi)
-  * [ember inspector for firefox](https://addons.mozilla.org/en-US/firefox/addon/ember-inspector/)
+By default, this UI uses host `http://localhost:54321` for API requests. Feel free to change it in the `app/adapters/application.ts` if your server uses another host or port.
