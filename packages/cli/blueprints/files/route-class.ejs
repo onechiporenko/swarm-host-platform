@@ -1,0 +1,10 @@
+import { Route } from '@swarm-host/server';
+
+export default class <%= className %>Route extends Route {
+  method = '<%= method %>';
+  url = '<%= url %>';
+
+  handler(<%= req %>, res, next, lair) {
+    res.json({});
+  }
+}

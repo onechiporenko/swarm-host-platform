@@ -3,6 +3,7 @@ import { Command } from './command';
 
 export interface InstanceOptions {
   url?: string;
+  syntax?: string;
   method?: string;
   extends?: string;
   rest?: string[];

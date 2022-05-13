@@ -23,6 +23,11 @@ exports.builder = (yargs: Argv) => {
       describe: '`path` is used if `url` is not provided',
       type: 'string',
     },
+    syntax: {
+      describe:
+        'Determines how new route will be created - subclass of Route or Route\'s instance ("class" or "default")',
+      default: 'default',
+    },
   });
 };
 exports.handler = (argv) => {

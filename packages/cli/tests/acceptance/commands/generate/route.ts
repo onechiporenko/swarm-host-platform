@@ -44,6 +44,21 @@ describe('Generate Route', () => {
     ).to.be.empty;
   });
 
+  it('should create a route with class syntax', () => {
+    generate('route', 'new/test', [
+      '--url=a/:b/c',
+      '--method=post',
+      '--syntax=class',
+    ]);
+    expect(fileExists('app/routes/new/test.ts')).to.be.true;
+    expect(
+      getFilesDiff(
+        'app/routes/new/test.ts',
+        '../tests/acceptance/results/routes/route-class.txt'
+      )
+    ).to.be.empty;
+  });
+
   it('should create a route with dynamic parameters', () => {
     generate('route', 'units/unit/objectives/objective', [
       '--url=units/:unit_id/objectives/:objective_id',
