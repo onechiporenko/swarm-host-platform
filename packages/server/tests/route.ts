@@ -37,7 +37,7 @@ describe('#Route', () => {
     });
     it('default handler should call `res.json` with `{}`', (done) => {
       const route = Route.createRoute('get', '/');
-      route.handler(
+      route.oldHandler(
         {} as Request,
         {
           json(data): void {
@@ -73,7 +73,7 @@ describe('#Route', () => {
           ]);
           done();
         });
-        route.handler(
+        route.oldHandler(
           { params: {} } as Request,
           {} as Response,
           {} as NextFunction,
@@ -91,7 +91,7 @@ describe('#Route', () => {
           });
           done();
         });
-        route.handler(
+        route.oldHandler(
           { params: { id: '1' } } as unknown as Request,
           {} as Response,
           {} as NextFunction,
@@ -102,7 +102,7 @@ describe('#Route', () => {
       it('default `next` should return `json` with data provided by handler', () => {
         const route = Route.get('/some', 'model', {});
         expect(
-          route.handler(
+          route.oldHandler(
             { params: { id: '1' } } as unknown as Request,
             {
               json(d: any): any {
@@ -132,7 +132,7 @@ describe('#Route', () => {
             done();
           }
         );
-        route.handler(
+        route.oldHandler(
           { params: { id: '1', id2: '2' } } as unknown as Request,
           {} as Response,
           {} as NextFunction,
@@ -158,7 +158,7 @@ describe('#Route', () => {
         });
         done();
       });
-      route.handler(
+      route.oldHandler(
         { body: { name: 'artanis' } } as Request,
         {} as Response,
         {} as NextFunction,
@@ -177,7 +177,7 @@ describe('#Route', () => {
     it('default handler should throw an error if `id` is not provided', () => {
       const route = Route.put('/some-path/:id', 'model', {}, () => ({}));
       expect(() =>
-        route.handler(
+        route.oldHandler(
           { params: {} } as Request,
           {} as Response,
           {} as NextFunction,
@@ -189,7 +189,7 @@ describe('#Route', () => {
     it('default handler should throw an error if more than one `id` is provided', () => {
       const route = Route.put('/some-path/:id', 'model', {}, () => ({}));
       expect(() =>
-        route.handler(
+        route.oldHandler(
           { params: { id: '1', id2: '2' } } as unknown as Request,
           {} as Response,
           {} as NextFunction,
@@ -208,7 +208,7 @@ describe('#Route', () => {
         });
         done();
       });
-      route.handler(
+      route.oldHandler(
         { params: { id: '1' }, body: { name: 'alarak' } } as unknown as Request,
         {} as Response,
         {} as NextFunction,
@@ -227,7 +227,7 @@ describe('#Route', () => {
     it('default handler should throw an error if `id` is not provided', () => {
       const route = Route.patch('/some-path/:id', 'model', {}, () => ({}));
       expect(() =>
-        route.handler(
+        route.oldHandler(
           { params: {} } as Request,
           {} as Response,
           {} as NextFunction,
@@ -239,7 +239,7 @@ describe('#Route', () => {
     it('default handler should throw an error if more than one `id` is provided', () => {
       const route = Route.patch('/some-path/:id', 'model', {}, () => ({}));
       expect(() =>
-        route.handler(
+        route.oldHandler(
           { params: { id: '1', id2: '2' } } as unknown as Request,
           {} as Response,
           {} as NextFunction,
@@ -258,7 +258,7 @@ describe('#Route', () => {
         });
         done();
       });
-      route.handler(
+      route.oldHandler(
         { params: { id: '1' }, body: { name: 'alarak' } } as unknown as Request,
         {} as Response,
         {} as NextFunction,
@@ -277,7 +277,7 @@ describe('#Route', () => {
     it('default handler should throw an error if `id` is not provided', () => {
       const route = Route.delete('/some-path/:id', 'model', () => ({}));
       expect(() =>
-        route.handler(
+        route.oldHandler(
           { params: {} } as Request,
           {} as Response,
           {} as NextFunction,
@@ -289,7 +289,7 @@ describe('#Route', () => {
     it('default handler should throw an error if more than one `id` is provided', () => {
       const route = Route.delete('/some-path/:id', 'model', () => ({}));
       expect(() =>
-        route.handler(
+        route.oldHandler(
           { params: { id: '1', id2: '2' } } as unknown as Request,
           {} as Response,
           {} as NextFunction,
@@ -305,7 +305,7 @@ describe('#Route', () => {
         expect(lair.getAll('model')).to.be.empty;
         done();
       });
-      route.handler(
+      route.oldHandler(
         { params: { id: '1' } } as unknown as Request,
         {} as Response,
         {} as NextFunction,

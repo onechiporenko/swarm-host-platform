@@ -11,7 +11,7 @@ function defaultNext(
   return res.json(data);
 }
 
-function defaultHandler(
+export function defaultHandler(
   req: Request,
   res: Response,
   next: NextFunction,
@@ -40,7 +40,7 @@ export default class Route {
     handler: Handler = defaultHandler
   ): Route {
     const route = new Route();
-    route.handler = handler;
+    route.oldHandler = handler;
     route.method = method;
     assert(
       `"${method}" is unknown method. It must be one of the known methods`,
@@ -150,11 +150,15 @@ export default class Route {
     return Route.createRoute('delete', path, handler);
   }
 
-  public handler: Handler;
+  public oldHandler: Handler;
   public method: string;
   /**
    * Used to override `server.namespace` for current Route
    */
   public namespace: string = null;
   public path: string;
+
+  public defaultHandler(req, res, next, lair) {
+    return defaultHandler(req, res, next, lair);
+  }
 }

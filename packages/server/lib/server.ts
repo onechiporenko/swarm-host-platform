@@ -14,7 +14,7 @@ import { Factory, Lair } from '@swarm-host/lair';
 import nPath = require('path');
 import winston = require('winston');
 import { printRoutesMap } from './express';
-import Route from './route';
+import Route, { defaultHandler } from './route';
 
 function isRoute(v: any): v is Route {
   let proto = v['__proto__'];
@@ -117,9 +117,13 @@ export default class Server {
     });
   }
 
-  public addRoute(route: Route): void {
+  public addRoute(routeInstanceOrClass: Route | typeof Route): void {
     let source;
     let path;
+    const route =
+      routeInstanceOrClass instanceof Route
+        ? routeInstanceOrClass
+        : new routeInstanceOrClass();
     if (route.namespace === null) {
       source = this.expressRouter;
       path = route.path;
@@ -128,7 +132,9 @@ export default class Server {
       path = nPath.join(route.namespace, route.path).replace(/\\/g, '/'); // quick fix for windows
     }
     source[route.method](path, (req, res, next) =>
-      route.handler.call(this.expressRouter, req, res, next, this.lair)
+      route.oldHandler
+        ? route.oldHandler.call(route, req, res, next, this.lair)
+        : route.defaultHandler(req, res, next, this.lair)
     );
   }
 

@@ -137,6 +137,55 @@ describe('#Server integration', () => {
           })
       );
     });
+
+    it('should add route-class', (done) => {
+      class RouteClass extends Route {
+        method = 'get';
+        path = '/some-path';
+        handler = (req, res) => res.json({});
+      }
+      server.addRoute(RouteClass);
+      server.startServer(() =>
+        chai
+          .request(server.server)
+          .get('/api/v2/some-path')
+          .end((err, res) => {
+            expect(res).to.have.property('status', 200);
+            done();
+          })
+      );
+    });
+
+    it('should add route-class with decorators', (done) => {
+      function d() {
+        return function (
+          target: any,
+          propertyKey: string,
+          descriptor: PropertyDescriptor
+        ) {
+          done();
+        };
+      }
+
+      class RouteClass extends Route {
+        method = 'get';
+        path = '/some-path';
+
+        @d()
+        handler(req, res) {
+          res.json({});
+        }
+      }
+      server.addRoute(RouteClass);
+      server.startServer(() =>
+        chai
+          .request(server.server)
+          .get('/api/v2/some-path')
+          .end((err, res) => {
+            expect(res).to.have.property('status', 200);
+          })
+      );
+    });
   });
 
   describe('#addRoutes', () => {
