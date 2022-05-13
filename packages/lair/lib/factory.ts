@@ -345,7 +345,7 @@ export class Factory {
     });
   }
 
-  public afterCreateRelationshipsDepth = Infinity;
+  public afterCreateRelationshipsDepth = 1;
   public afterCreateIgnoreRelated: string[] = [];
   public allowCustomIds = false;
 

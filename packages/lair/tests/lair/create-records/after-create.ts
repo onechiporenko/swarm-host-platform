@@ -10,6 +10,7 @@ class FactoryToTestAfterCreate1Case extends Factory {
   @field() a = '1';
   @field() b = '2';
   @field() c = '3';
+  afterCreateRelationshipsDepth = Infinity;
   afterCreate(record: LairRecord): LairRecord {
     record.a = 'a';
     record.b = 'b';
@@ -25,6 +26,7 @@ class FactoryToTestAfterCreate2aCase extends Factory {
     createRelated: 1,
   })
   propB;
+  afterCreateRelationshipsDepth = Infinity;
   afterCreate(record: LairRecord): LairRecord {
     expect(record).to.be.eql({
       id: '1',
@@ -47,6 +49,7 @@ class FactoryToTestAfterCreate2bCase extends Factory {
     createRelated: 1,
   })
   propC;
+  afterCreateRelationshipsDepth = Infinity;
   afterCreate(record: LairRecord): LairRecord {
     expect(record).to.be.eql({
       id: '1',
@@ -65,6 +68,7 @@ class FactoryToTestAfterCreate2cCase extends Factory {
   static factoryName = 'c';
   @field() c = 'c';
   @hasOne('b', 'propC') propB;
+  afterCreateRelationshipsDepth = Infinity;
   afterCreate(record: LairRecord): LairRecord {
     expect(record).to.be.eql({
       id: '1',
@@ -92,6 +96,7 @@ class FactoryToTestAfterCreate3aCase extends Factory {
   })
   propB;
   afterCreateIgnoreRelated = ['b'];
+  afterCreateRelationshipsDepth = Infinity;
   afterCreate(record: LairRecord): LairRecord {
     expect(record).to.be.eql({
       id: '1',
@@ -109,6 +114,7 @@ class FactoryToTestAfterCreate3bCase extends Factory {
   })
   propC;
   afterCreateIgnoreRelated = ['c'];
+  afterCreateRelationshipsDepth = Infinity;
   afterCreate(record: LairRecord): LairRecord {
     expect(record).to.be.eql({
       id: '1',
@@ -127,6 +133,7 @@ class FactoryToTestAfterCreate3cCase extends Factory {
   @field() c = 'c';
   @hasOne('b', 'propC') propB;
   afterCreateIgnoreRelated = ['b'];
+  afterCreateRelationshipsDepth = Infinity;
   afterCreate(record: LairRecord): LairRecord {
     expect(record).to.be.eql({
       id: '1',
@@ -198,6 +205,7 @@ describe('Lair', () => {
             createRelated: 1,
           })
           propC;
+          afterCreateRelationshipsDepth = Infinity;
           afterCreate(record: LairRecord): LairRecord {
             record.propC.id = '100500';
             delete record.propB;
