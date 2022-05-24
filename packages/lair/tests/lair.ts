@@ -35,6 +35,28 @@ describe('Lair', () => {
         lair.createRecords('test', 10);
         expect(lair.getAll('test')).to.have.property('length', 10);
       });
+
+      it('should return created records (with related records)', () => {
+        class ParentFactory extends Factory {
+          static factoryName = 'parent';
+
+          @hasMany('child', null, {
+            createRelated: 2,
+          })
+          children;
+        }
+        class ChildFactory extends Factory {
+          static factoryName = 'child';
+        }
+        lair.registerFactory(ParentFactory);
+        lair.registerFactory(ChildFactory);
+        const createdRecords = lair.createRecords('parent', 10);
+        expect(createdRecords).to.have.length(10);
+        expect(createdRecords[0].children).to.be.eql([
+          { id: '1' },
+          { id: '2' },
+        ]);
+      });
     });
 
     describe('#createRelated', () => {
@@ -1138,6 +1160,37 @@ describe('Lair', () => {
           );
         });
       });
+    });
+  });
+
+  describe('#cleanLair', () => {
+    it('should reset data, factories and meta', () => {
+      class FactoryToTestCleanLair extends Factory {
+        static factoryName = 'parent';
+      }
+      lair.registerFactory(FactoryToTestCleanLair);
+      lair.createRecords('parent', 5);
+      expect(lair.getDevInfo()).to.have.key('parent');
+      expect(lair.getDevInfo().parent.id).to.be.equal(6);
+      expect(lair.getDevInfo().parent.count).to.be.equal(5);
+      Lair.cleanLair();
+      expect(Lair.getLair().getDevInfo()).to.be.eql({});
+    });
+
+    it('should not reset factories and meta', () => {
+      class FactoryToTestCleanLair2 extends Factory {
+        static factoryName = 'parent';
+      }
+      lair.registerFactory(FactoryToTestCleanLair2);
+      lair.createRecords('parent', 4);
+      expect(lair.getDevInfo()).to.have.key('parent');
+      expect(lair.getDevInfo().parent.id).to.be.equal(5);
+      expect(lair.getDevInfo().parent.count).to.be.equal(4);
+      Lair.cleanLair({ soft: true });
+      lair = Lair.getLair();
+      expect(lair.getDevInfo()).to.have.key('parent');
+      expect(lair.getDevInfo().parent.id).to.be.equal(1);
+      expect(lair.getDevInfo().parent.count).to.be.equal(0);
     });
   });
 });

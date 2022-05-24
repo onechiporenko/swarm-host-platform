@@ -99,8 +99,23 @@ export class Lair {
   /**
    * It will drop existing database and unregister all factories
    */
-  public static cleanLair(): void {
-    Lair.instance = new Lair();
+  public static cleanLair(opts = { soft: false }): void {
+    const lair = Lair.getLair();
+    const factoriesCopy = {};
+    lair.meta = {};
+    lair.db = {};
+    lair.relationships = new Relationships();
+    if (opts.soft) {
+      keys(lair.factories).forEach((k) => {
+        factoriesCopy[k] = lair.factories[k].factory;
+      });
+      lair.factories = {};
+      keys(factoriesCopy).forEach((k) => {
+        lair.registerFactory(factoriesCopy[k]);
+      });
+    } else {
+      lair.factories = {};
+    }
   }
 
   private static instance: Lair;
@@ -149,9 +164,9 @@ export class Lair {
    * This method can be used only for initial db filling
    */
   @verbose
-  public createRecords(factoryName: string, count: number): void {
+  public createRecords(factoryName: string, count: number): LairRecord[] {
     this.afterCreateQueue = [];
-    this.internalCreateRecords(factoryName, count);
+    const newRecords = this.internalCreateRecords(factoryName, count);
     while (this.afterCreateQueue.length) {
       const {
         factoryName: fName,
@@ -175,6 +190,7 @@ export class Lair {
         }
       });
     }
+    return newRecords;
   }
 
   /**
