@@ -14,7 +14,8 @@ import { Factory, Lair } from '@swarm-host/lair';
 import nPath = require('path');
 import winston = require('winston');
 import { printRoutesMap } from './express';
-import Route, { defaultHandler } from './route';
+import Route from './route';
+import { assert } from './utils';
 
 function isRoute(v: any): v is Route {
   let proto = v['__proto__'];
@@ -131,6 +132,10 @@ export default class Server {
       source = this.expressApp;
       path = nPath.join(route.namespace, route.path).replace(/\\/g, '/'); // quick fix for windows
     }
+    assert(
+      `"path" is not defined for route "${route.constructor.name}"`,
+      !!path
+    );
     source[route.method](path, (req, res, next) =>
       route.oldHandler
         ? route.oldHandler.call(route, req, res, next, this.lair)

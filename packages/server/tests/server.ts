@@ -75,6 +75,15 @@ describe('#Server', () => {
     });
   });
 
+  describe('#addRoute', () => {
+    it('should throw an error if "path" is not provided', () => {
+      class RouteWithoutPath extends Route {}
+      expect(() => Server.getServer().addRoute(RouteWithoutPath)).to.throw(
+        '"path" is not defined for route "RouteWithoutPath"'
+      );
+    });
+  });
+
   describe('#addFactory', () => {
     it('should register factory in the Lair', () => {
       expect(lair.getDevInfo()).to.be.eql({});

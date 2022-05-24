@@ -158,7 +158,12 @@ export default class Route {
   public namespace: string = null;
   public path: string;
 
-  public defaultHandler(req, res, next, lair) {
+  public defaultHandler(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+    lair: Lair
+  ) {
     return defaultHandler(req, res, next, lair);
   }
 }
