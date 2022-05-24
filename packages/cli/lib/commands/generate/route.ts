@@ -28,6 +28,19 @@ exports.builder = (yargs: Argv) => {
         'Determines how new route will be created - subclass of Route or Route\'s instance ("class" or "default")',
       default: 'default',
     },
+    'skip-source': {
+      type: 'boolean',
+      description: 'Do not create a source file for route',
+      default: false,
+    },
+    'skip-test': {
+      type: 'boolean',
+      description: 'Do not create a test and schema files for route',
+      default: false,
+    },
+    'parent-model': {
+      type: 'string',
+    },
   });
 };
 exports.handler = (argv) => {

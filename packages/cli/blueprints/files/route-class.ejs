@@ -4,7 +4,7 @@ export default class <%= className %>Route extends Route {
   method = '<%= method %>';
   url = '<%= url %>';
 
-  handler(<%= req %>, res, next, lair) {
+  defaultHandler(<%= req %>, res, next, lair) {
     res.json({});
   }
 }

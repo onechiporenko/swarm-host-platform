@@ -1,4 +1,10 @@
-import { destroy, fileExists, generate, getTmpDir } from '../../utils/utils';
+import {
+  destroy,
+  fileExists,
+  generate,
+  getFilesDiff,
+  getTmpDir,
+} from '../../utils/utils';
 import { expect } from 'chai';
 import { cd, mkdir, rm } from 'shelljs';
 
@@ -26,7 +32,7 @@ describe('Destroy Factory', () => {
   it('should not delete existing factory', () => {
     generate('factory', 'unit');
     expect(fileExists('app/factories/unit.ts')).to.be.true;
-    destroy('factory', 'unit', 'n');
+    destroy('factory', 'unit', [], 'n');
     expect(fileExists('app/factories/unit.ts')).to.be.true;
   });
 
@@ -40,7 +46,7 @@ describe('Destroy Factory', () => {
   it('should not delete existing nested factory', () => {
     generate('factory', 'some/path/unit');
     expect(fileExists('app/factories/some/path/unit.ts')).to.be.true;
-    destroy('factory', 'some/path/unit', 'n');
+    destroy('factory', 'some/path/unit', [], 'n');
     expect(fileExists('app/factories/some/path/unit.ts')).to.be.true;
   });
 
@@ -50,5 +56,32 @@ describe('Destroy Factory', () => {
     expect(cmdResult.stderr).to.contain(
       'Path should not contain "..". You passed "a/../b"'
     );
+  });
+
+  it('should delete factory and test file', () => {
+    generate('factory', 'nested/parent');
+    expect(fileExists('app/factories/nested/parent.ts')).to.be.true;
+    expect(fileExists('tests/unit/factories/nested/parent.ts')).to.be.true;
+    destroy('factory', 'nested/parent');
+    expect(fileExists('app/factories/nested/parent.ts')).to.be.false;
+    expect(fileExists('tests/unit/factories/nested/parent.ts')).to.be.false;
+  });
+
+  it('should delete only factory file', () => {
+    generate('factory', 'nested/parent');
+    expect(fileExists('app/factories/nested/parent.ts')).to.be.true;
+    expect(fileExists('tests/unit/factories/nested/parent.ts')).to.be.true;
+    destroy('factory', 'nested/parent', ['--skip-test=true']);
+    expect(fileExists('app/factories/nested/parent.ts')).to.be.false;
+    expect(fileExists('tests/unit/factories/nested/parent.ts')).to.be.true;
+  });
+
+  it('should delete only test file', () => {
+    generate('factory', 'nested/parent');
+    expect(fileExists('app/factories/nested/parent.ts')).to.be.true;
+    expect(fileExists('tests/unit/factories/nested/parent.ts')).to.be.true;
+    destroy('factory', 'nested/parent', ['--skip-source=true']);
+    expect(fileExists('app/factories/nested/parent.ts')).to.be.true;
+    expect(fileExists('tests/unit/factories/nested/parent.ts')).to.be.false;
   });
 });

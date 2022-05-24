@@ -64,6 +64,15 @@ export class GenerateFactory extends Generate {
   }
 
   public writeFile(): void {
+    if (!this.instance.options['skip-source']) {
+      this.writeSourceFile();
+    }
+    if (!this.instance.options['skip-test']) {
+      this.writeTestFile();
+    }
+  }
+
+  public writeSourceFile() {
     const tpl = fs.readFileSync(
       path.join(__dirname, '../../../../blueprints/files/factory.ejs'),
       'utf-8'
@@ -112,5 +121,24 @@ export class GenerateFactory extends Generate {
       })
     ).to(this.instance.fullPath);
     console.log(colors.yellow(this.instance.relativePath), 'is created');
+  }
+
+  public writeTestFile() {
+    mkdir('-p', this.instance.testsPath);
+    const tpl = fs.readFileSync(
+      path.join(__dirname, '../../../../blueprints/files/factory-test.ejs'),
+      'utf-8'
+    );
+    echo(
+      render(tpl, {
+        name: this.instance.name,
+        className: classify(this.instance.name),
+      })
+    ).to(this.instance.testFullPath);
+    console.log(
+      'Test for',
+      colors.yellow(this.instance.relativePath),
+      'is created'
+    );
   }
 }

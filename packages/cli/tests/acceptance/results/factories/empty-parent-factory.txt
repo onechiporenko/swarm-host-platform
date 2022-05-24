@@ -1,0 +1,6 @@
+import { Factory } from '@swarm-host/server';
+
+export default class ParentFactory extends Factory {
+    static factoryName = 'parent';
+}
+

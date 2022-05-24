@@ -36,9 +36,10 @@ export const generate = (
 export const destroy = (
   type: string,
   path: string,
+  args: string[] = [],
   input = 'y'
 ): SpawnSyncReturns<string> =>
-  execConfirm('node', ['../dist/index.js', 'd', type, path], input);
+  execConfirm('node', ['../dist/index.js', 'd', type, path, ...args], input);
 
 export const fileExists = (path: string): boolean => test('-e', path);
 

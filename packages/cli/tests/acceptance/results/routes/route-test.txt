@@ -1,0 +1,21 @@
+import axios from 'axios';
+import { expect } from 'chai';
+import * as jsonschema from 'jsonschema';
+import routeSchema from '../../../../schemas/test/route';
+import { URL } from '../../../consts';
+
+describe('/test/route GET', () => {
+  describe('should handle request', () => {
+    let data;
+    beforeEach((done) => {
+      axios
+        .get(`${URL}/test/route`)
+        .then((res) => (data = res.data))
+        .finally(() => done());
+    });
+    it('and return valid data', () => {
+      expect(jsonschema.validate(data, routeSchema).errors).to.eql([]);
+    });
+  });
+});
+

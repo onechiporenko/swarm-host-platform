@@ -27,7 +27,7 @@ describe('Destroy Route', () => {
   it('should not delete existing route', () => {
     generate('route', 'units');
     expect(fileExists('app/routes/units.ts')).to.be.true;
-    destroy('route', 'units', 'n');
+    destroy('route', 'units', [], 'n');
     expect(fileExists('app/routes/units.ts')).to.be.true;
   });
 
@@ -41,7 +41,7 @@ describe('Destroy Route', () => {
   it('should not delete existing nested route', () => {
     generate('route', 'all/units');
     expect(fileExists('app/routes/all/units.ts')).to.be.true;
-    destroy('route', 'all/units', 'n');
+    destroy('route', 'all/units', [], 'n');
     expect(fileExists('app/routes/all/units.ts')).to.be.true;
   });
 
@@ -51,5 +51,47 @@ describe('Destroy Route', () => {
     expect(cmdResult.stderr).to.contain(
       'Path should not contain "..". You passed "a/../b"'
     );
+  });
+
+  it('should delete only test and schema files', () => {
+    generate('route', 'test/route');
+    expect(fileExists('app/routes/test/route.ts'), 'source file exists').to.be
+      .true;
+    expect(
+      fileExists('tests/integration/routes/test/route.ts'),
+      'test file exists'
+    ).to.be.true;
+    expect(fileExists('schemas/test/route.ts'), 'schema file exists').to.be
+      .true;
+    destroy('route', 'test/route', ['--skip-source=true']);
+    expect(fileExists('app/routes/test/route.ts'), 'source is not deleted').to
+      .be.true;
+    expect(
+      fileExists('tests/integration/routes/test/route.ts'),
+      'test is deleted'
+    ).to.be.false;
+    expect(fileExists('schemas/test/route.ts'), 'schema is deleted').to.be
+      .false;
+  });
+
+  it('should delete only source file', () => {
+    generate('route', 'test/route');
+    expect(fileExists('app/routes/test/route.ts'), 'source file exists').to.be
+      .true;
+    expect(
+      fileExists('tests/integration/routes/test/route.ts'),
+      'test file exists'
+    ).to.be.true;
+    expect(fileExists('schemas/test/route.ts'), 'schema file exists').to.be
+      .true;
+    destroy('route', 'test/route', ['--skip-test=true']);
+    expect(fileExists('app/routes/test/route.ts'), 'source is deleted').to.be
+      .false;
+    expect(
+      fileExists('tests/integration/routes/test/route.ts'),
+      'test is not deleted'
+    ).to.be.true;
+    expect(fileExists('schemas/test/route.ts'), 'schema is not deleted').to.be
+      .true;
   });
 });

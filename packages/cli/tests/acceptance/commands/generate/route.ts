@@ -80,4 +80,52 @@ describe('Generate Route', () => {
       'Path should not contain "..". You passed "a/../b"'
     );
   });
+
+  it('should create a route with test and schema files', () => {
+    generate('route', 'test/route', ['--url=test/route']);
+    expect(fileExists('app/routes/test/route.ts'), 'source file exists').to.be
+      .true;
+    expect(
+      fileExists('tests/integration/routes/test/route.ts'),
+      'test file exists'
+    ).to.be.true;
+    expect(
+      getFilesDiff(
+        'tests/integration/routes/test/route.ts',
+        '../tests/acceptance/results/routes/route-test.txt'
+      )
+    ).to.be.empty;
+    expect(fileExists('schemas/test/route.ts'), 'schema file exists').to.be
+      .true;
+    expect(
+      getFilesDiff(
+        'schemas/test/route.ts',
+        '../tests/acceptance/results/routes/route-schema.txt'
+      )
+    ).to.be.empty;
+  });
+
+  it('should create only test and schema files', () => {
+    generate('route', 'test/route', ['--skip-source=true']);
+    expect(fileExists('app/routes/test/route.ts'), 'source file does not exist')
+      .to.be.false;
+    expect(
+      fileExists('tests/integration/routes/test/route.ts'),
+      'test file exists'
+    ).to.be.true;
+    expect(fileExists('schemas/test/route.ts'), 'schema file exists').to.be
+      .true;
+  });
+
+  it('should create only source file', () => {
+    generate('route', 'test/route', ['--skip-test=true']);
+    expect(fileExists('app/routes/test/route.ts'), 'source file exists').to.be
+      .true;
+    expect(
+      fileExists('tests/integration/routes/test/route.ts'),
+      'test file does not exist'
+    ).to.be.false;
+    expect(fileExists('schemas/test/route.ts'), 'schema file does not exist').to
+      .be.false;
+  });
 });

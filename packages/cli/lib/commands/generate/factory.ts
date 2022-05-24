@@ -24,6 +24,16 @@ exports.builder = (yargs: Argv) => {
     extends: {
       describe: 'User defined factory to use as a parent class',
     },
+    'skip-source': {
+      type: 'boolean',
+      description: 'Do not create a source file for factory',
+      default: false,
+    },
+    'skip-test': {
+      type: 'boolean',
+      description: 'Do not create a test file for factory',
+      default: false,
+    },
   });
 };
 exports.handler = (argv) => {

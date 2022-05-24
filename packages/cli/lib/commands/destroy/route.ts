@@ -1,7 +1,7 @@
 import { Argv } from 'yargs';
 import { prompt } from 'inquirer';
-import { Destroy } from '../../models/commands/destroy';
 import { Route } from '../../models/instances/route';
+import { DestroyRoute } from '../../models/commands/destroy/route';
 
 const question = {
   choices: ['n', 'y'],
@@ -21,12 +21,22 @@ exports.builder = (yargs: Argv) => {
     path: {
       describe: 'path to route',
     },
+    'skip-source': {
+      type: 'boolean',
+      description: 'Do not create a source file for route',
+      default: false,
+    },
+    'skip-test': {
+      type: 'boolean',
+      description: 'Do not create a test and schema files for route',
+      default: false,
+    },
   });
 };
 exports.handler = (argv) => {
   prompt([question]).then((answer) => {
     if (answer.confirmDestroy) {
-      new Route(argv.path, argv, new Destroy()).command.execute();
+      new Route(argv.path, argv, new DestroyRoute()).command.execute();
     }
   });
 };

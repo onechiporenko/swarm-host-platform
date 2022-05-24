@@ -1,0 +1,21 @@
+import { Lair } from '@swarm-host/server';
+import { expect } from 'chai';
+
+let lair;
+describe('#ParentFactory', () => {
+  beforeEach(async () => {
+    lair = Lair.getLair();
+  });
+
+  describe('should create a record', () => {
+    let record;
+    beforeEach(() => {
+      record = lair.createRecords('parent', 1).pop();
+    });
+
+    it('with defined attr `id`', () => {
+      expect(record).to.have.property('id');
+    });
+  });
+});
+

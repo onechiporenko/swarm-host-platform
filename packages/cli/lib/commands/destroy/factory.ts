@@ -1,7 +1,7 @@
 import { Argv } from 'yargs';
 import { prompt } from 'inquirer';
-import { Destroy } from '../../models/commands/destroy';
 import { Factory } from '../../models/instances/factory';
+import { DestroyFactory } from '../../models/commands/destroy/factory';
 
 const question = {
   choices: ['n', 'y'],
@@ -26,7 +26,7 @@ exports.builder = (yargs: Argv) => {
 exports.handler = (argv) => {
   prompt([question]).then((answer) => {
     if (answer.confirmDestroy) {
-      new Factory(argv.path, argv, new Destroy()).command.execute();
+      new Factory(argv.path, argv, new DestroyFactory()).command.execute();
     }
   });
 };

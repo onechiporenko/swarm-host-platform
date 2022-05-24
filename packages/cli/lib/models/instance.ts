@@ -20,6 +20,8 @@ export class Instance {
   public relativePath: string;
   public type: string;
   public command: Command;
+  public testsPath: string;
+  public testFullPath: string;
 
   constructor(
     pathToNewInstance: string,
