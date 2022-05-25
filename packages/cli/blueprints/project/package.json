@@ -15,7 +15,7 @@
     "test:e2e": "mocha -r ts-node/register -r mocha-global.ts --recursive \"tests/integration/**/*.ts\""
   },
   "dependencies": {
-    "@swarm-host/server": "^5.2.0"
+    "@swarm-host/server": "^5.1.0"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
