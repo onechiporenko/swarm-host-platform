@@ -1,5 +1,5 @@
 import { Argv } from 'yargs';
-import { cp, exec, echo, ls } from 'shelljs';
+import { cp, exec, ls, ShellString } from 'shelljs';
 import { render } from 'ejs';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -34,7 +34,7 @@ exports.handler = (argv) => {
   // cp skipping dot files - https://github.com/shelljs/shelljs/issues/79
   cp(path.join(projectTplPath, '/.eslintrc.json'), '.');
   cp(path.join(projectTplPath, '/.prettierrc.js'), '.');
-  echo(
+  ShellString(
     render(packageJson, {
       name: projectName,
     })

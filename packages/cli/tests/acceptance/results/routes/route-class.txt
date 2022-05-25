@@ -8,4 +8,3 @@ export default class TestRoute extends Route {
     res.json({});
   }
 }
-

@@ -1,7 +1,7 @@
 import path = require('path');
 import { Instance } from '../instance';
 
-export class Factory extends Instance {
+export class FactoryInstance extends Instance {
   public setup(): void {
     this.type = 'factories';
   }

@@ -1,6 +1,6 @@
 import { Lair } from '@swarm-host/server';
 import { expect } from 'chai';
-import ParentFactory from '../../../app/factories/parent';
+import ParentFactory from '../../../../app/factories/nested/parent';
 
 let lair;
 describe('#ParentFactory', () => {

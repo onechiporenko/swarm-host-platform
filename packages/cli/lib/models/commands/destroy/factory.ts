@@ -1,10 +1,10 @@
 import colors = require('colors/safe');
 import { rm } from 'shelljs';
 import { Destroy } from '../destroy';
-import { Factory } from '../../instances/factory';
+import { FactoryInstance } from '../../instances/factory';
 
 export class DestroyFactory extends Destroy {
-  public instance: Factory;
+  public instance: FactoryInstance;
   public execute(): void {
     if (!this.instance.options['skip-source']) {
       rm('-rf', this.instance.fullPath);

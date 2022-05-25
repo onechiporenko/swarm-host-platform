@@ -1,10 +1,10 @@
 import colors = require('colors/safe');
 import { rm } from 'shelljs';
 import { Destroy } from '../destroy';
-import { Route } from '../../instances/route';
+import { RouteInstance } from '../../instances/route';
 
 export class DestroyRoute extends Destroy {
-  public instance: Route;
+  public instance: RouteInstance;
   public execute(): void {
     if (!this.instance.options['skip-source']) {
       rm('-rf', this.instance.fullPath);

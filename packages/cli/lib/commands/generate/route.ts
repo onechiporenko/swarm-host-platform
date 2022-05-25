@@ -1,6 +1,6 @@
 import { Argv } from 'yargs';
 import { GenerateRoute } from '../../models/commands/generate/route';
-import { Route } from '../../models/instances/route';
+import { RouteInstance } from '../../models/instances/route';
 
 exports.command = 'route <path>';
 exports.describe = 'generates new route';
@@ -44,5 +44,5 @@ exports.builder = (yargs: Argv) => {
   });
 };
 exports.handler = (argv) => {
-  new Route(argv.path, argv, new GenerateRoute()).command.execute();
+  new RouteInstance(argv.path, argv, new GenerateRoute()).command.execute();
 };

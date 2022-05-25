@@ -3,4 +3,3 @@ import { Factory } from '@swarm-host/server';
 export default class UnitFactory extends Factory {
     static factoryName = 'unit';
 }
-

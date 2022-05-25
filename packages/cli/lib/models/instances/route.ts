@@ -1,7 +1,7 @@
 import path = require('path');
 import { Instance } from '../instance';
 
-export class Route extends Instance {
+export class RouteInstance extends Instance {
   public schemasPath: string;
   public schemasFullPath: string;
 

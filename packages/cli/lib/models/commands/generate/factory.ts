@@ -2,7 +2,7 @@ import colors = require('colors/safe');
 import { render } from 'ejs';
 import fs = require('fs');
 import path = require('path');
-import { echo, mkdir } from 'shelljs';
+import { mkdir, ShellString } from 'shelljs';
 import { Generate } from '../generate';
 import FactoryAttr from './../../../models/factory-attr';
 import { camelize, classify } from '../../../utils/string';
@@ -63,6 +63,15 @@ export class GenerateFactory extends Generate {
       .map((item) => camelize(item));
   }
 
+  getImportPathForTestFile() {
+    const separator = this.instance.dir.includes('/') ? '/' : '\\';
+    const depth = this.instance.dir.split(separator).length;
+    const mod = this.instance.dir === '' ? 2 : 3;
+    return `${'../'.repeat(depth + mod)}app/${this.instance.type}/${
+      this.instance.dir ? this.instance.dir + '/' : ''
+    }${this.instance.name}`;
+  }
+
   public writeFiles(): void {
     if (!this.instance.options['skip-source']) {
       this.writeSourceFile();
@@ -107,7 +116,7 @@ export class GenerateFactory extends Generate {
       return attr1.attrName > attr2.attrName ? 1 : -1;
     });
     const imports = this.getSwarmHostImportString(swarmHostImports);
-    echo(
+    ShellString(
       render(tpl, {
         attrs,
         name: this.instance.name,
@@ -129,16 +138,11 @@ export class GenerateFactory extends Generate {
       path.join(__dirname, '../../../../blueprints/files/factory-test.ejs'),
       'utf-8'
     );
-    const separator = this.instance.dir.includes('/') ? '/' : '\\';
-    const depth = this.instance.dir.split(separator).length;
-    const importPath = `${'../'.repeat(depth + 3)}app/${this.instance.type}/${
-      this.instance.dir
-    }/${this.instance.name}`;
-    echo(
+    ShellString(
       render(tpl, {
         name: this.instance.name,
         className: classify(this.instance.name),
-        importPath,
+        importPath: this.getImportPathForTestFile(),
       })
     ).to(this.instance.testFullPath);
     console.log(

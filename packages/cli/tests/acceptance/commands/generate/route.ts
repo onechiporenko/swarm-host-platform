@@ -82,6 +82,26 @@ describe('Generate Route', () => {
   });
 
   it('should create a route with test and schema files', () => {
+    generate('route', 'route', ['--url=test/route']);
+    expect(fileExists('app/routes/route.ts'), 'source file exists').to.be.true;
+    expect(fileExists('tests/integration/routes/route.ts'), 'test file exists')
+      .to.be.true;
+    expect(
+      getFilesDiff(
+        'tests/integration/routes/route.ts',
+        '../tests/acceptance/results/routes/route-test.txt'
+      )
+    ).to.be.empty;
+    expect(fileExists('schemas/route.ts'), 'schema file exists').to.be.true;
+    expect(
+      getFilesDiff(
+        'schemas/route.ts',
+        '../tests/acceptance/results/routes/route-schema.txt'
+      )
+    ).to.be.empty;
+  });
+
+  it('should create a route with test and schema files (nested)', () => {
     generate('route', 'test/route', ['--url=test/route']);
     expect(fileExists('app/routes/test/route.ts'), 'source file exists').to.be
       .true;
@@ -92,7 +112,7 @@ describe('Generate Route', () => {
     expect(
       getFilesDiff(
         'tests/integration/routes/test/route.ts',
-        '../tests/acceptance/results/routes/route-test.txt'
+        '../tests/acceptance/results/routes/nested-route-test.txt'
       )
     ).to.be.empty;
     expect(fileExists('schemas/test/route.ts'), 'schema file exists').to.be

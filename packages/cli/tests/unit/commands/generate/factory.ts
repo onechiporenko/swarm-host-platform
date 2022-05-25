@@ -1,5 +1,6 @@
 import { GenerateFactory } from '../../../../lib/models/commands/generate/factory';
 import { expect } from 'chai';
+import { FactoryInstance } from '../../../../lib/models/instances/factory';
 
 let generateFactory;
 
@@ -100,6 +101,36 @@ describe('#GenerateFactory', () => {
         expect(
           generateFactory.getRelativePathForExtend(test.child, test.parent)
         ).to.equal(test.expected);
+      });
+    });
+  });
+
+  describe('#getImportPathForTestFile', () => {
+    [
+      {
+        m: 'top-level factory',
+        path: 'top-level',
+        e: '../../../app/factories/top-level',
+      },
+      {
+        m: 'one level deep factory',
+        path: 'nested/one',
+        e: '../../../../app/factories/nested/one',
+      },
+      {
+        m: 'two levels deep factory',
+        path: 'nested/one/two',
+        e: '../../../../../app/factories/nested/one/two',
+      },
+      {
+        m: 'three levels deep factory',
+        path: 'nested/one/two/three',
+        e: '../../../../../../app/factories/nested/one/two/three',
+      },
+    ].forEach((test) => {
+      it(test.m, () => {
+        new FactoryInstance(test.path, {}, generateFactory);
+        expect(generateFactory.getImportPathForTestFile()).to.be.equal(test.e);
       });
     });
   });

@@ -2,13 +2,13 @@ import fs = require('fs');
 import path = require('path');
 import colors = require('colors/safe');
 import { render } from 'ejs';
-import { mkdir, echo, test } from 'shelljs';
+import { mkdir, test, ShellString } from 'shelljs';
 import { Generate } from '../generate';
 import { camelize, classify } from '../../../utils/string';
-import { Route } from '../../instances/route';
+import { RouteInstance } from '../../instances/route';
 
 export class GenerateRoute extends Generate {
-  public instance: Route;
+  public instance: RouteInstance;
 
   protected url: string;
   protected dynamic: string[];
@@ -57,7 +57,7 @@ export class GenerateRoute extends Generate {
       'utf-8'
     );
     mkdir('-p', this.instance.dirPath);
-    echo(
+    ShellString(
       render(tpl, {
         method: this.instance.options.method,
         req: this.dynamic.length
@@ -76,7 +76,7 @@ export class GenerateRoute extends Generate {
       path.join(__dirname, `../../../../blueprints/files/default-schema.ejs`),
       'utf-8'
     );
-    echo(render(tpl, {})).to(this.instance.schemasFullPath);
+    ShellString(render(tpl, {})).to(this.instance.schemasFullPath);
     console.log(
       'Schema for',
       colors.yellow(this.instance.relativePath),
@@ -99,14 +99,12 @@ export class GenerateRoute extends Generate {
     );
     const separator = this.instance.dir.includes('/') ? '/' : '\\';
     const depth = this.instance.dir.split(separator).length;
-    const constPath = '../'.repeat(depth + 2) + 'consts';
-    const schemasPath =
-      '../'.repeat(depth + 3) +
-      'schemas/' +
-      this.instance.dir +
-      '/' +
-      this.instance.name;
-    echo(
+    const mod = this.instance.dir === '' ? 2 : 3;
+    const constPath = `${'../'.repeat(depth + mod - 1)}consts`;
+    const schemasPath = `${'../'.repeat(depth + mod)}schemas/${
+      this.instance.dir ? this.instance.dir + '/' : ''
+    }${this.instance.name}`;
+    ShellString(
       render(tpl, {
         method: this.instance.options.method.toUpperCase(),
         urlForRequest: this.url.replace(

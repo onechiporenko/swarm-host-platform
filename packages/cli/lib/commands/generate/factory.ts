@@ -1,6 +1,6 @@
 import { Argv } from 'yargs';
 import { GenerateFactory } from '../../models/commands/generate/factory';
-import { Factory } from '../../models/instances/factory';
+import { FactoryInstance } from '../../models/instances/factory';
 
 exports.command = 'factory <path> [rest..]';
 exports.describe = 'generates new factory';
@@ -37,5 +37,5 @@ exports.builder = (yargs: Argv) => {
   });
 };
 exports.handler = (argv) => {
-  new Factory(argv.path, argv, new GenerateFactory()).command.execute();
+  new FactoryInstance(argv.path, argv, new GenerateFactory()).command.execute();
 };

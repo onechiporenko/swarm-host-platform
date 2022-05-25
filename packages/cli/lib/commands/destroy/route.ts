@@ -1,6 +1,6 @@
 import { Argv } from 'yargs';
 import { prompt } from 'inquirer';
-import { Route } from '../../models/instances/route';
+import { RouteInstance } from '../../models/instances/route';
 import { DestroyRoute } from '../../models/commands/destroy/route';
 
 const question = {
@@ -36,7 +36,7 @@ exports.builder = (yargs: Argv) => {
 exports.handler = (argv) => {
   prompt([question]).then((answer) => {
     if (answer.confirmDestroy) {
-      new Route(argv.path, argv, new DestroyRoute()).command.execute();
+      new RouteInstance(argv.path, argv, new DestroyRoute()).command.execute();
     }
   });
 };

@@ -21,4 +21,3 @@ export default class UnitFactory extends Factory {
     @hasOne('squad', 'units')
     squad;
 }
-
