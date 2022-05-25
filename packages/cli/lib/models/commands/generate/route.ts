@@ -2,7 +2,7 @@ import fs = require('fs');
 import path = require('path');
 import colors = require('colors/safe');
 import { render } from 'ejs';
-import { mkdir, echo } from 'shelljs';
+import { mkdir, echo, test } from 'shelljs';
 import { Generate } from '../generate';
 import { camelize, classify } from '../../../utils/string';
 import { Route } from '../../instances/route';
@@ -13,7 +13,15 @@ export class GenerateRoute extends Generate {
   protected url: string;
   protected dynamic: string[];
 
-  public writeFile(): void {
+  public someFilesAlreadyExist(): boolean {
+    return (
+      super.someFilesAlreadyExist() ||
+      (test('-e', this.instance.schemasFullPath) &&
+        !this.instance.options['skip-test'])
+    );
+  }
+
+  public writeFiles(): void {
     this.setup();
     if (!this.instance.options['skip-source']) {
       this.writeSourceFile();

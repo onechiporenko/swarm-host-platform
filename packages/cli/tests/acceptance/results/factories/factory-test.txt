@@ -1,10 +1,17 @@
 import { Lair } from '@swarm-host/server';
 import { expect } from 'chai';
+import ParentFactory from '../../../../app/factories/nested/parent';
 
 let lair;
 describe('#ParentFactory', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
+    Lair.cleanLair();
     lair = Lair.getLair();
+    lair.registerFactory(ParentFactory);
+  });
+
+  afterEach(() => {
+    Lair.cleanLair();
   });
 
   describe('should create a record', () => {

@@ -63,7 +63,7 @@ export class GenerateFactory extends Generate {
       .map((item) => camelize(item));
   }
 
-  public writeFile(): void {
+  public writeFiles(): void {
     if (!this.instance.options['skip-source']) {
       this.writeSourceFile();
     }
@@ -129,10 +129,16 @@ export class GenerateFactory extends Generate {
       path.join(__dirname, '../../../../blueprints/files/factory-test.ejs'),
       'utf-8'
     );
+    const separator = this.instance.dir.includes('/') ? '/' : '\\';
+    const depth = this.instance.dir.split(separator).length;
+    const importPath = `${'../'.repeat(depth + 3)}app/${this.instance.type}/${
+      this.instance.dir
+    }/${this.instance.name}`;
     echo(
       render(tpl, {
         name: this.instance.name,
         className: classify(this.instance.name),
+        importPath,
       })
     ).to(this.instance.testFullPath);
     console.log(

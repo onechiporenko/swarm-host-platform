@@ -2,32 +2,45 @@ import * as inquirer from 'inquirer';
 import { Command } from '../command';
 import { test } from 'shelljs';
 
-const question = {
+export const confirmOverrideQuestion = {
   choices: ['n', 'y'],
-  message: 'File already exists. Override it?',
+  message: 'Some files are already exist. Override them?',
   name: 'confirmOverride',
   type: 'confirm',
 };
 
-export class Generate extends Command {
+export abstract class Generate extends Command {
+  public someFilesAlreadyExist(): boolean {
+    return (
+      (test('-e', this.instance.fullPath) &&
+        !this.instance.options['skip-source']) ||
+      (test('-e', this.instance.testFullPath) &&
+        !this.instance.options['skip-test'])
+    );
+  }
+
   public execute(): void {
-    if (test('-e', this.instance.fullPath)) {
+    if (this.someFilesAlreadyExist()) {
       inquirer
-        .prompt([question])
+        .prompt([confirmOverrideQuestion])
         .then((answer) => {
           if (answer.confirmOverride) {
-            this.writeFile();
+            this.writeFiles();
           }
         })
         .catch(() => {
           /* void */
         });
     } else {
-      this.writeFile();
+      this.writeFiles();
     }
   }
 
-  public writeFile(): void {
-    throw new Error('Implement me');
+  public writeFiles() {
+    this.writeSourceFile();
+    this.writeTestFile();
   }
+
+  public abstract writeSourceFile(): void;
+  public abstract writeTestFile(): void;
 }

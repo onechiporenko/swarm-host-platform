@@ -1,10 +1,17 @@
 import { Lair } from '@swarm-host/server';
 import { expect } from 'chai';
+import <%= className %>Factory from '<%= importPath %>';
 
 let lair;
 describe('#<%= className %>Factory', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
+    Lair.cleanLair();
     lair = Lair.getLair();
+    lair.registerFactory(<%= className %>Factory);
+  });
+
+  afterEach(() => {
+    Lair.cleanLair();
   });
 
   describe('should create a record', () => {

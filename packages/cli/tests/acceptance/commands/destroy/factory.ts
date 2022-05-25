@@ -1,10 +1,4 @@
-import {
-  destroy,
-  fileExists,
-  generate,
-  getFilesDiff,
-  getTmpDir,
-} from '../../utils/utils';
+import { destroy, fileExists, generate, getTmpDir } from '../../utils/utils';
 import { expect } from 'chai';
 import { cd, mkdir, rm } from 'shelljs';
 
