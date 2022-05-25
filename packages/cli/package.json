@@ -1,6 +1,6 @@
 {
   "name": "@swarm-host/cli",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "description": "CLI for Swarm-Host",
   "main": "./dist/index.js",
   "scripts": {
