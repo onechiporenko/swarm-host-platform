@@ -28,6 +28,18 @@ export function arrayDiff(arr1: string[], arr2: string[]): string[] {
   return arr1.filter((x) => arr2.indexOf(x) < 0);
 }
 
+export function arrayRandomItem<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+export function arrayShuffle(arr: any[]): any[] {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 export function uniq<T>(list: T[]): T[] {
   return list.filter(
     (item, index, collection) => collection.indexOf(item) === index

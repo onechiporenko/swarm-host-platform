@@ -69,6 +69,20 @@ describe('Lair', () => {
         });
       });
 
+      describe('#getRandomOne', () => {
+        it('should return one random record', () => {
+          expect(lair.getRandomOne('foo'))
+            .to.have.property('id')
+            .oneOf(['1', '2', '3', '4', '5']);
+        });
+
+        it('should throw an error for unknown type', () => {
+          expect(() => lair.getRandomOne('fake')).to.throw(
+            '"fake"-type doesn\'t exist in the database'
+          );
+        });
+      });
+
       describe('#queryMany', () => {
         it('should return filtered records', () => {
           expect(
@@ -92,6 +106,20 @@ describe('Lair', () => {
 
         it('should throw an error for unknown type', () => {
           expect(() => lair.queryOne('fake', (r) => !!r)).to.throw(
+            '"fake"-type doesn\'t exist in the database'
+          );
+        });
+      });
+
+      describe('#queryRandomOne', () => {
+        it('should return one random record', () => {
+          expect(lair.queryRandomOne('foo', (r) => Number(r.id) > 3))
+            .to.have.property('id')
+            .oneOf(['4', '5']);
+        });
+
+        it('should throw an error for unknown type', () => {
+          expect(() => lair.queryRandomOne('fake', (r) => !!r)).to.throw(
             '"fake"-type doesn\'t exist in the database'
           );
         });
@@ -414,16 +442,34 @@ describe('Lair', () => {
           lair.createRecords('a', 1);
           r = lair.getOne('a', '1');
         });
+
         it('#getOne', () => {
           expect(r).to.be.eql({ id: '1', propB: 'some' });
           delete r.id;
           expect(lair.getOne('a', '1')).to.be.eql({ id: '1', propB: 'some' });
         });
 
+        it('#getRandomOne', () => {
+          expect(r).to.be.eql({ id: '1', propB: 'some' });
+          delete r.id;
+          expect(lair.getRandomOne('a')).to.be.eql({ id: '1', propB: 'some' });
+        });
+
         it('#queryOne', () => {
           expect(r).to.be.eql({ id: '1', propB: 'some' });
           delete r.id;
           expect(lair.queryOne('a', (record) => record.id === '1')).to.be.eql({
+            id: '1',
+            propB: 'some',
+          });
+        });
+
+        it('#queryRandomOne', () => {
+          expect(r).to.be.eql({ id: '1', propB: 'some' });
+          delete r.id;
+          expect(
+            lair.queryRandomOne('a', (record) => record.id === '1')
+          ).to.be.eql({
             id: '1',
             propB: 'some',
           });

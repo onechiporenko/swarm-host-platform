@@ -9,7 +9,16 @@ import {
 } from './factory';
 import { LairRecord } from './record';
 import { Relationships } from './relationships';
-import { assert, copy, getId, getOrCalcValue, hasId, warn } from './utils';
+import {
+  arrayRandomItem,
+  arrayShuffle,
+  assert,
+  copy,
+  getId,
+  getOrCalcValue,
+  hasId,
+  warn,
+} from './utils';
 
 import {
   assertCrudOptions,
@@ -273,6 +282,46 @@ export class Lair {
     const opts = getDefaultCrudOptions(options);
     const records = this.db[factoryName];
     const ids = keys(records);
+    for (const id of ids) {
+      if (clb.call(null, records[id])) {
+        return this.getRecordWithRelationships(factoryName, id, [], opts);
+      }
+    }
+    return null;
+  }
+
+  /**
+   *  Get one random record of needed factory
+   */
+  @verbose
+  @assertHasType
+  @assertCrudOptions
+  public getRandomOne(
+    factoryName: string,
+    options: CRUDOptions = {}
+  ): LairRecord {
+    const opts = getDefaultCrudOptions(options);
+    const records = this.db[factoryName];
+    const ids = keys(records);
+    const id = arrayRandomItem(ids);
+    return this.getRecordWithRelationships(factoryName, id, [], opts);
+  }
+
+  /**
+   * Filter one random record of needed factory
+   * Callback is called with one parameter - record
+   */
+  @verbose
+  @assertHasType
+  @assertCrudOptions
+  public queryRandomOne(
+    factoryName: string,
+    clb: (record: LairRecord) => boolean,
+    options: CRUDOptions = {}
+  ): LairRecord {
+    const opts = getDefaultCrudOptions(options);
+    const records = this.db[factoryName];
+    const ids = arrayShuffle(keys(records));
     for (const id of ids) {
       if (clb.call(null, records[id])) {
         return this.getRecordWithRelationships(factoryName, id, [], opts);
