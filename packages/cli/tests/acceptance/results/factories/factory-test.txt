@@ -14,14 +14,9 @@ describe('#ParentFactory', () => {
     Lair.cleanLair();
   });
 
-  describe('should create a record', () => {
-    let record;
-    beforeEach(() => {
-      record = lair.createRecords('parent', 1).pop();
-    });
-
-    it('with defined attr `id`', () => {
-      expect(record).to.have.property('id');
+  describe('should have meta', () => {
+    it('defined', () => {
+      expect(lair.getMetaFor('parent')).not.to.be.undefined;
     });
   });
 });
