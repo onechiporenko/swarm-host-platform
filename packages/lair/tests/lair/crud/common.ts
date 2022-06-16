@@ -125,6 +125,39 @@ describe('Lair', () => {
         });
       });
 
+      describe('#queryRandomMany', () => {
+        it('should return three random records (by default)', () => {
+          expect(
+            lair
+              .queryRandomMany('foo', (r) => Number(r.id) > 2)
+              .map((r) => r.id)
+          ).contains.all.members(['3', '4', '5']);
+        });
+
+        it('should return asked number of random records', () => {
+          const records = lair
+            .queryRandomMany('foo', (r) => Number(r.id) > 2, {}, 2)
+            .map((r) => r.id);
+          expect(records).to.have.length(2);
+          expect(records[0]).to.be.oneOf(['3', '4', '5']);
+          expect(records[1]).to.be.oneOf(['3', '4', '5']);
+        });
+
+        it('should return existing number of random records', () => {
+          expect(lair.getAll('foo', { depth: 1 })).to.have.length(5);
+          const records = lair
+            .queryRandomMany('foo', (r) => true, {}, 10)
+            .map((r) => r.id);
+          expect(records).to.have.length(5);
+        });
+
+        it('should throw an error for unknown type', () => {
+          expect(() => lair.queryRandomMany('fake', (r) => !!r)).to.throw(
+            '"fake"-type doesn\'t exist in the database'
+          );
+        });
+      });
+
       describe('#deleteOne', () => {
         it('should delete record with provided id (no relations)', () => {
           expect(lair.getOne('foo', '1')).to.have.property('id', '1');
@@ -431,6 +464,278 @@ describe('Lair', () => {
         });
       });
 
+      describe('#getRandomOneForFactories', () => {
+        it('should throw an error if some factory does not exist (1st arg)', () => {
+          expect(() => lair.getRandomOneForFactories('not-existing')).to.throw(
+            '"not-existing"-type doesn\'t exist in the database'
+          );
+        });
+
+        it('should throw an error if some factory does not exist (not 1st arg)', () => {
+          lair.registerFactory(
+            class ExistingFactory extends Factory {
+              static factoryName = 'existing';
+            }
+          );
+          expect(() =>
+            lair.getRandomOneForFactories('existing', 'not-existing')
+          ).to.throw('"not-existing"-type doesn\'t exist in the database');
+        });
+
+        it('should return record from factory#1', () => {
+          lair.registerFactory(
+            class Factory1 extends Factory {
+              static factoryName = 'factory1';
+            }
+          );
+          lair.registerFactory(
+            class Factory1 extends Factory {
+              static factoryName = 'factory2';
+            }
+          );
+          lair.createRecords('factory1', 2);
+          const randomRecord = lair.getRandomOneForFactories(
+            'factory1',
+            'factory2'
+          );
+          expect(randomRecord.record).to.have.property('id').oneOf(['1', '2']);
+          expect(randomRecord.factoryName).to.be.equal('factory1');
+        });
+
+        it('should return record from factory#2', () => {
+          lair.registerFactory(
+            class Factory1 extends Factory {
+              static factoryName = 'factory1';
+            }
+          );
+          lair.registerFactory(
+            class Factory1 extends Factory {
+              static factoryName = 'factory2';
+            }
+          );
+          lair.createRecords('factory2', 2);
+          const randomRecord = lair.getRandomOneForFactories(
+            'factory1',
+            'factory2'
+          );
+          expect(randomRecord.record).to.have.property('id').oneOf(['1', '2']);
+          expect(randomRecord.factoryName).to.be.equal('factory2');
+        });
+
+        it('should return nothing if no records are for needed factories', () => {
+          lair.registerFactory(
+            class Factory1 extends Factory {
+              static factoryName = 'factory1';
+            }
+          );
+          lair.registerFactory(
+            class Factory1 extends Factory {
+              static factoryName = 'factory2';
+            }
+          );
+          const randomRecord = lair.getRandomOneForFactories(
+            'factory1',
+            'factory2'
+          );
+          expect(randomRecord).to.have.property('record', null);
+          expect(randomRecord).to.have.property('factoryName', null);
+        });
+      });
+
+      describe('#randomizeRelationsForExistingRecords', () => {
+        it('should thrown an error if 1st factory does not exists', () => {
+          lair.registerFactory(
+            class ChildA1Factory extends Factory {
+              static factoryName = 'child';
+            }
+          );
+          expect(() =>
+            lair.randomizeRelationsForExistingRecords('parent', 'child')
+          ).to.throw('"parent"-type doesn\'t exist in the database');
+        });
+
+        it('should thrown an error if 2ns factory does not exists', () => {
+          lair.registerFactory(
+            class ParentA1Factory extends Factory {
+              static factoryName = 'parent';
+            }
+          );
+          expect(() =>
+            lair.randomizeRelationsForExistingRecords('parent', 'child')
+          ).to.throw('"child"-type doesn\'t exist in the database');
+        });
+
+        it('should throw an error if factories are without relations', () => {
+          lair.registerFactory(
+            class ParentFactory extends Factory {
+              static factoryName = 'parent';
+            }
+          );
+          lair.registerFactory(
+            class ChildFactory extends Factory {
+              static factoryName = 'child';
+            }
+          );
+          expect(() =>
+            lair.randomizeRelationsForExistingRecords('parent', 'child')
+          ).to.throw('Factories "parent" and "child" don\'t have relations');
+        });
+
+        it('one-to-one', () => {
+          class ParentOneToOneFactory extends Factory {
+            static factoryName = 'parent';
+            @hasOne('child', 'parent')
+            child;
+          }
+          class ChildOneToOneFactory extends Factory {
+            static factoryName = 'child';
+            @hasOne('parent', 'child')
+            parent;
+          }
+          lair.registerFactory(ParentOneToOneFactory);
+          lair.registerFactory(ChildOneToOneFactory);
+          lair.createRecords('parent', 3);
+          lair.createRecords('child', 3);
+          lair.randomizeRelationsForExistingRecords('parent', 'child');
+          expect(lair.getOne('parent', '1', { depth: 1 }))
+            .to.have.property('child')
+            .oneOf([null, '1', '2', '3']);
+          expect(lair.getOne('parent', '2', { depth: 1 }))
+            .to.have.property('child')
+            .oneOf([null, '1', '2', '3']);
+          const parent3 = lair.getOne('parent', '3', { depth: 1 });
+          expect(parent3).to.have.property('child').oneOf(['1', '2', '3']);
+          expect(
+            lair.getOne('child', parent3.child, { depth: 1 })
+          ).to.have.property('parent', parent3.id);
+        });
+
+        it('many-to-one', () => {
+          class ParentManyToOneFactory extends Factory {
+            static factoryName = 'parent';
+            @hasMany('child', 'parent')
+            children;
+          }
+          class ChildManyToOneFactory extends Factory {
+            static factoryName = 'child';
+            @hasOne('parent', 'children')
+            parent;
+          }
+          lair.registerFactory(ParentManyToOneFactory);
+          lair.registerFactory(ChildManyToOneFactory);
+          lair.createRecords('parent', 2);
+          lair.createRecords('child', 100);
+          lair.randomizeRelationsForExistingRecords('parent', 'child');
+          const parent1 = lair.getOne('parent', '1', { depth: 1 });
+          const parent2 = lair.getOne('parent', '2', { depth: 1 });
+          expect(parent1).to.have.property('children').that.is.not.empty;
+          parent1.children.forEach((child) => {
+            expect(lair.getOne('child', child, { depth: 1 })).to.have.property(
+              'parent',
+              parent1.id
+            );
+          });
+          expect(parent2).to.have.property('children').that.is.not.empty;
+          parent2.children.forEach((child) => {
+            expect(lair.getOne('child', child, { depth: 1 })).to.have.property(
+              'parent',
+              parent2.id
+            );
+          });
+        });
+
+        it('one-to-many', () => {
+          class ParentOneToManyFactory extends Factory {
+            static factoryName = 'parent';
+            @hasOne('child', 'parents')
+            child;
+          }
+          class ChildOneToManyFactory extends Factory {
+            static factoryName = 'child';
+            @hasMany('parent', 'child')
+            parents;
+          }
+          lair.registerFactory(ParentOneToManyFactory);
+          lair.registerFactory(ChildOneToManyFactory);
+          lair.createRecords('parent', 5);
+          lair.createRecords('child', 10);
+          lair.randomizeRelationsForExistingRecords('parent', 'child');
+          lair.getAll('parent', { depth: 1 }).forEach((r) => {
+            expect(r)
+              .to.have.property('child')
+              .that.satisfies((c) => Number(c) >= 1 && Number(c) <= 10);
+            expect(lair.getOne('child', r.child, { depth: 1 }))
+              .to.have.property('parents')
+              .that.contains(r.id);
+          });
+        });
+
+        it('many-to-many', () => {
+          class ParentManyToManyFactory extends Factory {
+            static factoryName = 'parent';
+            @hasMany('child', 'parents')
+            children;
+          }
+          class ChildManyToManyFactory extends Factory {
+            static factoryName = 'child';
+            @hasMany('parent', 'children')
+            parents;
+          }
+          lair.registerFactory(ParentManyToManyFactory);
+          lair.registerFactory(ChildManyToManyFactory);
+          lair.createRecords('parent', 3);
+          lair.createRecords('child', 3);
+          lair.randomizeRelationsForExistingRecords('parent', 'child');
+          expect(lair.getOne('parent', '1', { depth: 1 }))
+            .to.have.property('children')
+            .that.contains.all.members(['1', '2', '3']);
+          expect(lair.getOne('parent', '2', { depth: 1 }))
+            .to.have.property('children')
+            .that.contains.all.members(['1', '2', '3']);
+          expect(lair.getOne('parent', '3', { depth: 1 }))
+            .to.have.property('children')
+            .that.contains.all.members(['1', '2', '3']);
+          expect(lair.getOne('child', '1', { depth: 1 }))
+            .to.have.property('parents')
+            .that.contains.all.members(['1', '2', '3']);
+          expect(lair.getOne('child', '2', { depth: 1 }))
+            .to.have.property('parents')
+            .that.contains.all.members(['1', '2', '3']);
+          expect(lair.getOne('child', '3', { depth: 1 }))
+            .to.have.property('parents')
+            .that.contains.all.members(['1', '2', '3']);
+        });
+
+        it('many-to-many (custom related count)', () => {
+          class ParentManyToManyFactory extends Factory {
+            static factoryName = 'parent';
+            @hasMany('child', 'parents')
+            children;
+          }
+          class ChildManyToManyFactory extends Factory {
+            static factoryName = 'child';
+            @hasMany('parent', 'children')
+            parents;
+          }
+          lair.registerFactory(ParentManyToManyFactory);
+          lair.registerFactory(ChildManyToManyFactory);
+          lair.createRecords('parent', 3);
+          lair.createRecords('child', 10);
+          lair.randomizeRelationsForExistingRecords('parent', 'child', {
+            relatedCount: 4,
+          });
+          expect(lair.getOne('parent', '1', { depth: 1 }))
+            .to.have.property('children')
+            .that.has.length(4);
+          expect(lair.getOne('parent', '2', { depth: 1 }))
+            .to.have.property('children')
+            .that.has.length(4);
+          expect(lair.getOne('parent', '3', { depth: 1 }))
+            .to.have.property('children')
+            .that.has.length(4);
+        });
+      });
+
       describe('RU methods should return copies of records from the db', () => {
         let r;
         beforeEach(() => {
@@ -487,6 +792,14 @@ describe('Lair', () => {
           expect(lair.queryMany('a', (record) => record.id === '1')).to.be.eql([
             { id: '1', propB: 'some' },
           ]);
+        });
+
+        it('queryRandomMany', () => {
+          expect(r).to.be.eql({ id: '1', propB: 'some' });
+          delete r.id;
+          expect(
+            lair.queryRandomMany('a', (record) => record.id === '1')
+          ).to.be.eql([{ id: '1', propB: 'some' }]);
         });
 
         it('#updateOne', () => {

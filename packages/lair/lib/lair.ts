@@ -1,5 +1,6 @@
 import {
   CreateRecordExtraData,
+  CreateRelated,
   Factory,
   FactoryData,
   FieldMetaAttr,
@@ -23,6 +24,7 @@ import {
 import {
   assertCrudOptions,
   assertHasType,
+  assertHasTypes,
   assertLoops,
   getLastItemsCount,
   verbose,
@@ -328,6 +330,101 @@ export class Lair {
       }
     }
     return null;
+  }
+
+  /**
+   * Get a list of random records matching condition
+   */
+  @verbose
+  @assertHasType
+  @assertCrudOptions
+  public queryRandomMany(
+    factoryName: string,
+    clb: (record: LairRecord) => boolean,
+    options: CRUDOptions = {},
+    limit = 3
+  ): LairRecord[] {
+    const opts = getDefaultCrudOptions(options);
+    let count = 0;
+    return arrayShuffle(keys(this.db[factoryName]))
+      .filter((id) => {
+        const match = clb.call(null, this.db[factoryName][id]);
+        const result = match && count < limit;
+        if (result) {
+          count++;
+        }
+        return result;
+      })
+      .map((id) => this.getRecordWithRelationships(factoryName, id, [], opts));
+  }
+
+  /**
+   * Get a single random record from one of the listed factories
+   */
+  @verbose
+  @assertHasTypes()
+  public getRandomOneForFactories(...factories: string[]): {
+    record: LairRecord;
+    factoryName: string;
+  } {
+    const records = factories
+      .map((factoryName) => ({
+        record: this.getRandomOne(factoryName, { ignoreRelated: true }),
+        factoryName,
+      }))
+      .filter((res) => !!res.record);
+    return records.length
+      ? records[Math.floor(Math.random() * records.length)]
+      : { record: null, factoryName: null };
+  }
+
+  /**
+   * Randomly link existing records for provided factories
+   */
+  @verbose
+  @assertHasTypes(2)
+  public randomizeRelationsForExistingRecords(
+    parentFactoryName: string,
+    childFactoryName: string,
+    opts: { relatedCount?: CreateRelated } = {}
+  ): void {
+    const parentMeta = this.getMetaFor(parentFactoryName);
+    let key = '';
+    let relType: MetaAttrType;
+    keys(parentMeta).forEach((propName) => {
+      if (parentMeta[propName].factoryName === childFactoryName) {
+        key = propName;
+        relType = parentMeta[propName].type;
+      }
+    });
+    assert(
+      `Factories "${parentFactoryName}" and "${childFactoryName}" don't have relations`,
+      !!key
+    );
+    this.getAll(parentFactoryName, { depth: 1 }).forEach((parentRecord) => {
+      const relatedCount = opts.relatedCount
+        ? getOrCalcValue<number>(
+            opts.relatedCount,
+            parentRecord,
+            parentRecord.id
+          )
+        : 3;
+      const newRelatedRecords =
+        relType === MetaAttrType.HAS_ONE
+          ? this.getRandomOne(childFactoryName)
+          : this.queryRandomMany(
+              childFactoryName,
+              () => true,
+              {},
+              relatedCount
+            );
+      this.updateOne(
+        parentFactoryName,
+        parentRecord.id,
+        { [key]: newRelatedRecords },
+        { ignoreRelated: true }
+      );
+    });
   }
 
   /**

@@ -4,6 +4,8 @@ import { assert, copy, getOrCalcValue, getVal } from './utils';
 
 const { keys, defineProperty, hasOwnProperty } = Object;
 
+export type CreateRelated = number | ((id: string) => number);
+
 export enum MetaAttrType {
   NONE,
   FIELD,
@@ -44,7 +46,7 @@ export interface RelationshipMetaAttr extends MetaAttr {
   invertedAttrName: string;
   reflexive: boolean;
   reflexiveDepth: number;
-  createRelated?: number | ((id: string) => number);
+  createRelated?: CreateRelated;
   useExistingAsRelated?: number | ((id: string) => number);
 }
 
@@ -59,7 +61,7 @@ export interface FieldMetaAttr<T> extends MetaAttr {
 export interface RelationshipOptions {
   reflexive?: boolean;
   depth?: number;
-  createRelated?: number | ((id: string) => number);
+  createRelated?: CreateRelated;
   useExistingAsRelated?: number | ((id: string) => number);
 }
 

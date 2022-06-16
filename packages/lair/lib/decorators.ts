@@ -20,6 +20,31 @@ export function assertHasType(
   return descriptor;
 }
 
+export function assertHasTypes(argsToCheck = -1) {
+  return function (
+    target: Lair,
+    key: string,
+    descriptor: PropertyDescriptor
+  ): PropertyDescriptor {
+    if (descriptor === undefined) {
+      descriptor = Object.getOwnPropertyDescriptor(target, key);
+    }
+    const originalMethod = descriptor.value;
+    descriptor.value = function (...args: any[]): any {
+      args
+        .slice(0, argsToCheck === -1 ? args.length : argsToCheck)
+        .forEach((type) => {
+          assert(
+            `"${type}"-type doesn't exist in the database`,
+            this.hasType(type)
+          );
+        });
+      return originalMethod.apply(this, args);
+    };
+    return descriptor;
+  };
+}
+
 export function assertCrudOptions(
   target: Lair,
   key: string,
