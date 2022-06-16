@@ -106,7 +106,7 @@ export class GenerateRoute extends Generate {
     }${this.instance.name}`;
     ShellString(
       render(tpl, {
-        method: this.instance.options.method.toUpperCase(),
+        method: this.instance.options.method.toLowerCase(),
         urlForRequest: this.url.replace(
           `:${this.dynamic[0]}`,
           '${res.data[0].id}'

@@ -4,13 +4,13 @@ import * as jsonschema from 'jsonschema';
 import <%= schemaName %> from '<%= schemasPath %>';
 import { HOST, PORT, URL } from '<%= constPath %>';
 
-describe('<%= url %> <%= method %>', () => {
+describe('<%= url %> <%= method.toUpperCase() %>', () => {
   describe('should handle request', () => {
     let data;
     beforeEach((done) => {
       axios.get(`${HOST}:${PORT}/lair/factories/<%= parentModelName %>`).then((res) =>
         axios
-          .get(`${URL}<%= urlForRequest %>`)
+          .<%= method %>>(`${URL}<%= urlForRequest %>`)
           .then((r) => (data = r.data))
           .finally(() => done()));
     });

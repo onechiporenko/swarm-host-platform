@@ -1,20 +1,20 @@
 import axios from 'axios';
 import { expect } from 'chai';
 import * as jsonschema from 'jsonschema';
-import <%= schemaName %> from '<%= schemasPath %>';
-import { URL } from '<%= constPath %>';
+import routeSchema from '../../../../schemas/test/route';
+import { URL } from '../../../consts';
 
-describe('<%= url %> <%= method.toUpperCase() %>', () => {
+describe('/test/route POST', () => {
   describe('should handle request', () => {
     let data;
     beforeEach((done) => {
       axios
-        .<%= method %>(`${URL}<%= url %>`)
+        .post(`${URL}/test/route`)
         .then((res) => (data = res.data))
         .finally(() => done());
     });
     it('and return valid data', () => {
-      expect(jsonschema.validate(data, <%= schemaName %>).errors).to.eql([]);
+      expect(jsonschema.validate(data, routeSchema).errors).to.eql([]);
     });
   });
 });
