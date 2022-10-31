@@ -1,6 +1,9 @@
+import * as path from 'path';
 import * as inquirer from 'inquirer';
+import { exec, test } from 'shelljs';
+import colors = require('colors/safe');
 import { Command } from '../command';
-import { test } from 'shelljs';
+import { assert } from '../../assert';
 
 export const confirmOverrideQuestion = {
   choices: ['n', 'y'],
@@ -10,6 +13,12 @@ export const confirmOverrideQuestion = {
 };
 
 export abstract class Generate extends Command {
+  protected linterPath = path.join(process.cwd(), './node_modules/.bin/eslint');
+
+  protected linterInstalled() {
+    return test('-f', this.linterPath);
+  }
+
   public someFilesAlreadyExist(): boolean {
     return (
       (test('-e', this.instance.fullPath) &&
@@ -26,6 +35,7 @@ export abstract class Generate extends Command {
         .then((answer) => {
           if (answer.confirmOverride) {
             this.writeFiles();
+            this.lintFiles();
           }
         })
         .catch(() => {
@@ -33,12 +43,34 @@ export abstract class Generate extends Command {
         });
     } else {
       this.writeFiles();
+      this.lintFiles();
     }
   }
 
   public writeFiles() {
     this.writeSourceFile();
     this.writeTestFile();
+  }
+
+  public lintFiles() {
+    assert(
+      'Linter is missing',
+      this.linterInstalled() || this.instance.options['skip-lint']
+    );
+    if (this.instance.options['skip-lint']) {
+      console.log(colors.yellow('Linting is skipped'));
+      return;
+    }
+    if (!this.instance.options['skip-source']) {
+      this.lintFile(this.instance.fullPath);
+    }
+    if (!this.instance.options['skip-test']) {
+      this.lintFile(this.instance.testFullPath);
+    }
+  }
+
+  public lintFile(filePath: string) {
+    exec(`${this.linterPath} ${filePath} --fix`, { silent: true });
   }
 
   public abstract writeSourceFile(): void;

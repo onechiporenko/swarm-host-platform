@@ -32,6 +32,17 @@ export class GenerateRoute extends Generate {
     }
   }
 
+  public lintFiles() {
+    super.lintFiles();
+    if (
+      this.linterInstalled() &&
+      !this.instance.options['skip-lint'] &&
+      !this.instance.options['skip-test']
+    ) {
+      this.lintFile(this.instance.schemasFullPath);
+    }
+  }
+
   protected setup() {
     this.url =
       this.instance.options.url ||

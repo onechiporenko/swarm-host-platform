@@ -38,6 +38,11 @@ exports.builder = (yargs: Argv) => {
       description: 'Do not create a test and schema files for route',
       default: false,
     },
+    'skip-lint': {
+      type: 'boolean',
+      description: 'Do not run default linter for created files',
+      default: false,
+    },
     'parent-model': {
       type: 'string',
     },

@@ -1,13 +1,12 @@
-import { GenerateFactory } from '../../../../lib/models/commands/generate/factory';
 import { expect } from 'chai';
+import { GenerateFactory } from '../../../../lib/models/commands/generate/factory';
 import { FactoryInstance } from '../../../../lib/models/instances/factory';
+import sinon = require('sinon');
 
 let generateFactory;
 
 describe('#GenerateFactory', () => {
-  beforeEach(() => {
-    generateFactory = new GenerateFactory();
-  });
+  beforeEach(() => (generateFactory = new GenerateFactory()));
 
   describe('#getCustomFactoryNameToExtend', () => {
     [
@@ -131,6 +130,147 @@ describe('#GenerateFactory', () => {
       it(test.m, () => {
         new FactoryInstance(test.path, {}, generateFactory);
         expect(generateFactory.getImportPathForTestFile()).to.be.equal(test.e);
+      });
+    });
+  });
+
+  describe('Linting', () => {
+    beforeEach(() => sinon.stub(generateFactory, 'lintFile'));
+
+    afterEach(() => generateFactory.lintFile.restore());
+
+    describe('asset linting', () => {
+      [
+        {
+          linterExists: true,
+          skipLint: true,
+          expected: false,
+        },
+        {
+          linterExists: true,
+          skipLint: false,
+          expected: false,
+        },
+        {
+          linterExists: false,
+          skipLint: true,
+          expected: false,
+        },
+        {
+          linterExists: false,
+          skipLint: false,
+          expected: true,
+        },
+      ].forEach((t) => {
+        describe(`Linter exists: ${t.linterExists}, skip lint: ${t.skipLint}`, () => {
+          beforeEach(() =>
+            sinon
+              .stub(generateFactory, 'linterInstalled')
+              .returns(t.linterExists)
+          );
+
+          afterEach(() => generateFactory.linterInstalled.restore());
+
+          it(
+            t.expected ? 'Should throw and error' : 'Should not throw an error',
+            () => {
+              new FactoryInstance(
+                'test-path',
+                {
+                  'skip-lint': t.skipLint,
+                },
+                generateFactory
+              );
+              if (t.expected) {
+                expect(() => {
+                  generateFactory.lintFiles();
+                }).to.throw('Linter is missing');
+              } else {
+                expect(() => {
+                  generateFactory.lintFiles();
+                }).not.to.throw('Linter is missing');
+              }
+            }
+          );
+        });
+      });
+    });
+
+    describe('source file', () => {
+      beforeEach(() =>
+        sinon.stub(generateFactory, 'linterInstalled').returns(true)
+      );
+      afterEach(() => generateFactory.linterInstalled.restore());
+      it('should lint source file', () => {
+        new FactoryInstance(
+          'test-path',
+          {
+            'skip-source': false,
+            'skip-lint': false,
+            'skip-test': true,
+          },
+          generateFactory
+        );
+        generateFactory.lintFiles();
+        expect(generateFactory.lintFile.callCount).to.be.equal(1);
+        const pathToLint = generateFactory.lintFile.firstCall.args[0];
+        expect(pathToLint)
+          .to.contain('test-path')
+          .and.to.contain('factories')
+          .and.to.contain('app');
+      });
+
+      it('should not lint source file', () => {
+        new FactoryInstance(
+          'test-path',
+          {
+            'skip-source': false,
+            'skip-lint': true,
+            'skip-test': true,
+          },
+          generateFactory
+        );
+        generateFactory.lintFiles();
+        expect(generateFactory.lintFile.callCount).to.be.equal(0);
+      });
+    });
+
+    describe('test file', () => {
+      beforeEach(() =>
+        sinon.stub(generateFactory, 'linterInstalled').returns(true)
+      );
+      afterEach(() => generateFactory.linterInstalled.restore());
+      it('should lint test file', () => {
+        new FactoryInstance(
+          'test-path',
+          {
+            'skip-source': true,
+            'skip-lint': false,
+            'skip-test': false,
+          },
+          generateFactory
+        );
+        generateFactory.lintFiles();
+        expect(generateFactory.lintFile.callCount).to.be.equal(1);
+        const pathToLint = generateFactory.lintFile.firstCall.args[0];
+        expect(pathToLint)
+          .to.contain('test-path')
+          .and.to.contain('factories')
+          .and.to.contain('tests');
+      });
+
+      it('should not lint test file', () => {
+        new FactoryInstance(
+          'test-path',
+          {
+            'skip-source': false,
+            'skip-lint': true,
+            'skip-test': false,
+          },
+          generateFactory
+        );
+        generateFactory.lintFiles();
+        expect(generateFactory.lintFile.callCount).to.be.equal(0);
       });
     });
   });
