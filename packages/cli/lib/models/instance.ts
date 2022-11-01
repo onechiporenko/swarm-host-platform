@@ -7,6 +7,7 @@ export interface InstanceOptions {
   method?: string;
   extends?: string;
   rest?: string[];
+  [k: string]: any;
 }
 
 export class Instance {

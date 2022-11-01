@@ -10,7 +10,7 @@ describe('<%= url %> <%= method.toUpperCase() %>', () => {
     beforeEach((done) => {
       axios.get(`${HOST}:${PORT}/lair/factories/<%= parentModelName %>`).then((res) =>
         axios
-          .<%= method %>>(`${URL}<%= urlForRequest %>`)
+          .<%= method %>(`${URL}<%= urlForRequest %>`)
           .then((r) => (data = r.data))
           .finally(() => done()));
     });

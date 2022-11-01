@@ -34,6 +34,11 @@ exports.builder = (yargs: Argv) => {
       description: 'Do not create a test file for factory',
       default: false,
     },
+    'skip-lint': {
+      type: 'boolean',
+      description: 'Do not run default linter for created files',
+      default: false,
+    },
   });
 };
 exports.handler = (argv) => {

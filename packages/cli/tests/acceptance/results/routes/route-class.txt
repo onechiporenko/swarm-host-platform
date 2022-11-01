@@ -2,7 +2,7 @@ import { Route } from '@swarm-host/server';
 
 export default class TestRoute extends Route {
   method = 'post';
-  url = '/a/:b/c';
+  path = '/a/:b/c';
 
   defaultHandler({params: {b}}, res, next, lair) {
     res.json({});
