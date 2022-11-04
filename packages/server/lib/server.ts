@@ -46,19 +46,29 @@ function getAll(req: Request, res: Response): Response {
 
 function getOne(req: Request, res: Response): Response {
   const { factoryName, id } = req.params;
-  return res.json(Lair.getLair().getOne(factoryName, id, { depth: 1 }));
+  const record = Lair.getLair().getOne(factoryName, id, { depth: 1 });
+  if (!record) {
+    return res.status(404).json();
+  }
+  return res.json(record);
 }
 
 function updateOne(req: Request, res: Response): Response {
   const { factoryName, id } = req.params;
-  return res.json(
-    Lair.getLair().updateOne(factoryName, id, req.body, { depth: 1 })
-  );
+  const lair = Lair.getLair();
+  if (!lair.getOne(factoryName, id, { ignoreRelated: true })) {
+    return res.status(404).json();
+  }
+  return res.json(lair.updateOne(factoryName, id, req.body, { depth: 1 }));
 }
 
 function deleteOne(req: Request, res: Response): Response {
   const { factoryName, id } = req.params;
-  Lair.getLair().deleteOne(factoryName, id);
+  const lair = Lair.getLair();
+  if (!lair.getOne(factoryName, id, { ignoreRelated: true })) {
+    return res.status(404).json();
+  }
+  lair.deleteOne(factoryName, id);
   return res.json({});
 }
 

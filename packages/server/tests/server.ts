@@ -1,10 +1,11 @@
 import chai = require('chai');
 import chaiHttp = require('chai-http');
-chai.use(chaiHttp);
-const { expect } = chai;
 import { Factory, Lair, field } from '@swarm-host/lair';
 import Route from '../lib/route';
 import Server from '../lib/server';
+
+chai.use(chaiHttp);
+const { expect } = chai;
 
 let lair;
 let server;
@@ -141,7 +142,7 @@ describe('#Server integration', () => {
           .request(server.server)
           .get('/api/v2/some-path')
           .end((err, res) => {
-            expect(res).to.have.property('status', 200);
+            expect(res).to.have.status(200);
             done();
           })
       );
@@ -159,7 +160,7 @@ describe('#Server integration', () => {
           .request(server.server)
           .get('/api/v2/some-path')
           .end((err, res) => {
-            expect(res).to.have.property('status', 200);
+            expect(res).to.have.status(200);
             done();
           })
       );
@@ -191,7 +192,7 @@ describe('#Server integration', () => {
           .request(server.server)
           .get('/api/v2/some-path')
           .end((err, res) => {
-            expect(res).to.have.property('status', 200);
+            expect(res).to.have.status(200);
           })
       );
     });
@@ -212,7 +213,7 @@ describe('#Server integration', () => {
           .request(server.server)
           .get('/api/v2/some-path')
           .end((err, res) => {
-            expect(res).to.have.property('status', 200);
+            expect(res).to.have.status(200);
             done();
           })
       );
@@ -225,7 +226,7 @@ describe('#Server integration', () => {
           .request(server.server)
           .get('/api/v2/some-path')
           .end((err, res) => {
-            expect(res).to.have.property('status', 200);
+            expect(res).to.have.status(200);
             done();
           })
       );
@@ -245,7 +246,7 @@ describe('#Server integration', () => {
           .request(server.server)
           .get('/api/v2/path')
           .end((err, res) => {
-            expect(res).to.have.property('status', 200);
+            expect(res).to.have.status(200);
             done();
           })
       );
@@ -257,7 +258,7 @@ describe('#Server integration', () => {
           .request(server.server)
           .get('/api/v2/path/subpath')
           .end((err, res) => {
-            expect(res).to.have.property('status', 200);
+            expect(res).to.have.status(200);
             done();
           })
       );
@@ -269,7 +270,7 @@ describe('#Server integration', () => {
           .request(server.server)
           .get('/reset-namespace')
           .end((err, res) => {
-            expect(res).to.have.property('status', 200);
+            expect(res).to.have.status(200);
             done();
           })
       );
@@ -291,7 +292,7 @@ describe('#Server integration', () => {
           .request(server.server)
           .get('/api/v2/a')
           .end((err, res) => {
-            expect(res).to.have.property('status', 200);
+            expect(res).to.have.status(200);
             expect(res)
               .to.have.property('body')
               .that.is.an('array')
@@ -307,7 +308,7 @@ describe('#Server integration', () => {
           .request(server.server)
           .get('/api/v2/b')
           .end((err, res) => {
-            expect(res).to.have.property('status', 200);
+            expect(res).to.have.status(200);
             expect(res)
               .to.have.property('body')
               .that.is.an('array')
@@ -499,6 +500,148 @@ describe('#Server integration', () => {
               })
           );
         });
+      });
+    });
+  });
+
+  describe('#lair meta routes', () => {
+    describe('#readOne', () => {
+      beforeEach((done) => {
+        server.addFactory(ModelA);
+        server.createRecords('a', 2);
+        server.startServer(done);
+      });
+
+      it('should return existing record', (done) => {
+        chai
+          .request(server.server)
+          .get('/lair/factories/a/1')
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(res).to.have.property('body').eql({ id: '1', name: 'test' });
+            done();
+          });
+      });
+
+      it('should return 404 for not existing record', (done) => {
+        chai
+          .request(server.server)
+          .get('/lair/factories/a/not-existing-record-id')
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(404);
+            done();
+          });
+      });
+    });
+
+    describe('#readMany', () => {
+      beforeEach((done) => {
+        server.addFactory(ModelA);
+        server.createRecords('a', 2);
+        server.startServer(done);
+      });
+
+      it('should return existing records', (done) => {
+        chai
+          .request(server.server)
+          .get('/lair/factories/a')
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(res)
+              .to.have.property('body')
+              .eql([
+                { id: '1', name: 'test' },
+                { id: '2', name: 'test' },
+              ]);
+            done();
+          });
+      });
+    });
+
+    describe('#delete', () => {
+      beforeEach((done) => {
+        server.addFactory(ModelA);
+        server.createRecords('a', 2);
+        server.startServer(done);
+      });
+
+      it('should delete existing record', (done) => {
+        chai
+          .request(server.server)
+          .del('/lair/factories/a/1')
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            done();
+          });
+      });
+
+      it('should return 404 for not existing record', (done) => {
+        chai
+          .request(server.server)
+          .del('/lair/factories/a/not-existing-record-id')
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(404);
+            done();
+          });
+      });
+    });
+
+    describe('#update', () => {
+      beforeEach((done) => {
+        server.addFactory(ModelA);
+        server.createRecords('a', 2);
+        server.startServer(done);
+      });
+
+      it('should update existing record', (done) => {
+        chai
+          .request(server.server)
+          .put('/lair/factories/a/1')
+          .send({ name: 'a' })
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(res).to.have.property('body').eql({ id: '1', name: 'a' });
+            done();
+          });
+      });
+
+      it('should return 404 for not existing record', (done) => {
+        chai
+          .request(server.server)
+          .put('/lair/factories/a/not-existing-record-id')
+          .send({ name: 'a' })
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(404);
+            done();
+          });
+      });
+    });
+
+    describe('#create', () => {
+      beforeEach((done) => {
+        server.addFactory(ModelA);
+        server.createRecords('a', 2);
+        server.startServer(done);
+      });
+
+      it('should create record', (done) => {
+        chai
+          .request(server.server)
+          .post('/lair/factories/a')
+          .send({ name: 'a' })
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(res).to.have.property('body').eql({ id: '3', name: 'a' });
+            done();
+          });
       });
     });
   });
