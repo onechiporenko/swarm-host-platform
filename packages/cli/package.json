@@ -28,6 +28,7 @@
     "directory": "packages/cli"
   },
   "dependencies": {
+    "axios": "^0.24.0",
     "colors": "^1.4.0",
     "ejs": "^3.1.6",
     "inquirer": "^8.1.5",
