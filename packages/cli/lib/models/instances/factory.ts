@@ -2,10 +2,6 @@ import path = require('path');
 import { Instance } from '../instance';
 
 export class FactoryInstance extends Instance {
-  public setup(): void {
-    this.type = 'factories';
-  }
-
   public parsePath(pathToNewInstance: string): void {
     super.parsePath(pathToNewInstance);
     this.testsPath = path.join(
@@ -15,5 +11,9 @@ export class FactoryInstance extends Instance {
       this.dir
     );
     this.testFullPath = path.join(this.testsPath, this.fileName);
+  }
+
+  public setup(): void {
+    this.type = 'factories';
   }
 }

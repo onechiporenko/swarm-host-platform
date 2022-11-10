@@ -1,5 +1,5 @@
 import { Argv } from 'yargs';
-import { cp, exec, ls, ShellString } from 'shelljs';
+import { ShellString, cp, exec, ls } from 'shelljs';
 import { render } from 'ejs';
 import * as path from 'path';
 import * as fs from 'fs';

@@ -1,6 +1,6 @@
 import child = require('child_process');
 import { SpawnSyncReturns } from 'child_process';
-import { exec, ShellString, test } from 'shelljs';
+import { ShellString, exec, test } from 'shelljs';
 
 export const getTmpDir = (): string =>
   `swarm-host-tmp-${Math.random()}`.replace(/\./g, '');

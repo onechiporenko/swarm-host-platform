@@ -8,11 +8,11 @@ const defaultValuesMap = {
 
 export default class FactoryAttr {
   public attrName: string;
-  public inverseAttr: string;
   public attrType: string;
-  public valueType: string;
   public defaultValue: string | boolean | number;
   public factory: string;
+  public inverseAttr: string;
+  public valueType: string;
 
   constructor(cmdArg: string) {
     const chunks = cmdArg.split(':');

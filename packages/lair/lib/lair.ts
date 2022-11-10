@@ -8,8 +8,6 @@ import {
   MetaAttrType,
   RelationshipMetaAttr,
 } from './factory';
-import { LairRecord } from './record';
-import { Relationships } from './relationships';
 import {
   arrayRandomItem,
   arrayShuffle,
@@ -20,7 +18,6 @@ import {
   hasId,
   warn,
 } from './utils';
-
 import {
   assertCrudOptions,
   assertHasType,
@@ -29,6 +26,8 @@ import {
   getLastItemsCount,
   verbose,
 } from './decorators';
+import { LairRecord } from './record';
+import { Relationships } from './relationships';
 
 function getDefaultCrudOptions(options: CRUDOptions): RelationshipOptions {
   return {
@@ -52,15 +51,15 @@ export interface InternalMetaStore {
 }
 
 interface AfterCreateItem {
+  extraData?: CreateRecordExtraData;
   factoryName?: string;
   id?: string;
-  extraData?: CreateRecordExtraData;
 }
 
 export interface CRUDOptions {
   depth?: number;
-  ignoreRelated?: string[] | boolean;
   handleNotAttrs?: boolean;
+  ignoreRelated?: string[] | boolean;
 }
 
 export interface DevInfoItem {
@@ -74,37 +73,40 @@ export interface DevInfo {
 }
 
 export interface CreateOneData {
-  id?: string;
   [prop: string]: any;
+  id?: string;
 }
 
 export interface ParentData {
-  factoryName: string;
   attrName: string;
+  factoryName: string;
 }
 
 export interface RelationshipOptions {
-  maxDepth: number;
   currentDepth: number;
   ignoreRelated: string[] | boolean;
+  maxDepth: number;
 }
 
 export interface RelatedFor {
+  attrName: string;
   factoryName: string;
   id: string;
-  attrName: string;
 }
 
 export class Lair {
-  /**
-   * Lair implements singleton-pattern
-   * Use this method to get its instance
-   */
-  public static getLair(): Lair {
-    if (!Lair.instance) {
-      Lair.instance = new Lair();
-    }
-    return Lair.instance;
+  private static instance: Lair;
+
+  public meta: InternalMetaStore = {};
+  public verbose = false;
+
+  private afterCreateQueue: AfterCreateItem[] = [];
+  private db: InternalDb = {};
+  private factories: { [id: string]: FactoryData } = {};
+  private relationships: Relationships;
+
+  private constructor() {
+    this.relationships = new Relationships();
   }
 
   /**
@@ -129,45 +131,57 @@ export class Lair {
     }
   }
 
-  private static instance: Lair;
-
-  public verbose = false;
-
-  private factories: { [id: string]: FactoryData } = {};
-  private relationships: Relationships;
-  private db: InternalDb = {};
-  public meta: InternalMetaStore = {};
-  private afterCreateQueue: AfterCreateItem[] = [];
-
-  private constructor() {
-    this.relationships = new Relationships();
+  /**
+   * Lair implements singleton-pattern
+   * Use this method to get its instance
+   */
+  public static getLair(): Lair {
+    if (!Lair.instance) {
+      Lair.instance = new Lair();
+    }
+    return Lair.instance;
   }
 
   /**
-   * Register factory instance in the Lair
-   * Lair works only with registered factories
+   * Create one record of needed factory
+   * ID is auto generated for new record. Don't include it to `data` (`data.id` will be skipped)
+   * All `data`-fields than not declared in the factory will be skipped
+   * Relationships with records of other factories will be automatically updated.
+   * Important! All related records should already be in the db
    */
-  public registerFactory(
-    factoryInstanceOrClass: Factory | typeof Factory
-  ): void {
-    const factory =
-      factoryInstanceOrClass instanceof Factory
-        ? factoryInstanceOrClass
-        : new factoryInstanceOrClass();
-    const name = factory.getFactoryName();
-    assert(
-      'Factory name must be defined in the `Factory` child-class as a static property "factoryName"',
-      !!name
-    );
-    assert(
-      `Factory with name "${name}" is already registered`,
-      !this.factories[name]
-    );
-    this.factories[name] = { factory, id: 1 } as FactoryData;
-    this.meta[name] = factory.meta;
-    this.relationships.addFactory(name);
-    this.relationships.updateMeta(this.meta);
-    this.addType(name);
+  @verbose
+  @assertHasType
+  @assertCrudOptions
+  public createOne(
+    factoryName: string,
+    data: CreateOneData,
+    options: CRUDOptions = {}
+  ): LairRecord {
+    const opts = getDefaultCrudOptions(options);
+    const meta = this.getMetaFor(factoryName);
+    const id = this.factories[factoryName].factory.allowCustomIds
+      ? data.id
+      : String(this.factories[factoryName].id);
+    const factory = this.factories[factoryName].factory;
+    this.relationships.addRecord(factoryName, id);
+    const newRecord = { id, ...factory.getDefaults() };
+    keys(data).forEach((attrName) => {
+      if (hasOwnProperty.call(meta, attrName)) {
+        newRecord[attrName] = this.createAttrValue(
+          factoryName,
+          id,
+          attrName,
+          data[attrName]
+        );
+      } else {
+        if (options.handleNotAttrs && attrName !== 'id') {
+          newRecord[attrName] = data[attrName];
+        }
+      }
+    });
+    this.db[factoryName][id] = newRecord;
+    this.factories[factoryName].id++;
+    return this.getRecordWithRelationships(factoryName, newRecord.id, [], opts);
   }
 
   /**
@@ -202,6 +216,82 @@ export class Lair {
       });
     }
     return newRecords;
+  }
+
+  /**
+   * Delete one record of needed factory
+   * Relationships with records of other factories will be automatically updated
+   */
+  @verbose
+  @assertHasType
+  public deleteOne(factoryName: string, id: string): void {
+    delete this.db[factoryName][id];
+    this.relationships.deleteRelationshipsForRecord(factoryName, id);
+  }
+
+  /**
+   * Get all records of needed factory
+   */
+  @verbose
+  @assertHasType
+  @assertCrudOptions
+  public getAll(factoryName: string, options: CRUDOptions = {}): LairRecord[] {
+    const opts = getDefaultCrudOptions(options);
+    return keys(this.db[factoryName]).map((id) =>
+      this.getRecordWithRelationships(factoryName, id, [], opts)
+    );
+  }
+
+  /**
+   * Get one record of needed factory by its id
+   */
+  @verbose
+  @assertHasType
+  @assertCrudOptions
+  public getOne(
+    factoryName: string,
+    id: string,
+    options: CRUDOptions = {}
+  ): LairRecord {
+    const opts = getDefaultCrudOptions(options);
+    return this.getRecordWithRelationships(factoryName, id, [], opts);
+  }
+
+  /**
+   *  Get one random record of needed factory
+   */
+  @verbose
+  @assertHasType
+  @assertCrudOptions
+  public getRandomOne(
+    factoryName: string,
+    options: CRUDOptions = {}
+  ): LairRecord {
+    const opts = getDefaultCrudOptions(options);
+    const records = this.db[factoryName];
+    const ids = keys(records);
+    const id = arrayRandomItem(ids);
+    return this.getRecordWithRelationships(factoryName, id, [], opts);
+  }
+
+  /**
+   * Get a single random record from one of the listed factories
+   */
+  @verbose
+  @assertHasTypes()
+  public getRandomOneForFactories(...factories: string[]): {
+    factoryName: string;
+    record: LairRecord;
+  } {
+    const records = factories
+      .map((factoryName) => ({
+        record: this.getRandomOne(factoryName, { ignoreRelated: true }),
+        factoryName,
+      }))
+      .filter((res) => !!res.record);
+    return records.length
+      ? records[Math.floor(Math.random() * records.length)]
+      : { record: null, factoryName: null };
   }
 
   /**
@@ -242,34 +332,6 @@ export class Lair {
   }
 
   /**
-   * Get all records of needed factory
-   */
-  @verbose
-  @assertHasType
-  @assertCrudOptions
-  public getAll(factoryName: string, options: CRUDOptions = {}): LairRecord[] {
-    const opts = getDefaultCrudOptions(options);
-    return keys(this.db[factoryName]).map((id) =>
-      this.getRecordWithRelationships(factoryName, id, [], opts)
-    );
-  }
-
-  /**
-   * Get one record of needed factory by its id
-   */
-  @verbose
-  @assertHasType
-  @assertCrudOptions
-  public getOne(
-    factoryName: string,
-    id: string,
-    options: CRUDOptions = {}
-  ): LairRecord {
-    const opts = getDefaultCrudOptions(options);
-    return this.getRecordWithRelationships(factoryName, id, [], opts);
-  }
-
-  /**
    * Filter one record of needed factory
    * Callback is called with one parameter - record
    */
@@ -284,46 +346,6 @@ export class Lair {
     const opts = getDefaultCrudOptions(options);
     const records = this.db[factoryName];
     const ids = keys(records);
-    for (const id of ids) {
-      if (clb.call(null, records[id])) {
-        return this.getRecordWithRelationships(factoryName, id, [], opts);
-      }
-    }
-    return null;
-  }
-
-  /**
-   *  Get one random record of needed factory
-   */
-  @verbose
-  @assertHasType
-  @assertCrudOptions
-  public getRandomOne(
-    factoryName: string,
-    options: CRUDOptions = {}
-  ): LairRecord {
-    const opts = getDefaultCrudOptions(options);
-    const records = this.db[factoryName];
-    const ids = keys(records);
-    const id = arrayRandomItem(ids);
-    return this.getRecordWithRelationships(factoryName, id, [], opts);
-  }
-
-  /**
-   * Filter one random record of needed factory
-   * Callback is called with one parameter - record
-   */
-  @verbose
-  @assertHasType
-  @assertCrudOptions
-  public queryRandomOne(
-    factoryName: string,
-    clb: (record: LairRecord) => boolean,
-    options: CRUDOptions = {}
-  ): LairRecord {
-    const opts = getDefaultCrudOptions(options);
-    const records = this.db[factoryName];
-    const ids = arrayShuffle(keys(records));
     for (const id of ids) {
       if (clb.call(null, records[id])) {
         return this.getRecordWithRelationships(factoryName, id, [], opts);
@@ -359,23 +381,26 @@ export class Lair {
   }
 
   /**
-   * Get a single random record from one of the listed factories
+   * Filter one random record of needed factory
+   * Callback is called with one parameter - record
    */
   @verbose
-  @assertHasTypes()
-  public getRandomOneForFactories(...factories: string[]): {
-    record: LairRecord;
-    factoryName: string;
-  } {
-    const records = factories
-      .map((factoryName) => ({
-        record: this.getRandomOne(factoryName, { ignoreRelated: true }),
-        factoryName,
-      }))
-      .filter((res) => !!res.record);
-    return records.length
-      ? records[Math.floor(Math.random() * records.length)]
-      : { record: null, factoryName: null };
+  @assertHasType
+  @assertCrudOptions
+  public queryRandomOne(
+    factoryName: string,
+    clb: (record: LairRecord) => boolean,
+    options: CRUDOptions = {}
+  ): LairRecord {
+    const opts = getDefaultCrudOptions(options);
+    const records = this.db[factoryName];
+    const ids = arrayShuffle(keys(records));
+    for (const id of ids) {
+      if (clb.call(null, records[id])) {
+        return this.getRecordWithRelationships(factoryName, id, [], opts);
+      }
+    }
+    return null;
   }
 
   /**
@@ -428,48 +453,6 @@ export class Lair {
   }
 
   /**
-   * Create one record of needed factory
-   * ID is auto generated for new record. Don't include it to `data` (`data.id` will be skipped)
-   * All `data`-fields than not declared in the factory will be skipped
-   * Relationships with records of other factories will be automatically updated.
-   * Important! All related records should already be in the db
-   */
-  @verbose
-  @assertHasType
-  @assertCrudOptions
-  public createOne(
-    factoryName: string,
-    data: CreateOneData,
-    options: CRUDOptions = {}
-  ): LairRecord {
-    const opts = getDefaultCrudOptions(options);
-    const meta = this.getMetaFor(factoryName);
-    const id = this.factories[factoryName].factory.allowCustomIds
-      ? data.id
-      : String(this.factories[factoryName].id);
-    const factory = this.factories[factoryName].factory;
-    this.relationships.addRecord(factoryName, id);
-    const newRecord = { id, ...factory.getDefaults() };
-    keys(data).forEach((attrName) => {
-      if (hasOwnProperty.call(meta, attrName)) {
-        newRecord[attrName] = this.createAttrValue(
-          factoryName,
-          id,
-          attrName,
-          data[attrName]
-        );
-      } else {
-        if (options.handleNotAttrs && attrName !== 'id') {
-          newRecord[attrName] = data[attrName];
-        }
-      }
-    });
-    this.db[factoryName][id] = newRecord;
-    this.factories[factoryName].id++;
-    return this.getRecordWithRelationships(factoryName, newRecord.id, [], opts);
-  }
-
-  /**
    * Update one record of needed factory
    * ID and any field from `data` which doesn't exist in the factory's meta will be skipped (same as for `createOne`)
    * Relationships with records of other factories will be automatically updated.
@@ -513,17 +496,6 @@ export class Lair {
   }
 
   /**
-   * Delete one record of needed factory
-   * Relationships with records of other factories will be automatically updated
-   */
-  @verbose
-  @assertHasType
-  public deleteOne(factoryName: string, id: string): void {
-    delete this.db[factoryName][id];
-    this.relationships.deleteRelationshipsForRecord(factoryName, id);
-  }
-
-  /**
    * Get info about current Lair state:
    *  - Registered factories
    *  - ID-value for each factory
@@ -542,12 +514,352 @@ export class Lair {
     return ret;
   }
 
-  private hasType(type: string): boolean {
-    return !!this.db[type];
+  public getMetaFor(factoryNameOrClass: any): Meta {
+    const metaForFactoryName = this.meta[factoryNameOrClass];
+    if (metaForFactoryName) {
+      return metaForFactoryName;
+    }
+    const factoryName = keys(this.factories).find(
+      (factoryName) =>
+        this.factories[factoryName].factory === factoryNameOrClass
+    );
+    return factoryName ? this.meta[factoryName] : undefined;
+  }
+
+  /**
+   * Register factory instance in the Lair
+   * Lair works only with registered factories
+   */
+  public registerFactory(
+    factoryInstanceOrClass: Factory | typeof Factory
+  ): void {
+    const factory =
+      factoryInstanceOrClass instanceof Factory
+        ? factoryInstanceOrClass
+        : new factoryInstanceOrClass();
+    const name = factory.getFactoryName();
+    assert(
+      'Factory name must be defined in the `Factory` child-class as a static property "factoryName"',
+      !!name
+    );
+    assert(
+      `Factory with name "${name}" is already registered`,
+      !this.factories[name]
+    );
+    this.factories[name] = { factory, id: 1 } as FactoryData;
+    this.meta[name] = factory.meta;
+    this.relationships.addFactory(name);
+    this.relationships.updateMeta(this.meta);
+    this.addType(name);
   }
 
   private addType(type: string): void {
     this.db[type] = {};
+  }
+
+  private createAttrValue(
+    factoryName: string,
+    id: string,
+    attrName: string,
+    val: string | string[]
+  ): string | string[] | null {
+    const meta = this.getMetaFor(factoryName);
+    const attrMeta = meta[attrName] as FieldMetaAttr<any>;
+    const { factoryName: distFactoryName, invertedAttrName: distAttrName } =
+      attrMeta;
+    const distMeta = this.getMetaFor(distFactoryName);
+    if (attrMeta.type === MetaAttrType.HAS_MANY) {
+      if (distMeta[distAttrName]) {
+        if (distMeta[distAttrName].type === MetaAttrType.HAS_ONE) {
+          return this.createManyToOneAttrValue(
+            factoryName,
+            id,
+            attrName,
+            val as string[],
+            distFactoryName,
+            distAttrName
+          );
+        }
+        if (distMeta[distAttrName].type === MetaAttrType.HAS_MANY) {
+          return this.createManyToManyAttrValue(
+            factoryName,
+            id,
+            attrName,
+            val as string[],
+            distFactoryName,
+            distAttrName
+          );
+        }
+      } else {
+        this.relationships.setMany(factoryName, id, attrName, val as string[]);
+      }
+    }
+    if (attrMeta.type === MetaAttrType.HAS_ONE) {
+      if (distMeta[distAttrName]) {
+        if (distMeta[distAttrName].type === MetaAttrType.HAS_ONE) {
+          return this.createOneToOneAttrValue(
+            factoryName,
+            id,
+            attrName,
+            val as string,
+            distFactoryName,
+            distAttrName
+          );
+        }
+        if (distMeta[distAttrName].type === MetaAttrType.HAS_MANY) {
+          return this.createOneToManyAttrValue(
+            factoryName,
+            id,
+            attrName,
+            val as string,
+            distFactoryName,
+            distAttrName
+          );
+        }
+      } else {
+        this.relationships.setOne(factoryName, id, attrName, val as string);
+      }
+    }
+    if (attrMeta.allowedValues && attrMeta.allowedValues.length) {
+      assert(
+        `"${attrName}" must be one of the "${attrMeta.allowedValues}". You passed "${val}"`,
+        attrMeta.allowedValues.indexOf(val) !== -1
+      );
+    }
+    warn(
+      `"${attrName}" expected to be "${
+        attrMeta.preferredType
+      }". You passed "${typeof val}"`,
+      !attrMeta.preferredType || attrMeta.preferredType === typeof val
+    );
+    return val;
+  }
+
+  private createManyToManyAttrValue(
+    factoryName: string,
+    id: string,
+    attrName: string,
+    newDistIds: string[],
+    distFactoryName: string,
+    distAttrName: string
+  ): string[] | null {
+    assert(
+      `Array of ids should be provided for value of "${attrName}" [many-to-many relationship]`,
+      isArray(newDistIds) || newDistIds === null
+    );
+    if (newDistIds === null || newDistIds.length === 0) {
+      this.relationships.deleteRelationshipForAttr(factoryName, id, attrName);
+      return [];
+    }
+    const distIds = newDistIds.map((newDistId) => {
+      assert(
+        `"${newDistId}" is invalid identifier for record of "${distFactoryName}" [many-to-many relationship]`,
+        hasId(newDistId) || this.factories[factoryName].factory.allowCustomIds
+      );
+      const distId = getId(newDistId);
+      assert(
+        `Record of "${distFactoryName}" with id "${distId}" doesn't exist. Create it first [many-to-many relationship]`,
+        !!this.db[distFactoryName][distId]
+      );
+      return distId;
+    });
+    this.relationships.createManyToMany(
+      factoryName,
+      id,
+      attrName,
+      distIds,
+      distFactoryName,
+      distAttrName
+    );
+    return newDistIds;
+  }
+
+  private createManyToOneAttrValue(
+    factoryName: string,
+    id: string,
+    attrName: string,
+    newDistIds: string[],
+    distFactoryName: string,
+    distAttrName: string
+  ): string[] | null {
+    assert(
+      `Array of ids should be provided for value of "${attrName}" [many-to-one relationship]`,
+      isArray(newDistIds) || newDistIds === null
+    );
+    if (newDistIds === null || newDistIds.length === 0) {
+      this.relationships.deleteRelationshipForAttr(factoryName, id, attrName);
+      return [];
+    }
+    const distIds = newDistIds.map((newDistId) => {
+      assert(
+        `"${newDistId}" is invalid identifier for record of "${distFactoryName}" [many-to-one relationship]`,
+        hasId(newDistId) || this.factories[factoryName].factory.allowCustomIds
+      );
+      const distId = getId(newDistId);
+      assert(
+        `Record of "${distFactoryName}" with id "${distId}" doesn't exist. Create it first [many-to-one relationship]`,
+        !!this.db[distFactoryName][distId]
+      );
+      return distId;
+    });
+    this.relationships.createManyToOne(
+      factoryName,
+      id,
+      attrName,
+      distIds,
+      distFactoryName,
+      distAttrName
+    );
+    return distIds;
+  }
+
+  private createOneToManyAttrValue(
+    factoryName: string,
+    id: string,
+    attrName: string,
+    newDistId: string,
+    distFactoryName: string,
+    distAttrName: string
+  ): string | null {
+    if (newDistId === null) {
+      this.relationships.deleteRelationshipForAttr(factoryName, id, attrName);
+      return null;
+    }
+    assert(
+      `"${newDistId}" is invalid identifier for record of "${distFactoryName}" [one-to-many relationship]`,
+      hasId(newDistId) || this.factories[factoryName].factory.allowCustomIds
+    );
+    const distId = getId(newDistId);
+    assert(
+      `Record of "${distFactoryName}" with id "${distId}" doesn't exist. Create it first [one-to-many relationship]`,
+      !!this.db[distFactoryName][distId]
+    );
+    this.relationships.createOneToMany(
+      factoryName,
+      id,
+      attrName,
+      distId,
+      distFactoryName,
+      distAttrName
+    );
+    return distId;
+  }
+
+  private createOneToOneAttrValue(
+    factoryName: string,
+    id: string,
+    attrName: string,
+    newDistId: string,
+    distFactoryName: string,
+    distAttrName: string
+  ): string | null {
+    if (newDistId === null) {
+      this.relationships.deleteRelationshipForAttr(factoryName, id, attrName);
+      return null;
+    }
+    assert(
+      `"${newDistId}" is invalid identifier for record of "${distFactoryName}" [one-to-one relationship]`,
+      hasId(newDistId) || this.factories[factoryName].factory.allowCustomIds
+    );
+    const distId = getId(newDistId);
+    assert(
+      `Record of "${distFactoryName}" with id "${distId}" doesn't exist. Create it first [one-to-one relationship]`,
+      !!this.db[distFactoryName][distId]
+    );
+    this.relationships.createOneToOne(
+      factoryName,
+      id,
+      attrName,
+      distId,
+      distFactoryName,
+      distAttrName
+    );
+    return distId;
+  }
+
+  private getRecordWithRelationships(
+    factoryName: string,
+    id: string,
+    relatedFor: RelatedFor[] = [],
+    options: RelationshipOptions = {
+      maxDepth: Infinity,
+      currentDepth: 1,
+      ignoreRelated: [],
+    }
+  ): LairRecord {
+    const recordRelationships = this.relationships.getRelationshipsForRecord(
+      factoryName,
+      id
+    );
+    const meta = this.getMetaFor(factoryName);
+    let record = this.db[factoryName][id];
+    if (!record) {
+      return null;
+    }
+    record = copy(record);
+    if (options.currentDepth >= options.maxDepth) {
+      return { ...record, ...recordRelationships } as LairRecord;
+    }
+    let ignoreRelated = [];
+    if (typeof options.ignoreRelated === 'boolean') {
+      ignoreRelated = options.ignoreRelated
+        ? this.getRelatedFactoryNames(factoryName)
+        : [];
+    }
+    if (isArray(options.ignoreRelated)) {
+      ignoreRelated = options.ignoreRelated;
+    }
+    if (recordRelationships) {
+      keys(recordRelationships).forEach((attrName) => {
+        const relatedIds = recordRelationships[attrName];
+        const relatedFactoryName = (meta[attrName] as RelationshipMetaAttr)
+          .factoryName;
+        if (ignoreRelated.indexOf(relatedFactoryName) !== -1) {
+          delete record[attrName];
+          return;
+        }
+        if (this.isRelated(factoryName, attrName, relatedFor)) {
+          record[attrName] = relatedIds;
+        } else {
+          const isRelatedFor = [...relatedFor, { factoryName, id, attrName }];
+          const opts = { ...options } as RelationshipOptions;
+          opts.currentDepth++;
+          record[attrName] = isArray(relatedIds)
+            ? relatedIds.map((relatedId) =>
+                this.getRecordWithRelationships(
+                  relatedFactoryName,
+                  relatedId,
+                  isRelatedFor,
+                  opts
+                )
+              )
+            : relatedIds
+            ? this.getRecordWithRelationships(
+                relatedFactoryName,
+                relatedIds,
+                isRelatedFor,
+                opts
+              )
+            : null;
+        }
+      });
+    }
+    return record;
+  }
+
+  private getRelatedFactoryNames(factoryName: string): string[] {
+    const metaForFactory = this.getMetaFor(factoryName);
+    const relatedFactoryNames = [];
+    keys(metaForFactory).forEach((fieldName: string) => {
+      if (metaForFactory[fieldName].factoryName) {
+        relatedFactoryNames.push(metaForFactory[fieldName].factoryName);
+      }
+    });
+    return relatedFactoryNames;
+  }
+
+  private hasType(type: string): boolean {
+    return !!this.db[type];
   }
 
   private internalCreateRecords(
@@ -652,76 +964,6 @@ export class Lair {
     return newRecords;
   }
 
-  private getRecordWithRelationships(
-    factoryName: string,
-    id: string,
-    relatedFor: RelatedFor[] = [],
-    options: RelationshipOptions = {
-      maxDepth: Infinity,
-      currentDepth: 1,
-      ignoreRelated: [],
-    }
-  ): LairRecord {
-    const recordRelationships = this.relationships.getRelationshipsForRecord(
-      factoryName,
-      id
-    );
-    const meta = this.getMetaFor(factoryName);
-    let record = this.db[factoryName][id];
-    if (!record) {
-      return null;
-    }
-    record = copy(record);
-    if (options.currentDepth >= options.maxDepth) {
-      return { ...record, ...recordRelationships } as LairRecord;
-    }
-    let ignoreRelated = [];
-    if (typeof options.ignoreRelated === 'boolean') {
-      ignoreRelated = options.ignoreRelated
-        ? this.getRelatedFactoryNames(factoryName)
-        : [];
-    }
-    if (isArray(options.ignoreRelated)) {
-      ignoreRelated = options.ignoreRelated;
-    }
-    if (recordRelationships) {
-      keys(recordRelationships).forEach((attrName) => {
-        const relatedIds = recordRelationships[attrName];
-        const relatedFactoryName = (meta[attrName] as RelationshipMetaAttr)
-          .factoryName;
-        if (ignoreRelated.indexOf(relatedFactoryName) !== -1) {
-          delete record[attrName];
-          return;
-        }
-        if (this.isRelated(factoryName, attrName, relatedFor)) {
-          record[attrName] = relatedIds;
-        } else {
-          const isRelatedFor = [...relatedFor, { factoryName, id, attrName }];
-          const opts = { ...options } as RelationshipOptions;
-          opts.currentDepth++;
-          record[attrName] = isArray(relatedIds)
-            ? relatedIds.map((relatedId) =>
-                this.getRecordWithRelationships(
-                  relatedFactoryName,
-                  relatedId,
-                  isRelatedFor,
-                  opts
-                )
-              )
-            : relatedIds
-            ? this.getRecordWithRelationships(
-                relatedFactoryName,
-                relatedIds,
-                isRelatedFor,
-                opts
-              )
-            : null;
-        }
-      });
-    }
-    return record;
-  }
-
   private isRelated(
     factoryName: string,
     attrName: string,
@@ -736,248 +978,5 @@ export class Lair {
         r.attrName &&
         r.attrName === attrMeta.invertedAttrName
     );
-  }
-
-  private createAttrValue(
-    factoryName: string,
-    id: string,
-    attrName: string,
-    val: string | string[]
-  ): string | string[] | null {
-    const meta = this.getMetaFor(factoryName);
-    const attrMeta = meta[attrName] as FieldMetaAttr<any>;
-    const { factoryName: distFactoryName, invertedAttrName: distAttrName } =
-      attrMeta;
-    const distMeta = this.getMetaFor(distFactoryName);
-    if (attrMeta.type === MetaAttrType.HAS_MANY) {
-      if (distMeta[distAttrName]) {
-        if (distMeta[distAttrName].type === MetaAttrType.HAS_ONE) {
-          return this.createManyToOneAttrValue(
-            factoryName,
-            id,
-            attrName,
-            val as string[],
-            distFactoryName,
-            distAttrName
-          );
-        }
-        if (distMeta[distAttrName].type === MetaAttrType.HAS_MANY) {
-          return this.createManyToManyAttrValue(
-            factoryName,
-            id,
-            attrName,
-            val as string[],
-            distFactoryName,
-            distAttrName
-          );
-        }
-      } else {
-        this.relationships.setMany(factoryName, id, attrName, val as string[]);
-      }
-    }
-    if (attrMeta.type === MetaAttrType.HAS_ONE) {
-      if (distMeta[distAttrName]) {
-        if (distMeta[distAttrName].type === MetaAttrType.HAS_ONE) {
-          return this.createOneToOneAttrValue(
-            factoryName,
-            id,
-            attrName,
-            val as string,
-            distFactoryName,
-            distAttrName
-          );
-        }
-        if (distMeta[distAttrName].type === MetaAttrType.HAS_MANY) {
-          return this.createOneToManyAttrValue(
-            factoryName,
-            id,
-            attrName,
-            val as string,
-            distFactoryName,
-            distAttrName
-          );
-        }
-      } else {
-        this.relationships.setOne(factoryName, id, attrName, val as string);
-      }
-    }
-    if (attrMeta.allowedValues && attrMeta.allowedValues.length) {
-      assert(
-        `"${attrName}" must be one of the "${attrMeta.allowedValues}". You passed "${val}"`,
-        attrMeta.allowedValues.indexOf(val) !== -1
-      );
-    }
-    warn(
-      `"${attrName}" expected to be "${
-        attrMeta.preferredType
-      }". You passed "${typeof val}"`,
-      !attrMeta.preferredType || attrMeta.preferredType === typeof val
-    );
-    return val;
-  }
-
-  private createOneToOneAttrValue(
-    factoryName: string,
-    id: string,
-    attrName: string,
-    newDistId: string,
-    distFactoryName: string,
-    distAttrName: string
-  ): string | null {
-    if (newDistId === null) {
-      this.relationships.deleteRelationshipForAttr(factoryName, id, attrName);
-      return null;
-    }
-    assert(
-      `"${newDistId}" is invalid identifier for record of "${distFactoryName}" [one-to-one relationship]`,
-      hasId(newDistId) || this.factories[factoryName].factory.allowCustomIds
-    );
-    const distId = getId(newDistId);
-    assert(
-      `Record of "${distFactoryName}" with id "${distId}" doesn't exist. Create it first [one-to-one relationship]`,
-      !!this.db[distFactoryName][distId]
-    );
-    this.relationships.createOneToOne(
-      factoryName,
-      id,
-      attrName,
-      distId,
-      distFactoryName,
-      distAttrName
-    );
-    return distId;
-  }
-
-  private createManyToOneAttrValue(
-    factoryName: string,
-    id: string,
-    attrName: string,
-    newDistIds: string[],
-    distFactoryName: string,
-    distAttrName: string
-  ): string[] | null {
-    assert(
-      `Array of ids should be provided for value of "${attrName}" [many-to-one relationship]`,
-      isArray(newDistIds) || newDistIds === null
-    );
-    if (newDistIds === null || newDistIds.length === 0) {
-      this.relationships.deleteRelationshipForAttr(factoryName, id, attrName);
-      return [];
-    }
-    const distIds = newDistIds.map((newDistId) => {
-      assert(
-        `"${newDistId}" is invalid identifier for record of "${distFactoryName}" [many-to-one relationship]`,
-        hasId(newDistId) || this.factories[factoryName].factory.allowCustomIds
-      );
-      const distId = getId(newDistId);
-      assert(
-        `Record of "${distFactoryName}" with id "${distId}" doesn't exist. Create it first [many-to-one relationship]`,
-        !!this.db[distFactoryName][distId]
-      );
-      return distId;
-    });
-    this.relationships.createManyToOne(
-      factoryName,
-      id,
-      attrName,
-      distIds,
-      distFactoryName,
-      distAttrName
-    );
-    return distIds;
-  }
-
-  private createOneToManyAttrValue(
-    factoryName: string,
-    id: string,
-    attrName: string,
-    newDistId: string,
-    distFactoryName: string,
-    distAttrName: string
-  ): string | null {
-    if (newDistId === null) {
-      this.relationships.deleteRelationshipForAttr(factoryName, id, attrName);
-      return null;
-    }
-    assert(
-      `"${newDistId}" is invalid identifier for record of "${distFactoryName}" [one-to-many relationship]`,
-      hasId(newDistId) || this.factories[factoryName].factory.allowCustomIds
-    );
-    const distId = getId(newDistId);
-    assert(
-      `Record of "${distFactoryName}" with id "${distId}" doesn't exist. Create it first [one-to-many relationship]`,
-      !!this.db[distFactoryName][distId]
-    );
-    this.relationships.createOneToMany(
-      factoryName,
-      id,
-      attrName,
-      distId,
-      distFactoryName,
-      distAttrName
-    );
-    return distId;
-  }
-
-  private createManyToManyAttrValue(
-    factoryName: string,
-    id: string,
-    attrName: string,
-    newDistIds: string[],
-    distFactoryName: string,
-    distAttrName: string
-  ): string[] | null {
-    assert(
-      `Array of ids should be provided for value of "${attrName}" [many-to-many relationship]`,
-      isArray(newDistIds) || newDistIds === null
-    );
-    if (newDistIds === null || newDistIds.length === 0) {
-      this.relationships.deleteRelationshipForAttr(factoryName, id, attrName);
-      return [];
-    }
-    const distIds = newDistIds.map((newDistId) => {
-      assert(
-        `"${newDistId}" is invalid identifier for record of "${distFactoryName}" [many-to-many relationship]`,
-        hasId(newDistId) || this.factories[factoryName].factory.allowCustomIds
-      );
-      const distId = getId(newDistId);
-      assert(
-        `Record of "${distFactoryName}" with id "${distId}" doesn't exist. Create it first [many-to-many relationship]`,
-        !!this.db[distFactoryName][distId]
-      );
-      return distId;
-    });
-    this.relationships.createManyToMany(
-      factoryName,
-      id,
-      attrName,
-      distIds,
-      distFactoryName,
-      distAttrName
-    );
-    return newDistIds;
-  }
-
-  public getMetaFor(factoryNameOrClass: any): Meta {
-    const metaForFactoryName = this.meta[factoryNameOrClass];
-    if (metaForFactoryName) {
-      return metaForFactoryName;
-    }
-    const factoryName = keys(this.factories).find(
-      (factoryName) =>
-        this.factories[factoryName].factory === factoryNameOrClass
-    );
-    return factoryName ? this.meta[factoryName] : undefined;
-  }
-
-  private getRelatedFactoryNames(factoryName: string): string[] {
-    const metaForFactory = this.getMetaFor(factoryName);
-    const relatedFactoryNames = [];
-    keys(metaForFactory).forEach((fieldName: string) => {
-      if (metaForFactory[fieldName].factoryName) {
-        relatedFactoryNames.push(metaForFactory[fieldName].factoryName);
-      }
-    });
-    return relatedFactoryNames;
   }
 }

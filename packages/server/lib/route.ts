@@ -34,6 +34,14 @@ export type CustomNext = (
 ) => any;
 
 export default class Route {
+  public method: string;
+  /**
+   * Used to override `server.namespace` for current Route
+   */
+  public namespace: string = null;
+  public oldHandler: Handler;
+  public path: string;
+
   public static createRoute(
     method = 'get',
     path = '/',
@@ -48,6 +56,27 @@ export default class Route {
     );
     route.path = path;
     return route;
+  }
+
+  public static delete(
+    path: string,
+    modelName: string,
+    customNext: CustomNext = defaultNext
+  ): Route {
+    const handler = (
+      req: Request,
+      res: Response,
+      next: NextFunction,
+      lair: Lair
+    ) => {
+      const parameters = Object.keys(req.params);
+      const id =
+        parameters.length === 1 ? req.params[parameters[0]] : undefined;
+      assert('identifier is not provided', !!id);
+      lair.deleteOne(modelName, id);
+      return customNext(req, res, null, lair);
+    };
+    return Route.createRoute('delete', path, handler);
   }
 
   public static get(
@@ -71,6 +100,26 @@ export default class Route {
       return customNext(req, res, result, lair);
     };
     return Route.createRoute('get', path, handler);
+  }
+
+  public static patch(
+    path: string,
+    modelName: string,
+    lairOptions: CRUDOptions = {},
+    customNext: CustomNext = defaultNext
+  ): Route {
+    return Route.createRoute(
+      'patch',
+      path,
+      (req: Request, res: Response, next: NextFunction, lair: Lair) => {
+        const parameters = Object.keys(req.params);
+        const id =
+          parameters.length === 1 ? req.params[parameters[0]] : undefined;
+        assert('identifier is not provided', !!id);
+        const result = lair.updateOne(modelName, id, req.body, lairOptions);
+        return customNext(req, res, result, lair);
+      }
+    );
   }
 
   public static post(
@@ -108,55 +157,6 @@ export default class Route {
       }
     );
   }
-
-  public static patch(
-    path: string,
-    modelName: string,
-    lairOptions: CRUDOptions = {},
-    customNext: CustomNext = defaultNext
-  ): Route {
-    return Route.createRoute(
-      'patch',
-      path,
-      (req: Request, res: Response, next: NextFunction, lair: Lair) => {
-        const parameters = Object.keys(req.params);
-        const id =
-          parameters.length === 1 ? req.params[parameters[0]] : undefined;
-        assert('identifier is not provided', !!id);
-        const result = lair.updateOne(modelName, id, req.body, lairOptions);
-        return customNext(req, res, result, lair);
-      }
-    );
-  }
-
-  public static delete(
-    path: string,
-    modelName: string,
-    customNext: CustomNext = defaultNext
-  ): Route {
-    const handler = (
-      req: Request,
-      res: Response,
-      next: NextFunction,
-      lair: Lair
-    ) => {
-      const parameters = Object.keys(req.params);
-      const id =
-        parameters.length === 1 ? req.params[parameters[0]] : undefined;
-      assert('identifier is not provided', !!id);
-      lair.deleteOne(modelName, id);
-      return customNext(req, res, null, lair);
-    };
-    return Route.createRoute('delete', path, handler);
-  }
-
-  public oldHandler: Handler;
-  public method: string;
-  /**
-   * Used to override `server.namespace` for current Route
-   */
-  public namespace: string = null;
-  public path: string;
 
   public defaultHandler(
     req: Request,

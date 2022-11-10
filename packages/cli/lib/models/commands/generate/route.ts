@@ -2,7 +2,7 @@ import fs = require('fs');
 import path = require('path');
 import colors = require('colors/safe');
 import { render } from 'ejs';
-import { mkdir, test, ShellString } from 'shelljs';
+import { ShellString, mkdir, test } from 'shelljs';
 import { Generate } from '../generate';
 import { camelize, classify } from '../../../utils/string';
 import { RouteInstance } from '../../instances/route';
@@ -10,8 +10,19 @@ import { RouteInstance } from '../../instances/route';
 export class GenerateRoute extends Generate {
   public instance: RouteInstance;
 
-  protected url: string;
   protected dynamic: string[];
+  protected url: string;
+
+  public lintFiles() {
+    super.lintFiles();
+    if (
+      this.linterInstalled() &&
+      !this.instance.options['skip-lint'] &&
+      !this.instance.options['skip-test']
+    ) {
+      this.lintFile(this.instance.schemasFullPath);
+    }
+  }
 
   public someFilesAlreadyExist(): boolean {
     return (
@@ -32,28 +43,18 @@ export class GenerateRoute extends Generate {
     }
   }
 
-  public lintFiles() {
-    super.lintFiles();
-    if (
-      this.linterInstalled() &&
-      !this.instance.options['skip-lint'] &&
-      !this.instance.options['skip-test']
-    ) {
-      this.lintFile(this.instance.schemasFullPath);
-    }
-  }
-
-  protected setup() {
-    this.url =
-      this.instance.options.url ||
-      path.join(this.instance.dir, this.instance.name).replace(/\\/g, '/');
-    if (this.url[0] !== '/') {
-      this.url = `/${this.url}`;
-    }
-    this.dynamic = this.url
-      .split('/')
-      .filter((c) => c[0] === ':')
-      .map((c) => c.substr(1));
+  public writeSchemaFile() {
+    mkdir('-p', this.instance.schemasPath);
+    const tpl = fs.readFileSync(
+      path.join(__dirname, `../../../../blueprints/files/default-schema.ejs`),
+      'utf-8'
+    );
+    ShellString(render(tpl, {})).to(this.instance.schemasFullPath);
+    console.log(
+      'Schema for',
+      colors.yellow(this.instance.relativePath),
+      'is created'
+    );
   }
 
   public writeSourceFile() {
@@ -79,20 +80,6 @@ export class GenerateRoute extends Generate {
       })
     ).to(this.instance.fullPath);
     console.log(colors.yellow(this.instance.relativePath), 'is created');
-  }
-
-  public writeSchemaFile() {
-    mkdir('-p', this.instance.schemasPath);
-    const tpl = fs.readFileSync(
-      path.join(__dirname, `../../../../blueprints/files/default-schema.ejs`),
-      'utf-8'
-    );
-    ShellString(render(tpl, {})).to(this.instance.schemasFullPath);
-    console.log(
-      'Schema for',
-      colors.yellow(this.instance.relativePath),
-      'is created'
-    );
   }
 
   public writeTestFile() {
@@ -134,5 +121,18 @@ export class GenerateRoute extends Generate {
       colors.yellow(this.instance.relativePath),
       'is created'
     );
+  }
+
+  protected setup() {
+    this.url =
+      this.instance.options.url ||
+      path.join(this.instance.dir, this.instance.name).replace(/\\/g, '/');
+    if (this.url[0] !== '/') {
+      this.url = `/${this.url}`;
+    }
+    this.dynamic = this.url
+      .split('/')
+      .filter((c) => c[0] === ':')
+      .map((c) => c.substr(1));
   }
 }

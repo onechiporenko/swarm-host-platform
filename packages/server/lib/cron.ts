@@ -3,6 +3,18 @@ import { ScheduledTask } from 'node-cron';
 const { hasOwnProperty } = Object;
 
 export default class Cron {
+  private static instance: Cron;
+
+  private readonly tasks: { [key: string]: ScheduledTask };
+
+  private constructor() {
+    this.tasks = {};
+  }
+
+  public static cleanCron(): void {
+    Cron.instance = new Cron();
+  }
+
   public static getCron(): Cron {
     if (!Cron.instance) {
       Cron.instance = new Cron();
@@ -10,20 +22,16 @@ export default class Cron {
     return Cron.instance;
   }
 
-  public static cleanCron(): void {
-    Cron.instance = new Cron();
-  }
-
-  private static instance: Cron;
-
-  private tasks: { [key: string]: ScheduledTask };
-
-  private constructor() {
-    this.tasks = {};
-  }
-
   public add(id: string, job: ScheduledTask): void {
     this.tasks[id] = job;
+  }
+
+  public destroy(id: string): void {
+    const job = this.tasks[id];
+    if (job) {
+      job.destroy();
+      delete this.tasks[id];
+    }
   }
 
   public has(id: string): boolean {
@@ -41,14 +49,6 @@ export default class Cron {
     const job = this.tasks[id];
     if (job) {
       job.stop();
-    }
-  }
-
-  public destroy(id: string): void {
-    const job = this.tasks[id];
-    if (job) {
-      job.destroy();
-      delete this.tasks[id];
     }
   }
 }

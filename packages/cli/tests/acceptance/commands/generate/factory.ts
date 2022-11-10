@@ -6,7 +6,7 @@ import {
 } from '../../utils/utils';
 import { expect } from 'chai';
 import shell = require('shelljs');
-import { cd, ShellString } from 'shelljs';
+import { ShellString, cd } from 'shelljs';
 
 let tmpDir;
 

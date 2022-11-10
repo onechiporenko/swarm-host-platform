@@ -1,3 +1,5 @@
+import { CRUDOptions, DevInfo, DevInfoItem, Lair } from './lair';
+
 import {
   CreateRecordExtraData,
   Factory,
@@ -9,11 +11,10 @@ import {
   RelationshipMetaAttr,
   SequenceMetaAttr,
   field,
-  hasOne,
   hasMany,
+  hasOne,
   sequenceItem,
 } from './factory';
-import { CRUDOptions, DevInfo, DevInfoItem, Lair } from './lair';
 
 import { LairRecord } from './record';
 

@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/member-ordering */
 import { expect } from 'chai';
 import { Factory, field, hasMany, hasOne } from '../../lib/factory';
 import { Lair } from '../../lib/lair';
 
-import { manyToOneFoo, manyToOneBar, manyToOneBaz } from '../expects';
+import { manyToOneBar, manyToOneBaz, manyToOneFoo } from '../expects';
 
 let lair;
 

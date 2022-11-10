@@ -1,5 +1,5 @@
-import { MetaAttrType } from '../../lib/factory';
 import { expect } from 'chai';
+import { MetaAttrType } from '../../lib/factory';
 import { CommonFactory } from './_shared';
 
 let factory;

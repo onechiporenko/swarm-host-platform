@@ -2,27 +2,27 @@ import path = require('path');
 import { Command } from './command';
 
 export interface InstanceOptions {
-  url?: string;
-  syntax?: string;
-  method?: string;
-  extends?: string;
-  rest?: string[];
   [k: string]: any;
+  extends?: string;
+  method?: string;
+  rest?: string[];
+  syntax?: string;
+  url?: string;
 }
 
 export class Instance {
-  public options: InstanceOptions;
-  public pathToNewInstance: string;
-  public name: string;
+  public command: Command;
   public dir: string;
+  public dirPath: string;
   public fileName: string;
   public fullPath: string;
-  public dirPath: string;
+  public name: string;
+  public options: InstanceOptions;
+  public pathToNewInstance: string;
   public relativePath: string;
-  public type: string;
-  public command: Command;
-  public testsPath: string;
   public testFullPath: string;
+  public testsPath: string;
+  public type: string;
 
   constructor(
     pathToNewInstance: string,
@@ -36,10 +36,6 @@ export class Instance {
     this.parsePath(pathToNewInstance);
   }
 
-  public setup(): void {
-    return undefined;
-  }
-
   public parsePath(pathToNewInstance: string): void {
     const p = path.parse(pathToNewInstance);
     this.pathToNewInstance = pathToNewInstance;
@@ -49,5 +45,9 @@ export class Instance {
     this.fileName = `${p.name}.ts`;
     this.fullPath = path.join(this.dirPath, this.fileName);
     this.relativePath = path.join(this.type, p.dir, this.fileName);
+  }
+
+  public setup(): void {
+    return undefined;
   }
 }

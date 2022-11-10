@@ -1,5 +1,5 @@
-import { Factory, field } from '../../lib/factory';
 import { expect } from 'chai';
+import { Factory, field } from '../../lib/factory';
 
 describe('Factory', () => {
   describe('#field', () => {
