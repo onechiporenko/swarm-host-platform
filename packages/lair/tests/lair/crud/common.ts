@@ -1,7 +1,7 @@
 import { expect } from 'chai';
+import sinon = require('sinon');
 import { Factory, field, hasMany, hasOne } from '../../../lib/factory';
 import { Lair } from '../../../lib/lair';
-import sinon = require('sinon');
 
 let sandbox;
 let lair;

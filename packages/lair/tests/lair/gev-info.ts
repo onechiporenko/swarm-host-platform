@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Factory, field, MetaAttrType } from '../../lib/factory';
+import { Factory, MetaAttrType, field } from '../../lib/factory';
 import { Lair } from '../../lib/lair';
 
 let lair;

@@ -1,6 +1,6 @@
+import { expect } from 'chai';
 import { Factory, field } from '../../lib/factory';
 import { Lair } from '../../lib/lair';
-import { expect } from 'chai';
 import { CommonFactory } from './_shared';
 
 let factory;

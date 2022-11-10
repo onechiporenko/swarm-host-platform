@@ -11,26 +11,6 @@ export type tickCallback = (val: any, indx?: number) => any;
 
 export interface JobOptions {
   /**
-   * Job identifier
-   */
-  id: string;
-
-  /**
-   * Cron-string
-   */
-  frequency: string;
-
-  /**
-   * Number of `tick`s
-   */
-  ticksCount: number;
-
-  /**
-   * Time in seconds
-   */
-  ticksDelay: number;
-
-  /**
    * When job should be stopped
    */
   endTime?: number;
@@ -41,14 +21,34 @@ export interface JobOptions {
   firstTick?: tickCallback;
 
   /**
-   * Job-handler for ticks before `firstTick` and `lastTick`
+   * Cron-string
    */
-  tick?: tickCallback;
+  frequency: string;
+
+  /**
+   * Job identifier
+   */
+  id: string;
 
   /**
    * Finish job
    */
   lastTick?: tickCallback;
+
+  /**
+   * Job-handler for ticks before `firstTick` and `lastTick`
+   */
+  tick?: tickCallback;
+
+  /**
+   * Number of `tick`s
+   */
+  ticksCount: number;
+
+  /**
+   * Time in seconds
+   */
+  ticksDelay: number;
 }
 
 /**
@@ -61,6 +61,19 @@ export interface JobOptions {
  * `tick` is called `ticksCount` times
  */
 export default class Job {
+  private firstTick: tickCallback;
+  private internalId: string;
+  private internalJob: ScheduledTask;
+  private lastTick: tickCallback;
+  private tick: tickCallback;
+  private constructor() {
+    // do nothing
+  }
+
+  get id(): string {
+    return this.internalId;
+  }
+
   public static createJob(options: JobOptions): Job {
     assert(
       '"options.ticksCount" must be greater than 0',
@@ -101,17 +114,8 @@ export default class Job {
     return job;
   }
 
-  private internalId: string;
-  private firstTick: tickCallback;
-  private tick: tickCallback;
-  private lastTick: tickCallback;
-  private internalJob: ScheduledTask;
-  private constructor() {
-    // do nothing
-  }
-
-  get id(): string {
-    return this.internalId;
+  public destroy(): void {
+    Cron.getCron().destroy(this.id);
   }
 
   public start(): void {
@@ -120,9 +124,5 @@ export default class Job {
 
   public stop(): void {
     Cron.getCron().stop(this.id);
-  }
-
-  public destroy(): void {
-    Cron.getCron().destroy(this.id);
   }
 }

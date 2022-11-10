@@ -1,5 +1,5 @@
-import { assert } from './utils';
 import { Lair } from './lair';
+import { assert } from './utils';
 
 const { isArray } = Array;
 

@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { Factory, field, hasMany, hasOne } from '../../lib/factory';
 import { Lair } from '../../lib/lair';
 
-import { oneToManyFoo, oneToManyBar, oneToManyBaz } from '../expects';
+import { oneToManyBar, oneToManyBaz, oneToManyFoo } from '../expects';
 
 let lair;
 

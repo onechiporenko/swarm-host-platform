@@ -1,7 +1,7 @@
 import { MetaAttrType, RelationshipMetaAttr } from './factory';
+import { arrayDiff, assert, isId, uniq } from './utils';
 import { InternalMetaStore } from './lair';
 import { LairRecord } from './record';
-import { arrayDiff, assert, isId, uniq } from './utils';
 
 const { isArray } = Array;
 const { keys } = Object;
@@ -23,12 +23,8 @@ function mapIds(val: string[]): string[] {
 }
 
 export class Relationships {
-  private relationships: InternalRelationships = {};
   private meta: InternalMetaStore = {};
-
-  public updateMeta(newMeta: InternalMetaStore): void {
-    this.meta = newMeta;
-  }
+  private relationships: InternalRelationships = {};
 
   public addFactory(factoryName: string): void {
     if (!this.relationships[factoryName]) {
@@ -52,13 +48,202 @@ export class Relationships {
     }
   }
 
-  public recalculateRelationshipsForRecord(
+  public addToMany(
     factoryName: string,
-    record: LairRecord
+    id: string,
+    attrName: string,
+    valueToAdd: string
   ): void {
-    keys(this.meta[factoryName]).forEach((attrName) =>
-      this.recalculateRelationshipForAttr(factoryName, record, attrName)
+    assert(
+      `"addToMany" should be used only for HAS_MANY relationships. You try to use for "${factoryName}.${attrName}"`,
+      this.meta[factoryName][attrName].type === MetaAttrType.HAS_MANY
     );
+    const newDistRelationships = this.getMany(factoryName, id, attrName) || [];
+    if (newDistRelationships.indexOf(valueToAdd) === -1) {
+      newDistRelationships.push(valueToAdd);
+    }
+    this.addRecord(factoryName, id);
+    this.setMany(factoryName, id, attrName, newDistRelationships);
+  }
+
+  public createManyToMany(
+    factoryName: string,
+    id: string,
+    attrName: string,
+    newDistIds: string[],
+    distFactoryName: string,
+    distAttrName: string
+  ): void {
+    const currentIds = this.getMany(factoryName, id, attrName);
+    const toAdd = currentIds ? arrayDiff(newDistIds, currentIds) : [];
+    const toRemove = currentIds ? arrayDiff(currentIds, newDistIds) : [];
+    toAdd.map((newId) =>
+      this.addToMany(distFactoryName, newId, distAttrName, id)
+    );
+    toRemove.map((newId) =>
+      this.removeFromMany(distFactoryName, newId, distAttrName, id)
+    );
+    this.setMany(factoryName, id, attrName, newDistIds);
+  }
+
+  public createManyToOne(
+    factoryName: string,
+    id: string,
+    attrName: string,
+    newDistIds: string[],
+    distFactoryName: string,
+    distAttrName: string
+  ): void {
+    const currentIds = this.getMany(factoryName, id, attrName);
+    const toAdd = currentIds ? arrayDiff(newDistIds, currentIds) : [];
+    const toRemove = currentIds ? arrayDiff(currentIds, newDistIds) : [];
+    toAdd.map((newId) => {
+      const oldSourceId = this.getOne(distFactoryName, newId, distAttrName);
+      if (oldSourceId) {
+        this.removeFromMany(factoryName, oldSourceId, attrName, newId);
+      }
+      this.setOne(distFactoryName, newId, distAttrName, id);
+    });
+    toRemove.map((newId) =>
+      this.setOne(distFactoryName, newId, distAttrName, null)
+    );
+    this.setMany(factoryName, id, attrName, newDistIds);
+  }
+
+  public createOneToMany(
+    factoryName: string,
+    id: string,
+    attrName: string,
+    newDistId: string,
+    distFactoryName: string,
+    distAttrName: string
+  ): void {
+    const oldDistId = this.getOne(factoryName, id, attrName);
+    if (oldDistId) {
+      this.removeFromMany(distFactoryName, oldDistId, distAttrName, id);
+    }
+    this.addToMany(distFactoryName, newDistId, distAttrName, id);
+    this.setOne(factoryName, id, attrName, newDistId);
+  }
+
+  public createOneToOne(
+    factoryName: string,
+    id: string,
+    attrName: string,
+    newDistId: string,
+    distFactoryName: string,
+    distAttrName: string
+  ): void {
+    const oldDistId = this.getOne(factoryName, id, attrName);
+    if (oldDistId) {
+      this.setOne(distFactoryName, oldDistId, distAttrName, null);
+      const oldSourceId = this.getOne(distFactoryName, oldDistId, distAttrName);
+      if (oldSourceId) {
+        this.setOne(factoryName, oldSourceId, attrName, null);
+      }
+    }
+    const oldSourceId2 = this.getOne(distFactoryName, newDistId, distAttrName);
+    this.setOne(factoryName, oldSourceId2, attrName, null);
+    this.setOne(factoryName, id, attrName, newDistId);
+    this.setOne(distFactoryName, newDistId, distAttrName, id);
+  }
+
+  public deleteRelationshipForAttr(
+    factoryName: string,
+    id: string,
+    attrName: string
+  ): void {
+    const meta = this.meta[factoryName];
+    const attrMeta = meta[attrName] as RelationshipMetaAttr;
+    if (
+      attrMeta.type !== MetaAttrType.HAS_ONE &&
+      attrMeta.type !== MetaAttrType.HAS_MANY
+    ) {
+      return;
+    }
+    const distMeta = this.meta[attrMeta.factoryName][attrMeta.invertedAttrName];
+    if (!distMeta) {
+      // relation looks like `Factory.hasOne('bar1', null)` or Factory.hasMany('bar1', null)
+      return;
+    }
+    if (attrMeta.type === MetaAttrType.HAS_ONE) {
+      if (distMeta.type === MetaAttrType.HAS_ONE) {
+        // ONE TO ONE
+        this.updateOneToOne(
+          factoryName,
+          id,
+          attrName,
+          attrMeta.factoryName,
+          null,
+          attrMeta.invertedAttrName
+        );
+      }
+      if (distMeta.type === MetaAttrType.HAS_MANY) {
+        // ONE TO MANY
+        this.updateOneToMany(
+          factoryName,
+          id,
+          attrName,
+          attrMeta.factoryName,
+          null,
+          attrMeta.invertedAttrName
+        );
+      }
+    }
+    if (meta[attrName].type === MetaAttrType.HAS_MANY) {
+      if (distMeta.type === MetaAttrType.HAS_ONE) {
+        // MANY TO ONE
+        this.updateManyToOne(
+          factoryName,
+          id,
+          attrName,
+          attrMeta.factoryName,
+          null,
+          attrMeta.invertedAttrName
+        );
+      }
+      if (distMeta.type === MetaAttrType.HAS_MANY) {
+        // MANY TO MANY
+        this.updateManyToMany(
+          factoryName,
+          id,
+          attrName,
+          attrMeta.factoryName,
+          null,
+          attrMeta.invertedAttrName
+        );
+      }
+    }
+  }
+
+  public deleteRelationshipsForRecord(factoryName: string, id: string): void {
+    keys(this.meta[factoryName]).forEach((attrName) =>
+      this.deleteRelationshipForAttr(factoryName, id, attrName)
+    );
+    delete this.relationships[factoryName][id];
+  }
+
+  public getMany(factoryName: string, id: string, attrName: string): string[] {
+    if (!this.recordRelationshipsExist(factoryName, id)) {
+      return [];
+    }
+    const val = this.relationships[factoryName][id][attrName];
+    return isArray(val) ? val : [];
+  }
+
+  public getOne(factoryName: string, id: string, attrName: string): string {
+    if (!this.recordRelationshipsExist(factoryName, id)) {
+      return null;
+    }
+    const val = this.relationships[factoryName][id][attrName];
+    return !isArray(val) ? val : null;
+  }
+
+  public getRelationshipsForRecord(
+    factoryName: string,
+    id: string
+  ): RecordRelationShips {
+    return this.relationships[factoryName][id];
   }
 
   public recalculateRelationshipForAttr(
@@ -137,95 +322,13 @@ export class Relationships {
     }
   }
 
-  public deleteRelationshipsForRecord(factoryName: string, id: string): void {
-    keys(this.meta[factoryName]).forEach((attrName) =>
-      this.deleteRelationshipForAttr(factoryName, id, attrName)
-    );
-    delete this.relationships[factoryName][id];
-  }
-
-  public deleteRelationshipForAttr(
+  public recalculateRelationshipsForRecord(
     factoryName: string,
-    id: string,
-    attrName: string
+    record: LairRecord
   ): void {
-    const meta = this.meta[factoryName];
-    const attrMeta = meta[attrName] as RelationshipMetaAttr;
-    if (
-      attrMeta.type !== MetaAttrType.HAS_ONE &&
-      attrMeta.type !== MetaAttrType.HAS_MANY
-    ) {
-      return;
-    }
-    const distMeta = this.meta[attrMeta.factoryName][attrMeta.invertedAttrName];
-    if (!distMeta) {
-      // relation looks like `Factory.hasOne('bar1', null)` or Factory.hasMany('bar1', null)
-      return;
-    }
-    if (attrMeta.type === MetaAttrType.HAS_ONE) {
-      if (distMeta.type === MetaAttrType.HAS_ONE) {
-        // ONE TO ONE
-        this.updateOneToOne(
-          factoryName,
-          id,
-          attrName,
-          attrMeta.factoryName,
-          null,
-          attrMeta.invertedAttrName
-        );
-      }
-      if (distMeta.type === MetaAttrType.HAS_MANY) {
-        // ONE TO MANY
-        this.updateOneToMany(
-          factoryName,
-          id,
-          attrName,
-          attrMeta.factoryName,
-          null,
-          attrMeta.invertedAttrName
-        );
-      }
-    }
-    if (meta[attrName].type === MetaAttrType.HAS_MANY) {
-      if (distMeta.type === MetaAttrType.HAS_ONE) {
-        // MANY TO ONE
-        this.updateManyToOne(
-          factoryName,
-          id,
-          attrName,
-          attrMeta.factoryName,
-          null,
-          attrMeta.invertedAttrName
-        );
-      }
-      if (distMeta.type === MetaAttrType.HAS_MANY) {
-        // MANY TO MANY
-        this.updateManyToMany(
-          factoryName,
-          id,
-          attrName,
-          attrMeta.factoryName,
-          null,
-          attrMeta.invertedAttrName
-        );
-      }
-    }
-  }
-
-  public getOne(factoryName: string, id: string, attrName: string): string {
-    if (!this.recordRelationshipsExist(factoryName, id)) {
-      return null;
-    }
-    const val = this.relationships[factoryName][id][attrName];
-    return !isArray(val) ? val : null;
-  }
-
-  public getMany(factoryName: string, id: string, attrName: string): string[] {
-    if (!this.recordRelationshipsExist(factoryName, id)) {
-      return [];
-    }
-    const val = this.relationships[factoryName][id][attrName];
-    return isArray(val) ? val : [];
+    keys(this.meta[factoryName]).forEach((attrName) =>
+      this.recalculateRelationshipForAttr(factoryName, record, attrName)
+    );
   }
 
   public removeFromMany(
@@ -247,22 +350,20 @@ export class Relationships {
     this.setMany(factoryName, id, attrName, newValue);
   }
 
-  public addToMany(
+  public setMany(
     factoryName: string,
     id: string,
     attrName: string,
-    valueToAdd: string
+    valueToSet: string[]
   ): void {
     assert(
-      `"addToMany" should be used only for HAS_MANY relationships. You try to use for "${factoryName}.${attrName}"`,
+      `"setMany" should be used only for HAS_MANY relationships. You try to use for "${factoryName}.${attrName}"`,
       this.meta[factoryName][attrName].type === MetaAttrType.HAS_MANY
     );
-    const newDistRelationships = this.getMany(factoryName, id, attrName) || [];
-    if (newDistRelationships.indexOf(valueToAdd) === -1) {
-      newDistRelationships.push(valueToAdd);
+    if (!this.recordRelationshipsExist(factoryName, id)) {
+      return;
     }
-    this.addRecord(factoryName, id);
-    this.setMany(factoryName, id, attrName, newDistRelationships);
+    this.relationships[factoryName][id][attrName] = uniq(valueToSet.sort());
   }
 
   public setOne(
@@ -280,110 +381,23 @@ export class Relationships {
     }
     this.relationships[factoryName][id][attrName] = valueToSet;
   }
-
-  public setMany(
-    factoryName: string,
-    id: string,
-    attrName: string,
-    valueToSet: string[]
-  ): void {
-    assert(
-      `"setMany" should be used only for HAS_MANY relationships. You try to use for "${factoryName}.${attrName}"`,
-      this.meta[factoryName][attrName].type === MetaAttrType.HAS_MANY
-    );
-    if (!this.recordRelationshipsExist(factoryName, id)) {
-      return;
-    }
-    this.relationships[factoryName][id][attrName] = uniq(valueToSet.sort());
+  public updateMeta(newMeta: InternalMetaStore): void {
+    this.meta = newMeta;
   }
 
-  public getRelationshipsForRecord(
-    factoryName: string,
-    id: string
-  ): RecordRelationShips {
-    return this.relationships[factoryName][id];
-  }
-
-  public createOneToOne(
-    factoryName: string,
-    id: string,
-    attrName: string,
-    newDistId: string,
+  protected dropRelationship(
     distFactoryName: string,
-    distAttrName: string
+    distAttrName: string,
+    sourceRecordId: string
   ): void {
-    const oldDistId = this.getOne(factoryName, id, attrName);
-    if (oldDistId) {
-      this.setOne(distFactoryName, oldDistId, distAttrName, null);
-      const oldSourceId = this.getOne(distFactoryName, oldDistId, distAttrName);
-      if (oldSourceId) {
-        this.setOne(factoryName, oldSourceId, attrName, null);
+    keys(this.relationships[distFactoryName]).forEach((rId) => {
+      if (
+        this.relationships[distFactoryName][rId][distAttrName] ===
+        sourceRecordId
+      ) {
+        this.relationships[distFactoryName][rId][distAttrName] = null;
       }
-    }
-    const oldSourceId2 = this.getOne(distFactoryName, newDistId, distAttrName);
-    this.setOne(factoryName, oldSourceId2, attrName, null);
-    this.setOne(factoryName, id, attrName, newDistId);
-    this.setOne(distFactoryName, newDistId, distAttrName, id);
-  }
-
-  public createManyToOne(
-    factoryName: string,
-    id: string,
-    attrName: string,
-    newDistIds: string[],
-    distFactoryName: string,
-    distAttrName: string
-  ): void {
-    const currentIds = this.getMany(factoryName, id, attrName);
-    const toAdd = currentIds ? arrayDiff(newDistIds, currentIds) : [];
-    const toRemove = currentIds ? arrayDiff(currentIds, newDistIds) : [];
-    toAdd.map((newId) => {
-      const oldSourceId = this.getOne(distFactoryName, newId, distAttrName);
-      if (oldSourceId) {
-        this.removeFromMany(factoryName, oldSourceId, attrName, newId);
-      }
-      this.setOne(distFactoryName, newId, distAttrName, id);
     });
-    toRemove.map((newId) =>
-      this.setOne(distFactoryName, newId, distAttrName, null)
-    );
-    this.setMany(factoryName, id, attrName, newDistIds);
-  }
-
-  public createOneToMany(
-    factoryName: string,
-    id: string,
-    attrName: string,
-    newDistId: string,
-    distFactoryName: string,
-    distAttrName: string
-  ): void {
-    const oldDistId = this.getOne(factoryName, id, attrName);
-    if (oldDistId) {
-      this.removeFromMany(distFactoryName, oldDistId, distAttrName, id);
-    }
-    this.addToMany(distFactoryName, newDistId, distAttrName, id);
-    this.setOne(factoryName, id, attrName, newDistId);
-  }
-
-  public createManyToMany(
-    factoryName: string,
-    id: string,
-    attrName: string,
-    newDistIds: string[],
-    distFactoryName: string,
-    distAttrName: string
-  ): void {
-    const currentIds = this.getMany(factoryName, id, attrName);
-    const toAdd = currentIds ? arrayDiff(newDistIds, currentIds) : [];
-    const toRemove = currentIds ? arrayDiff(currentIds, newDistIds) : [];
-    toAdd.map((newId) =>
-      this.addToMany(distFactoryName, newId, distAttrName, id)
-    );
-    toRemove.map((newId) =>
-      this.removeFromMany(distFactoryName, newId, distAttrName, id)
-    );
-    this.setMany(factoryName, id, attrName, newDistIds);
   }
 
   protected recordRelationshipsExist(factoryName: string, id: string): boolean {
@@ -394,40 +408,47 @@ export class Relationships {
     return !!f[id];
   }
 
-  /**
-   * Update relations for records related like one-to-one.
-   *
-   * * Allows dropping relation (with `distRecordId` null).
-   * * Allows updating relation (with `distRecordId` not null).
-   *
-   * Also drops relation for `a1` in case `a1 - b1`, when new `a2 - b1` is set.
-   */
-  protected updateOneToOne(
+  protected updateManyToMany(
     sourceFactoryName: string,
     sourceRecordId: string,
     sourceAttrName: string,
     distFactoryName: string,
-    distRecordId: string,
+    distRecordIds: string[],
     distAttrName: string
   ): void {
+    distRecordIds = distRecordIds || [];
     this.addRecord(sourceFactoryName, sourceRecordId);
-    this.setOne(
+    if (isArray(distRecordIds)) {
+      distRecordIds.forEach((distRecordId) =>
+        this.addRecord(distFactoryName, distRecordId)
+      );
+    }
+    const oldDistIds =
+      this.getMany(sourceFactoryName, sourceRecordId, sourceAttrName) || [];
+    const toRemove = arrayDiff(oldDistIds, distRecordIds);
+    const toAdd = arrayDiff(distRecordIds, oldDistIds);
+    toRemove.forEach((distId) => {
+      this.removeFromMany(
+        distFactoryName,
+        distId,
+        distAttrName,
+        sourceRecordId
+      );
+    });
+    toAdd.forEach((distRecordId) => {
+      this.addToMany(
+        distFactoryName,
+        distRecordId,
+        distAttrName,
+        sourceRecordId
+      );
+    });
+    this.setMany(
       sourceFactoryName,
       sourceRecordId,
       sourceAttrName,
-      distRecordId
+      isArray(distRecordIds) ? distRecordIds : []
     );
-    if (distRecordId) {
-      this.addRecord(distFactoryName, distRecordId);
-      const oldDistId =
-        this.relationships[distFactoryName][distRecordId][distAttrName];
-      this.setOne(distFactoryName, distRecordId, distAttrName, sourceRecordId);
-      if (typeof oldDistId === 'string') {
-        this.setOne(sourceFactoryName, oldDistId, sourceAttrName, null);
-      }
-    } else {
-      this.dropRelationship(distFactoryName, distAttrName, sourceRecordId);
-    }
   }
 
   protected updateManyToOne(
@@ -520,61 +541,39 @@ export class Relationships {
     }
   }
 
-  protected updateManyToMany(
+  /**
+   * Update relations for records related like one-to-one.
+   *
+   * * Allows dropping relation (with `distRecordId` null).
+   * * Allows updating relation (with `distRecordId` not null).
+   *
+   * Also drops relation for `a1` in case `a1 - b1`, when new `a2 - b1` is set.
+   */
+  protected updateOneToOne(
     sourceFactoryName: string,
     sourceRecordId: string,
     sourceAttrName: string,
     distFactoryName: string,
-    distRecordIds: string[],
+    distRecordId: string,
     distAttrName: string
   ): void {
-    distRecordIds = distRecordIds || [];
     this.addRecord(sourceFactoryName, sourceRecordId);
-    if (isArray(distRecordIds)) {
-      distRecordIds.forEach((distRecordId) =>
-        this.addRecord(distFactoryName, distRecordId)
-      );
-    }
-    const oldDistIds =
-      this.getMany(sourceFactoryName, sourceRecordId, sourceAttrName) || [];
-    const toRemove = arrayDiff(oldDistIds, distRecordIds);
-    const toAdd = arrayDiff(distRecordIds, oldDistIds);
-    toRemove.forEach((distId) => {
-      this.removeFromMany(
-        distFactoryName,
-        distId,
-        distAttrName,
-        sourceRecordId
-      );
-    });
-    toAdd.forEach((distRecordId) => {
-      this.addToMany(
-        distFactoryName,
-        distRecordId,
-        distAttrName,
-        sourceRecordId
-      );
-    });
-    this.setMany(
+    this.setOne(
       sourceFactoryName,
       sourceRecordId,
       sourceAttrName,
-      isArray(distRecordIds) ? distRecordIds : []
+      distRecordId
     );
-  }
-
-  protected dropRelationship(
-    distFactoryName: string,
-    distAttrName: string,
-    sourceRecordId: string
-  ): void {
-    keys(this.relationships[distFactoryName]).forEach((rId) => {
-      if (
-        this.relationships[distFactoryName][rId][distAttrName] ===
-        sourceRecordId
-      ) {
-        this.relationships[distFactoryName][rId][distAttrName] = null;
+    if (distRecordId) {
+      this.addRecord(distFactoryName, distRecordId);
+      const oldDistId =
+        this.relationships[distFactoryName][distRecordId][distAttrName];
+      this.setOne(distFactoryName, distRecordId, distAttrName, sourceRecordId);
+      if (typeof oldDistId === 'string') {
+        this.setOne(sourceFactoryName, oldDistId, sourceAttrName, null);
       }
-    });
+    } else {
+      this.dropRelationship(distFactoryName, distAttrName, sourceRecordId);
+    }
   }
 }

@@ -2,26 +2,21 @@ import colors = require('colors/safe');
 import { render } from 'ejs';
 import fs = require('fs');
 import path = require('path');
-import { mkdir, ShellString } from 'shelljs';
+import { ShellString, mkdir } from 'shelljs';
 import { Generate } from '../generate';
 import FactoryAttr from './../../../models/factory-attr';
 import { camelize, classify } from '../../../utils/string';
 
 export class GenerateFactory extends Generate {
-  getRelativePathForExtend(childPath, parentPath): string {
-    let child = childPath.split('/');
-    child.pop();
-    child = child.join('/');
-    let parent = parentPath.split('/');
-    const parentFactoryName = parent.pop();
-    parent = parent.join('/');
-    let relativePath = `${path
-      .relative(child, parent)
-      .replace(/\\/g, '/')}/${parentFactoryName}`;
-    if (path.isAbsolute(relativePath)) {
-      relativePath = `.${relativePath}`;
-    }
-    return relativePath.indexOf('.') === 0 ? relativePath : `./${relativePath}`;
+  getCustomFactoryImportString(
+    customFactoryName: string,
+    childPath: string,
+    parentPath: string
+  ): string {
+    return `import ${customFactoryName} from '${this.getRelativePathForExtend(
+      childPath,
+      parentPath
+    )}';`;
   }
 
   getCustomFactoryNameToExtend(path: string): string {
@@ -38,22 +33,29 @@ export class GenerateFactory extends Generate {
     return `${customFactoryName}Factory`;
   }
 
-  getCustomFactoryImportString(
-    customFactoryName: string,
-    childPath: string,
-    parentPath: string
-  ): string {
-    return `import ${customFactoryName} from '${this.getRelativePathForExtend(
-      childPath,
-      parentPath
-    )}';`;
+  getImportPathForTestFile() {
+    const separator = this.instance.dir.includes('/') ? '/' : '\\';
+    const depth = this.instance.dir.split(separator).length;
+    const mod = this.instance.dir === '' ? 2 : 3;
+    return `${'../'.repeat(depth + mod)}app/${this.instance.type}/${
+      this.instance.dir ? this.instance.dir + '/' : ''
+    }${this.instance.name}`;
   }
 
-  getSwarmHostImportString(imports: string[]): string {
-    if (!imports.length) {
-      return '';
+  getRelativePathForExtend(childPath, parentPath): string {
+    let child = childPath.split('/');
+    child.pop();
+    child = child.join('/');
+    let parent = parentPath.split('/');
+    const parentFactoryName = parent.pop();
+    parent = parent.join('/');
+    let relativePath = `${path
+      .relative(child, parent)
+      .replace(/\\/g, '/')}/${parentFactoryName}`;
+    if (path.isAbsolute(relativePath)) {
+      relativePath = `.${relativePath}`;
     }
-    return `import { ${imports.join(', ')} } from '@swarm-host/server';`;
+    return relativePath.indexOf('.') === 0 ? relativePath : `./${relativePath}`;
   }
 
   getSwarmHostImports(attrs: FactoryAttr[]) {
@@ -63,13 +65,11 @@ export class GenerateFactory extends Generate {
       .map((item) => camelize(item));
   }
 
-  getImportPathForTestFile() {
-    const separator = this.instance.dir.includes('/') ? '/' : '\\';
-    const depth = this.instance.dir.split(separator).length;
-    const mod = this.instance.dir === '' ? 2 : 3;
-    return `${'../'.repeat(depth + mod)}app/${this.instance.type}/${
-      this.instance.dir ? this.instance.dir + '/' : ''
-    }${this.instance.name}`;
+  getSwarmHostImportString(imports: string[]): string {
+    if (!imports.length) {
+      return '';
+    }
+    return `import { ${imports.join(', ')} } from '@swarm-host/server';`;
   }
 
   public writeFiles(): void {

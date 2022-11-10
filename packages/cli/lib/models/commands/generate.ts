@@ -15,19 +15,6 @@ export const confirmOverrideQuestion = {
 export abstract class Generate extends Command {
   protected linterPath = path.join(process.cwd(), './node_modules/.bin/eslint');
 
-  protected linterInstalled() {
-    return test('-f', this.linterPath);
-  }
-
-  public someFilesAlreadyExist(): boolean {
-    return (
-      (test('-e', this.instance.fullPath) &&
-        !this.instance.options['skip-source']) ||
-      (test('-e', this.instance.testFullPath) &&
-        !this.instance.options['skip-test'])
-    );
-  }
-
   public execute(): void {
     if (this.someFilesAlreadyExist()) {
       inquirer
@@ -47,9 +34,8 @@ export abstract class Generate extends Command {
     }
   }
 
-  public writeFiles() {
-    this.writeSourceFile();
-    this.writeTestFile();
+  public lintFile(filePath: string) {
+    exec(`${this.linterPath} ${filePath} --fix`, { silent: true });
   }
 
   public lintFiles() {
@@ -69,8 +55,22 @@ export abstract class Generate extends Command {
     }
   }
 
-  public lintFile(filePath: string) {
-    exec(`${this.linterPath} ${filePath} --fix`, { silent: true });
+  public someFilesAlreadyExist(): boolean {
+    return (
+      (test('-e', this.instance.fullPath) &&
+        !this.instance.options['skip-source']) ||
+      (test('-e', this.instance.testFullPath) &&
+        !this.instance.options['skip-test'])
+    );
+  }
+
+  public writeFiles() {
+    this.writeSourceFile();
+    this.writeTestFile();
+  }
+
+  protected linterInstalled() {
+    return test('-f', this.linterPath);
   }
 
   public abstract writeSourceFile(): void;

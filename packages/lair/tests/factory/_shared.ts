@@ -1,35 +1,33 @@
 import {
-  field,
   Factory,
-  hasOne,
+  field,
   hasMany,
+  hasOne,
   sequenceItem,
 } from '../../lib/factory';
 
 export class CommonFactory extends Factory {
   static factoryName = 'f';
+
   @field()
   first = 'static';
-
-  @field()
-  get second(): string {
-    return `dynamic ${this.id}`;
-  }
-
-  @field()
-  get third(): string {
-    return `third is ${this.second}`;
-  }
 
   @field({
     defaultValue: 'default value for fourth',
   })
   fourth = 'fourth';
 
+  @hasMany('anotherFactory', 'attr2') many;
+  @hasMany('test', null, { reflexive: true, depth: 2 }) manyTests;
+  @hasOne('anotherFactory', 'attr1') one;
+
+  @hasOne('test', null, { reflexive: true, depth: 2 }) oneTest;
+
+  @sequenceItem(1, (prevItems) => prevItems.reduce((a, b) => a + b, 0))
+  sequenceItem;
+
   @field()
-  get fifth(): string {
-    return `fifth ${this.id}`;
-  }
+  seventh = 1;
 
   @field({
     allowedValues: [1, 2, 3],
@@ -38,11 +36,8 @@ export class CommonFactory extends Factory {
   sixth = 1;
 
   @field()
-  seventh = 1;
-
-  @field()
-  get rand(): number {
-    return Math.random();
+  get fifth(): string {
+    return `fifth ${this.id}`;
   }
 
   @field()
@@ -55,10 +50,18 @@ export class CommonFactory extends Factory {
     return this.rand as number;
   }
 
-  @hasOne('anotherFactory', 'attr1') one;
-  @hasMany('anotherFactory', 'attr2') many;
-  @hasOne('test', null, { reflexive: true, depth: 2 }) oneTest;
-  @hasMany('test', null, { reflexive: true, depth: 2 }) manyTests;
-  @sequenceItem(1, (prevItems) => prevItems.reduce((a, b) => a + b, 0))
-  sequenceItem;
+  @field()
+  get rand(): number {
+    return Math.random();
+  }
+
+  @field()
+  get second(): string {
+    return `dynamic ${this.id}`;
+  }
+
+  @field()
+  get third(): string {
+    return `third is ${this.second}`;
+  }
 }

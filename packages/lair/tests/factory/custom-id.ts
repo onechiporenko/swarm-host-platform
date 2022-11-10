@@ -7,15 +7,15 @@ let lair;
 class FactoryWithCustomId extends Factory {
   static factoryName = 'a';
 
-  @field()
-  get id() {
-    return `custom_${this.index}`;
-  }
-
   @sequenceItem(1, (prevValues) => prevValues.length + 1)
   index;
 
   allowCustomIds = true;
+
+  @field()
+  get id() {
+    return `custom_${this.index}`;
+  }
 }
 
 describe('Factory', () => {

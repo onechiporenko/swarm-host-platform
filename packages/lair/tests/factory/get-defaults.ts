@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import {
-  field,
   Factory,
-  hasOne,
+  field,
   hasMany,
+  hasOne,
   sequenceItem,
 } from '../../lib/factory';
 

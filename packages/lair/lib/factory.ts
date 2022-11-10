@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { LairRecord } from './record';
 import { assert, copy, getOrCalcValue, getVal } from './utils';
+import { LairRecord } from './record';
 
 const { keys, defineProperty, hasOwnProperty } = Object;
 
@@ -28,40 +28,40 @@ export interface Meta {
 }
 
 export interface MetaAttr {
-  type: MetaAttrType;
-  extras?: Record<string, any>;
   [prop: string]: any;
+  extras?: Record<string, any>;
+  type: MetaAttrType;
 }
 
 export interface SequenceMetaAttr<T> extends MetaAttr {
-  initialValue: T;
   getNextValue: (prevItems: T[]) => T;
-  prevValues: T[];
+  initialValue: T;
   lastValuesCount: number;
+  prevValues: T[];
   started: boolean;
 }
 
 export interface RelationshipMetaAttr extends MetaAttr {
+  createRelated?: CreateRelated;
   factoryName: string;
   invertedAttrName: string;
   reflexive: boolean;
   reflexiveDepth: number;
-  createRelated?: CreateRelated;
   useExistingAsRelated?: number | ((id: string) => number);
 }
 
 export interface FieldMetaAttr<T> extends MetaAttr {
-  defaultValue?: T;
   allowedValues?: T[]; // something like enum
+  defaultValue?: T;
+  getter?: (...args: any[]) => any;
   preferredType?: string;
   value: T | (() => T);
-  getter?: (...args: any[]) => any;
 }
 
 export interface RelationshipOptions {
-  reflexive?: boolean;
-  depth?: number;
   createRelated?: CreateRelated;
+  depth?: number;
+  reflexive?: boolean;
   useExistingAsRelated?: number | ((id: string) => number);
 }
 
@@ -70,14 +70,14 @@ export interface SequenceItemOptions {
 }
 
 export interface FieldOptions<T> {
+  allowedValues?: T[];
   defaultValue?: T;
   preferredType?: string;
-  allowedValues?: T[];
 }
 
 export interface CreateRecordExtraData {
-  relatedTo?: RelatedToData;
   [key: string]: any;
+  relatedTo?: RelatedToData;
 }
 
 export interface RelatedToData {
@@ -328,6 +328,34 @@ export class Factory {
   static factoryName = '';
   static internalMeta: Meta;
 
+  public afterCreateIgnoreRelated: string[] = [];
+  public afterCreateRelationshipsDepth = 1;
+  public allowCustomIds = false;
+
+  protected _id;
+  protected cache = new Map();
+  protected currentRecordId;
+
+  public constructor() {
+    this.softInitMeta();
+    this.mergeMetaWithParent();
+  }
+
+  @field()
+  get id() {
+    return this._id;
+  }
+  set id(v) {
+    this._id = v;
+  }
+
+  get meta(): Meta {
+    return Reflect.getOwnMetadata(
+      FACTORY_META_KEY,
+      this['__proto__'].constructor
+    );
+  }
+
   // for internal use
   static resetMeta(): void {
     const meta = Reflect.getOwnMetadata(FACTORY_META_KEY, this);
@@ -347,28 +375,11 @@ export class Factory {
     });
   }
 
-  public afterCreateRelationshipsDepth = 1;
-  public afterCreateIgnoreRelated: string[] = [];
-  public allowCustomIds = false;
-
-  protected cache = new Map();
-  protected currentRecordId;
-
-  protected _id;
-
-  @field()
-  get id() {
-    return this._id;
-  }
-  set id(v) {
-    this._id = v;
-  }
-
-  get meta(): Meta {
-    return Reflect.getOwnMetadata(
-      FACTORY_META_KEY,
-      this['__proto__'].constructor
-    );
+  public afterCreate(
+    record: LairRecord,
+    extraData: CreateRecordExtraData
+  ): LairRecord {
+    return record;
   }
 
   /**
@@ -382,17 +393,6 @@ export class Factory {
     return {
       ...newRecord,
     };
-  }
-
-  public afterCreate(
-    record: LairRecord,
-    extraData: CreateRecordExtraData
-  ): LairRecord {
-    return record;
-  }
-
-  public getFactoryName(): string {
-    return this['__proto__'].constructor.factoryName;
   }
 
   /**
@@ -409,30 +409,8 @@ export class Factory {
     }, {});
   }
 
-  public constructor() {
-    this.softInitMeta();
-    this.mergeMetaWithParent();
-  }
-
-  protected softInitMeta(): void {
-    setupFactoryMeta(this['__proto__'].constructor);
-  }
-
-  protected mergeMetaWithParent(): void {
-    const parentClass = this['__proto__']['__proto__'];
-    if (parentClass) {
-      const parentMeta =
-        Reflect.getOwnMetadata(FACTORY_META_KEY, parentClass.constructor) || {};
-      keys(parentMeta).forEach((attrName) => {
-        if (!this.meta[attrName]) {
-          updateFactoryMeta(
-            this['__proto__'].constructor,
-            attrName,
-            parentMeta[attrName]
-          );
-        }
-      });
-    }
+  public getFactoryName(): string {
+    return this['__proto__'].constructor.factoryName;
   }
 
   protected getNewRecord(
@@ -465,5 +443,26 @@ export class Factory {
     this.cache.delete(this.currentRecordId);
     delete record.extraData;
     return record;
+  }
+
+  protected mergeMetaWithParent(): void {
+    const parentClass = this['__proto__']['__proto__'];
+    if (parentClass) {
+      const parentMeta =
+        Reflect.getOwnMetadata(FACTORY_META_KEY, parentClass.constructor) || {};
+      keys(parentMeta).forEach((attrName) => {
+        if (!this.meta[attrName]) {
+          updateFactoryMeta(
+            this['__proto__'].constructor,
+            attrName,
+            parentMeta[attrName]
+          );
+        }
+      });
+    }
+  }
+
+  protected softInitMeta(): void {
+    setupFactoryMeta(this['__proto__'].constructor);
   }
 }

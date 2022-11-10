@@ -80,38 +80,22 @@ function createOne(req: Request, res: Response): Response {
 }
 
 export default class Server {
-  public static getServer(): Server {
-    if (!Server.instance) {
-      Server.instance = new Server();
-    }
-    return Server.instance;
-  }
-
-  public static cleanServer(): void {
-    Lair.cleanLair();
-    Server.instance = new Server();
-  }
-
   private static instance: Server;
 
+  public delay = 0;
   public expressApp: Application;
+  public lairNamespace = '/lair';
   public namespace = '';
   public port = 54321;
   public verbose = true;
-  public delay = 0;
-  public lairNamespace = '/lair';
 
-  public get server(): http.Server {
-    return this.internalServer;
-  }
-
-  private readonly expressRouter: Router;
+  private createRecordsQueue: [string, number][] = [];
   private readonly expressLairRouter: Router;
+  private readonly expressRouter: Router;
+  private internalServer: http.Server;
   private readonly lair: Lair;
   private logger: winston.Logger;
-  private createRecordsQueue: [string, number][] = [];
   private middlewaresQueue: RequestHandler[] = [];
-  private internalServer: http.Server;
 
   private constructor() {
     this.expressApp = express();
@@ -126,6 +110,44 @@ export default class Server {
         }),
       ],
     });
+  }
+
+  public get server(): http.Server {
+    return this.internalServer;
+  }
+
+  public static cleanServer(): void {
+    Lair.cleanLair();
+    Server.instance = new Server();
+  }
+
+  public static getServer(): Server {
+    if (!Server.instance) {
+      Server.instance = new Server();
+    }
+    return Server.instance;
+  }
+
+  public addFactories(factories: (Factory | typeof Factory)[]): void {
+    factories.map((factory) => this.addFactory(factory));
+  }
+
+  public async addFactoriesFromDir(path: string): Promise<any> {
+    return Promise.all(
+      read(path).map((factoryPath) => this.add('factory', path, factoryPath))
+    );
+  }
+
+  public addFactory(factory: Factory | typeof Factory): void {
+    this.lair.registerFactory(factory);
+  }
+
+  public addMiddleware(clb: RequestHandler): void {
+    this.middlewaresQueue.push(clb);
+  }
+
+  public addMiddlewares(clbs: RequestHandler[]): void {
+    clbs.map((clb) => this.addMiddleware(clb));
   }
 
   public addRoute(routeInstanceOrClass: Route | typeof Route): void {
@@ -163,30 +185,8 @@ export default class Server {
     );
   }
 
-  public addFactory(factory: Factory | typeof Factory): void {
-    this.lair.registerFactory(factory);
-  }
-
-  public addFactories(factories: (Factory | typeof Factory)[]): void {
-    factories.map((factory) => this.addFactory(factory));
-  }
-
-  public async addFactoriesFromDir(path: string): Promise<any> {
-    return Promise.all(
-      read(path).map((factoryPath) => this.add('factory', path, factoryPath))
-    );
-  }
-
   public createRecords(factoryName: string, count: number): void {
     this.createRecordsQueue.push([factoryName, count]);
-  }
-
-  public addMiddleware(clb: RequestHandler): void {
-    this.middlewaresQueue.push(clb);
-  }
-
-  public addMiddlewares(clbs: RequestHandler[]): void {
-    clbs.map((clb) => this.addMiddleware(clb));
   }
 
   public startServer(clb?: () => void): void {
@@ -201,60 +201,6 @@ export default class Server {
 
   public stopServer(clb?: () => void): any {
     return this.internalServer.close(clb);
-  }
-
-  private addLairMetaRoutes(): void {
-    this.expressLairRouter.get('/meta', (req, res) =>
-      res.json(this.lair.getDevInfo())
-    );
-    const path = `/factories/:factoryName`;
-    const singlePath = `${path}/:id`;
-    this.expressLairRouter.get(path, getAll);
-    this.expressLairRouter.get(singlePath, getOne);
-    this.expressLairRouter.delete(singlePath, deleteOne);
-    this.expressLairRouter.patch(singlePath, updateOne);
-    this.expressLairRouter.put(singlePath, updateOne);
-    this.expressLairRouter.post(path, createOne);
-    this.expressApp.use(this.lairNamespace, this.expressLairRouter);
-  }
-
-  private addAppRoutes(): void {
-    this.expressApp.use(this.namespace, this.expressRouter);
-  }
-
-  private fillLair(): void {
-    this.createRecordsQueue.map((crArgs) => this.lair.createRecords(...crArgs));
-    this.createRecordsQueue = [];
-  }
-
-  private useMiddlewares(): void {
-    const app = this.expressApp;
-    app.use(bodyParser.json());
-    app.use((req, res, next) => {
-      if (this.verbose) {
-        this.logger.info({
-          level: 'info',
-          message: colors.green(`${req.method} ${req.url}`),
-        });
-      }
-      next();
-    });
-    this.middlewaresQueue.map((clb) => app.use(clb));
-    this.middlewaresQueue = [];
-    app.use((req, res, next) => {
-      if (this.delay) {
-        setTimeout(next, this.delay);
-      } else {
-        next();
-      }
-    });
-  }
-
-  private printRoutesMap(): void {
-    if (this.verbose) {
-      this.logger.info({ level: 'info', message: 'Defined route-handlers' });
-      this.expressApp._router.stack.forEach(printRoutesMap.bind(null, []));
-    }
   }
 
   private async add(type: string, parent: string, path: string): Promise<any> {
@@ -286,5 +232,59 @@ export default class Server {
         }
       );
     }
+  }
+
+  private addAppRoutes(): void {
+    this.expressApp.use(this.namespace, this.expressRouter);
+  }
+
+  private addLairMetaRoutes(): void {
+    this.expressLairRouter.get('/meta', (req, res) =>
+      res.json(this.lair.getDevInfo())
+    );
+    const path = `/factories/:factoryName`;
+    const singlePath = `${path}/:id`;
+    this.expressLairRouter.get(path, getAll);
+    this.expressLairRouter.get(singlePath, getOne);
+    this.expressLairRouter.delete(singlePath, deleteOne);
+    this.expressLairRouter.patch(singlePath, updateOne);
+    this.expressLairRouter.put(singlePath, updateOne);
+    this.expressLairRouter.post(path, createOne);
+    this.expressApp.use(this.lairNamespace, this.expressLairRouter);
+  }
+
+  private fillLair(): void {
+    this.createRecordsQueue.map((crArgs) => this.lair.createRecords(...crArgs));
+    this.createRecordsQueue = [];
+  }
+
+  private printRoutesMap(): void {
+    if (this.verbose) {
+      this.logger.info({ level: 'info', message: 'Defined route-handlers' });
+      this.expressApp._router.stack.forEach(printRoutesMap.bind(null, []));
+    }
+  }
+
+  private useMiddlewares(): void {
+    const app = this.expressApp;
+    app.use(bodyParser.json());
+    app.use((req, res, next) => {
+      if (this.verbose) {
+        this.logger.info({
+          level: 'info',
+          message: colors.green(`${req.method} ${req.url}`),
+        });
+      }
+      next();
+    });
+    this.middlewaresQueue.map((clb) => app.use(clb));
+    this.middlewaresQueue = [];
+    app.use((req, res, next) => {
+      if (this.delay) {
+        setTimeout(next, this.delay);
+      } else {
+        next();
+      }
+    });
   }
 }
