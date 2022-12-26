@@ -7,13 +7,12 @@ import { URL } from '../../../consts';
 describe('/test/route GET', () => {
   describe('should handle request', () => {
     let data;
-    beforeEach((done) => {
-      axios
-        .get(`${URL}/test/route`)
-        .then((res) => (data = res.data))
-        .finally(() => done());
+    beforeEach(async () => {
+      const routeResponse = await axios.get(`${URL}/test/route`);
+      data = routeResponse.data;
     });
     it('and return valid data', () => {
+      expect(data).not.to.be.undefined;
       expect(jsonschema.validate(data, routeSchema).errors).to.eql([]);
     });
   });

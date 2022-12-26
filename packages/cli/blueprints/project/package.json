@@ -11,18 +11,18 @@
     "build": "rm -rf dist && tsc",
     "lint": "eslint -c .eslintrc.json .",
     "lint:fix": "eslint -c .eslintrc.json . --fix",
-    "test": "mocha -r ts-node/register --recursive \"tests/unit/**/*.ts\"",
-    "test:e2e": "mocha -r ts-node/register -r mocha-global.ts --recursive \"tests/integration/**/*.ts\""
+    "test": "mocha -r ts-node/register -r mocha-global.ts --recursive \"tests/unit/**/*.ts\"",
+    "test:e2e": "mocha -r ts-node/register -r mocha-global-e2e.ts --recursive \\\"tests/integration/**/*.ts\\\""
   },
   "dependencies": {
-    "@swarm-host/server": "^5.4.2"
+    "@swarm-host/server": "^5.4.2",
+    "yargs": "^17.2.1"
   },
   "devDependencies": {
-    "@types/axios": "^0.14.0",
     "@types/chai": "^4.3.0",
-    "@types/jsonschema": "^1.1.1",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.10.1",
+    "@types/yargs": "^17.0.3",
     "@typescript-eslint/eslint-plugin": "^5.3.1",
     "@typescript-eslint/parser": "^5.3.1",
     "axios": "^0.24.0",

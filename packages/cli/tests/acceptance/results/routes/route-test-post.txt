@@ -7,13 +7,12 @@ import { URL } from '../../consts';
 describe('/test/route POST', () => {
   describe('should handle request', () => {
     let data;
-    beforeEach((done) => {
-      axios
-        .post(`${URL}/test/route`)
-        .then((res) => (data = res.data))
-        .finally(() => done());
+    beforeEach(async () => {
+      const routeResponse = await axios.post(`${URL}/test/route`);
+      data = routeResponse.data;
     });
     it('and return valid data', () => {
+      expect(data).not.to.be.undefined;
       expect(jsonschema.validate(data, routeSchema).errors).to.eql([]);
     });
   });
