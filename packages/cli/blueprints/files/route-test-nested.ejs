@@ -7,14 +7,13 @@ import { HOST, PORT, URL } from '<%= constPath %>';
 describe('<%= url %> <%= method.toUpperCase() %>', () => {
   describe('should handle request', () => {
     let data;
-    beforeEach((done) => {
-      axios.get(`${HOST}:${PORT}/lair/factories/<%= parentModelName %>`).then((res) =>
-        axios
-          .<%= method %>(`${URL}<%= urlForRequest %>`)
-          .then((r) => (data = r.data))
-          .finally(() => done()));
+    beforeEach(async () => {
+      const <%= parentModelNameResponse %> = await axios.get(`${HOST}:${PORT}/lair/factories/<%= parentModelName %>`);
+      const <%= childModelNameResponse %> = await axios.<%= method %>(`${URL}<%= urlForRequest %>`);
+      data = <%= childModelNameResponse %>.data;
     });
     it('and return valid data', () => {
+      expect(data).not.to.be.undefined;
       expect(jsonschema.validate(data, <%= schemaName %>).errors).to.eql([]);
     });
   });

@@ -1,13 +1,16 @@
 import server from './app/server';
-import { PORT, PREFIX } from './tests/consts';
 import serverSetup from './server-setup';
+import { PORT } from './tests/consts';
 
 export async function mochaGlobalSetup(): Promise<void> {
   server.port = PORT;
-  server.namespace = PREFIX;
+  await server.addRoutesFromDir(`${__dirname}/app/routes`);
+  await server.addFactoriesFromDir(`${__dirname}/app/factories`);
   serverSetup(server);
   return new Promise((resolve) => {
-    server.startServer(() => resolve());
+    server.startServer(() => {
+      resolve();
+    });
   });
 }
 

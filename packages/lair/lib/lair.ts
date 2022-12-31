@@ -294,6 +294,17 @@ export class Lair {
       : { record: null, factoryName: null };
   }
 
+  @verbose
+  @assertHasTypes()
+  public getRecordsCountForFactories(
+    ...factories: string[]
+  ): Record<string, number> {
+    return factories.reduce((res, factoryName) => {
+      res[factoryName] = keys(this.db[factoryName]).length;
+      return res;
+    }, {});
+  }
+
   /**
    * Load records data from the predefined JSON's to the db
    * This method can be used only for initial db filling
@@ -504,9 +515,9 @@ export class Lair {
    */
   public getDevInfo(): DevInfo {
     const ret = {};
-    Object.keys(this.factories).forEach((factoryName) => {
+    keys(this.factories).forEach((factoryName) => {
       ret[factoryName] = {
-        count: Object.keys(this.db[factoryName]).length,
+        count: keys(this.db[factoryName]).length,
         id: this.factories[factoryName].id,
         meta: copy(this.getMetaFor(factoryName)),
       };

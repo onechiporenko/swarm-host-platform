@@ -7,13 +7,12 @@ import { URL } from '<%= constPath %>';
 describe('<%= url %> <%= method.toUpperCase() %>', () => {
   describe('should handle request', () => {
     let data;
-    beforeEach((done) => {
-      axios
-        .<%= method %>(`${URL}<%= url %>`)
-        .then((res) => (data = res.data))
-        .finally(() => done());
+    beforeEach(async () => {
+      const <%= childModelNameResponse %> = await axios.<%= method %>(`${URL}<%= url %>`);
+      data = <%= childModelNameResponse %>.data;
     });
     it('and return valid data', () => {
+      expect(data).not.to.be.undefined;
       expect(jsonschema.validate(data, <%= schemaName %>).errors).to.eql([]);
     });
   });

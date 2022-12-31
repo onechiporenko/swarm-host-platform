@@ -99,6 +99,10 @@ export class GenerateRoute extends Generate {
     const depth = this.instance.dir.split(separator).length;
     const mod = this.instance.dir === '' ? 2 : 3;
     const constPath = `${'../'.repeat(depth + mod - 1)}consts`;
+    const parentModelName = this.instance.options['parent-model'];
+    const childModelName = this.instance.name;
+    const parentModelNameResponse = `${parentModelName}Response`;
+    const childModelNameResponse = `${childModelName}Response`;
     const schemasPath = `${'../'.repeat(depth + mod)}schemas/${
       this.instance.dir ? this.instance.dir + '/' : ''
     }${this.instance.name}`;
@@ -107,11 +111,14 @@ export class GenerateRoute extends Generate {
         method: this.instance.options.method.toLowerCase(),
         urlForRequest: this.url.replace(
           `:${this.dynamic[0]}`,
-          '${res.data[0].id}'
+          `\${${parentModelNameResponse}.data[0].id}`
         ),
         url: this.url,
         schemaName: `${camelize(this.instance.name)}Schema`,
-        parentModelName: this.instance.options['parent-model'],
+        parentModelName,
+        parentModelNameResponse,
+        childModelName,
+        childModelNameResponse,
         schemasPath,
         constPath,
       })
