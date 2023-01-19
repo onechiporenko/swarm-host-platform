@@ -39,14 +39,45 @@ function isFactory(v: any): v is Factory {
   return false;
 }
 
+const getCrudOptionsFromRequest = (req: Request) => {
+  const {
+    query: { depth, ignoreRelated, handleNotAttrs },
+  } = req;
+  let _ignoreRelated;
+  if (Array.isArray(ignoreRelated)) {
+    _ignoreRelated = ignoreRelated;
+  } else {
+    if (typeof ignoreRelated === 'string') {
+      _ignoreRelated = [ignoreRelated];
+    } else {
+      if (typeof ignoreRelated === 'boolean') {
+        _ignoreRelated = ignoreRelated;
+      } else {
+        _ignoreRelated = false;
+      }
+    }
+  }
+  return {
+    depth: depth ? Number(depth) : Infinity,
+    handleNotAttrs: !!handleNotAttrs,
+    ignoreRelated: _ignoreRelated,
+  };
+};
+
 function getAll(req: Request, res: Response): Response {
   const { factoryName } = req.params;
-  return res.json(Lair.getLair().getAll(factoryName, { depth: 1 }));
+  return res.json(
+    Lair.getLair().getAll(factoryName, getCrudOptionsFromRequest(req))
+  );
 }
 
 function getOne(req: Request, res: Response): Response {
   const { factoryName, id } = req.params;
-  const record = Lair.getLair().getOne(factoryName, id, { depth: 1 });
+  const record = Lair.getLair().getOne(
+    factoryName,
+    id,
+    getCrudOptionsFromRequest(req)
+  );
   if (!record) {
     return res.status(404).json();
   }
@@ -59,7 +90,9 @@ function updateOne(req: Request, res: Response): Response {
   if (!lair.getOne(factoryName, id, { ignoreRelated: true })) {
     return res.status(404).json();
   }
-  return res.json(lair.updateOne(factoryName, id, req.body, { depth: 1 }));
+  return res.json(
+    lair.updateOne(factoryName, id, req.body, getCrudOptionsFromRequest(req))
+  );
 }
 
 function deleteOne(req: Request, res: Response): Response {
@@ -75,7 +108,11 @@ function deleteOne(req: Request, res: Response): Response {
 function createOne(req: Request, res: Response): Response {
   const { factoryName } = req.params;
   return res.json(
-    Lair.getLair().createOne(factoryName, req.body, { depth: 1 })
+    Lair.getLair().createOne(
+      factoryName,
+      req.body,
+      getCrudOptionsFromRequest(req)
+    )
   );
 }
 

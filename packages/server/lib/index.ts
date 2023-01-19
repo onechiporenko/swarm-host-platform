@@ -19,6 +19,7 @@ import {
   sequenceItem,
 } from '@swarm-host/lair';
 import Cron from './cron';
+import { instanceExists } from './decorators';
 import Job, { JobOptions, tickCallback } from './job';
 import Route, { CustomNext, Handler } from './route';
 import Server from './server';
@@ -50,4 +51,5 @@ export {
   hasOne,
   hasMany,
   sequenceItem,
+  instanceExists,
 };
