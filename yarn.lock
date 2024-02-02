@@ -2785,9 +2785,9 @@
     "@types/ember-data" "*"
 
 "@types/ember-data__store@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@types/ember-data__store/-/ember-data__store-4.0.0.tgz#d4039424b4b26c98c6417dc98028b151c6c81dee"
-  integrity sha512-J0hDf9LcG9T/DT/w/1E6P++K37yma+ANXN10ijT+fWKP5b3BE5uk7i1XNHmuKhfUzMQ1GzoO3nUxnTlnTr75oA==
+  version "4.0.7"
+  resolved "https://registry.yarnpkg.com/@types/ember-data__store/-/ember-data__store-4.0.7.tgz#0f1e6b116d0d6b86ce47d1683521b26614d58693"
+  integrity sha512-0S3Etr32i4aGvhXhZM6CXaosvX8E6c+RCx8pCxUXVdn+SmICm8jqFXsDC6Gnqq4bJeTkf9cglqz46prOVR1Tcg==
   dependencies:
     "@types/ember-data" "*"
 
